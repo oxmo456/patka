@@ -1,0 +1,12 @@
+[package]
+name = "patka"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "patka"
+path = "apps/patka/src/main.rs"
+
+[dependencies]
+log = "0.4"
+env_logger = { version = "0.11", default-features = false, features = ["auto-color", "humantime"] }

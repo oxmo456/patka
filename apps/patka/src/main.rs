@@ -1,3 +1,8 @@
+use log::info;
+
 fn main() {
-    println!("HELLO WORLD");
+    env_logger::init();
+
+    info!("patka starting");
+
 }
