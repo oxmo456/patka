@@ -2,11 +2,11 @@ load("@rules_rust//rust:defs.bzl", "rust_binary")
 
 rust_binary(
     name = "patka",
-    srcs = ["src/main.rs"],
+    srcs = glob(["src/**/*.rs"]),
     edition = "2021",
     visibility = ["//visibility:public"],
     deps = [
-        "@crates//:env_logger",
         "@crates//:log",
+        "@crates//:ratatui",
     ],
 )

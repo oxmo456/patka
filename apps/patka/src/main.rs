@@ -1,8 +1,21 @@
-use log::info;
+mod app;
+mod logs;
+mod ui;
 
-fn main() {
-    env_logger::init();
+use app::App;
+use logs::Logs;
 
-    info!("patka starting");
+fn main() -> std::io::Result<()> {
+    let logs = Logs::default();
+    logs.install();
 
+    log::info!("patka starting");
+
+    let terminal = ratatui::init();
+
+    let result = App::new(logs).run(terminal);
+
+    ratatui::restore();
+
+    result
 }

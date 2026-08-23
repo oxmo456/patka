@@ -9,4 +9,4 @@ path = "apps/patka/src/main.rs"
 
 [dependencies]
 log = "0.4"
-env_logger = { version = "0.11", default-features = false, features = ["auto-color", "humantime"] }
+ratatui = "0.29"
