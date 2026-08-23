@@ -7,7 +7,7 @@ use ratatui::widgets::{Block, Paragraph};
 use ratatui::{DefaultTerminal, Frame};
 
 use crate::logs::Logs;
-use crate::ui::scroll_to_bottom;
+use crate::ui::pin_to_bottom;
 
 enum KeyPressedAction {
     Quit,
@@ -88,10 +88,16 @@ impl App {
         let [history, input] =
             Layout::vertical([Constraint::Min(0), Constraint::Length(3)]).areas(area);
 
+        let lines = self
+            .messages
+            .iter()
+            .map(|m| Line::raw(m.as_str()))
+            .collect();
+        let (lines, scroll) = pin_to_bottom(lines, history);
         frame.render_widget(
-            Paragraph::new(self.messages.join("\n"))
+            Paragraph::new(lines)
                 .block(Block::bordered().title("Chat"))
-                .scroll((scroll_to_bottom(self.messages.len(), history), 0)),
+                .scroll((scroll, 0)),
             history,
         );
         frame.render_widget(
@@ -114,10 +120,11 @@ impl App {
             })
             .collect();
 
+        let (lines, scroll) = pin_to_bottom(lines, area);
         frame.render_widget(
             Paragraph::new(lines)
                 .block(Block::bordered().title("Agent logs".dim()))
-                .scroll((scroll_to_bottom(records.len(), area), 0)),
+                .scroll((scroll, 0)),
             area,
         );
     }
