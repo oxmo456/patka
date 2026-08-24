@@ -3,3 +3,4 @@ bazel-*
 .bazelbsp/
 .claude/
 /target
+node_modules/

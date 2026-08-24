@@ -1,0 +1,20 @@
+{
+  "name": "patka",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --experimental-ffi apps/patka/main.ts",
+    "check": "tsc -p apps/patka --noEmit"
+  },
+  "dependencies": {
+    "@opentui/core": "^0.5.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=26.7.0"
+  }
+}

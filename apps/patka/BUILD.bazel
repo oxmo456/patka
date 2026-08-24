@@ -1,12 +1,25 @@
-load("@rules_rust//rust:defs.bzl", "rust_binary")
+load("@aspect_rules_js//js:defs.bzl", "js_binary")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 
-rust_binary(
-    name = "patka",
-    srcs = glob(["src/**/*.rs"]),
-    edition = "2021",
-    visibility = ["//visibility:public"],
+ts_project(
+    name = "lib",
+    srcs = glob(["*.ts"]),
+    transpiler = "tsc",
+    tsconfig = "tsconfig.json",
     deps = [
-        "@crates//:log",
-        "@crates//:ratatui",
+        "//:package_json",
+        "//:node_modules/@opentui/core",
+        "//:node_modules/@types/node",
     ],
+)
+
+js_binary(
+    name = "patka",
+    data = [
+        ":lib",
+        "//:package_json",
+    ],
+    entry_point = "main.js",
+    node_options = ["--experimental-ffi"],
+    visibility = ["//visibility:public"],
 )
