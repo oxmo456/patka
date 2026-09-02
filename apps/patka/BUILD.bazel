@@ -1,14 +1,17 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
+load("@npm//:vitest/package_json.bzl", vitest_bin = "bin")
 
 ts_project(
     name = "lib",
-    srcs = glob(["*.ts"]),
+    srcs = glob(
+        ["*.ts"],
+        exclude = ["*.spec.ts"],
+    ),
     transpiler = "tsc",
     tsconfig = "tsconfig.json",
     deps = [
         "//:package_json",
-        "//:node_modules/@opentui/core",
         "//:node_modules/@types/node",
     ],
 )
@@ -20,6 +23,16 @@ js_binary(
         "//:package_json",
     ],
     entry_point = "main.js",
-    node_options = ["--experimental-ffi"],
     visibility = ["//visibility:public"],
+)
+
+vitest_bin.vitest_test(
+    name = "patka_test",
+    args = ["run"],
+    chdir = package_name(),
+    data = glob(["*.ts"]) + [
+        "tsconfig.json",
+        "//:package_json",
+        "//:node_modules/vitest",
+    ],
 )
