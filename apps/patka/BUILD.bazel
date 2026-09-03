@@ -13,6 +13,7 @@ ts_project(
     deps = [
         "//:package_json",
         "//:node_modules/@types/node",
+        "//:node_modules/ollama",
         "//:node_modules/rxjs",
     ],
 )
@@ -22,6 +23,7 @@ js_binary(
     data = [
         ":lib",
         "//:package_json",
+        "//:node_modules/ollama",
         "//:node_modules/rxjs",
     ],
     entry_point = "main.js",
@@ -35,6 +37,7 @@ vitest_bin.vitest_test(
     data = glob(["*.ts"]) + [
         "tsconfig.json",
         "//:package_json",
+        "//:node_modules/ollama",
         "//:node_modules/rxjs",
         "//:node_modules/vitest",
     ],
