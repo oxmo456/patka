@@ -1,10 +1,20 @@
-import { Observable, Subject } from "rxjs";
-import type { PatkaMessage } from "./patka-message.ts";
+import { randomUUID } from "node:crypto";
+import { Subject, switchMap } from "rxjs";
+import type { InferenceClient } from "./inference-client.ts";
 
 export class PatkaAgent {
-  private readonly responsesSubject = new Subject<PatkaMessage>();
+  private readonly inputMessages = new Subject<string>();
+  private readonly inferenceClient: InferenceClient;
 
-  readonly responses: Observable<PatkaMessage> = this.responsesSubject.asObservable();
+  readonly responses = this.inputMessages.pipe(
+    switchMap((message) => this.inferenceClient.generate({ message, id: randomUUID() })),
+  );
 
-  send(message: string): void {}
+  constructor(inferenceClient: InferenceClient) {
+    this.inferenceClient = inferenceClient;
+  }
+
+  send(message: string): void {
+    this.inputMessages.next(message);
+  }
 }

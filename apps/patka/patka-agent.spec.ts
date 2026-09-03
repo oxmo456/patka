@@ -1,5 +1,8 @@
-import { describe, it, expect } from "vitest";
-import { Observable } from "rxjs";
+import { describe, it, expect, vi } from "vitest";
+import { randomUUID } from "node:crypto";
+import { Observable, of } from "rxjs";
+import type { InferenceClient } from "./inference-client.ts";
+import type { PatkaMessage } from "./patka-message.ts";
 import { PatkaAgent } from "./patka-agent.ts";
 
 describe("PatkaAgent", () => {
@@ -8,26 +11,104 @@ describe("PatkaAgent", () => {
   });
 
   it("can be instantiated", () => {
-    expect(new PatkaAgent()).toBeInstanceOf(PatkaAgent);
+    const inferenceClient: InferenceClient = {
+      generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
+    };
+
+    expect(new PatkaAgent(inferenceClient)).toBeInstanceOf(PatkaAgent);
   });
 
   describe("send", () => {
-    it("exists", () => {
-      expect(new PatkaAgent().send).toBeTypeOf("function");
-    });
-
-    it("takes a single argument", () => {
-      expect(new PatkaAgent().send.length).toBe(1);
-    });
-
     it("returns nothing", () => {
-      expect(new PatkaAgent().send("hello")).toBeUndefined();
+      const inferenceClient: InferenceClient = {
+        generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
+      };
+      const agent = new PatkaAgent(inferenceClient);
+
+      expect(agent.send("hello")).toBeUndefined();
+    });
+
+    it("generates from the sent message", () => {
+      const inferenceClient: InferenceClient = {
+        generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
+      };
+      const agent = new PatkaAgent(inferenceClient);
+      agent.responses.subscribe();
+
+      agent.send("hello");
+
+      expect(inferenceClient.generate).toHaveBeenCalledWith({
+        message: "hello",
+        id: expect.any(String),
+      });
+    });
+
+    it("does not generate anything on its own", () => {
+      const inferenceClient: InferenceClient = {
+        generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
+      };
+      const agent = new PatkaAgent(inferenceClient);
+
+      agent.responses.subscribe();
+
+      expect(inferenceClient.generate).not.toHaveBeenCalled();
     });
   });
 
   describe("responses", () => {
     it("is an Observable", () => {
-      expect(new PatkaAgent().responses).toBeInstanceOf(Observable);
+      const inferenceClient: InferenceClient = {
+        generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
+      };
+
+      expect(new PatkaAgent(inferenceClient).responses).toBeInstanceOf(Observable);
+    });
+
+    it("emits what the inference client generated", () => {
+      const answer: PatkaMessage = { message: "world", id: randomUUID() };
+      const inferenceClient: InferenceClient = { generate: vi.fn(() => of(answer)) };
+      const agent = new PatkaAgent(inferenceClient);
+      const received: PatkaMessage[] = [];
+      agent.responses.subscribe((response) => received.push(response));
+
+      agent.send("hello");
+
+      expect(received).toEqual([answer]);
+    });
+
+    it("emits nothing before a message is sent", () => {
+      const answer: PatkaMessage = { message: "world", id: randomUUID() };
+      const inferenceClient: InferenceClient = { generate: vi.fn(() => of(answer)) };
+      const agent = new PatkaAgent(inferenceClient);
+      const received: PatkaMessage[] = [];
+
+      agent.responses.subscribe((response) => received.push(response));
+
+      expect(received).toEqual([]);
+    });
+
+    it("drops messages sent while nothing is subscribed", () => {
+      const inferenceClient: InferenceClient = {
+        generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
+      };
+      const agent = new PatkaAgent(inferenceClient);
+
+      agent.send("hello");
+
+      expect(inferenceClient.generate).not.toHaveBeenCalled();
+    });
+
+    it("generates once per subscriber", () => {
+      const inferenceClient: InferenceClient = {
+        generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
+      };
+      const agent = new PatkaAgent(inferenceClient);
+      agent.responses.subscribe();
+      agent.responses.subscribe();
+
+      agent.send("hello");
+
+      expect(inferenceClient.generate).toHaveBeenCalledTimes(2);
     });
   });
 });
