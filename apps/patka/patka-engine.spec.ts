@@ -19,7 +19,7 @@ describe("PatkaEngine", () => {
       expect(received).toEqual([[]]);
     });
 
-    it("holds every prompt that was sent", () => {
+    it("holds prompts and responses in the order they happened", () => {
       const patkaAgent = new PatkaAgent({
         generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
       });
@@ -27,10 +27,15 @@ describe("PatkaEngine", () => {
       let chat: ReadonlyArray<PatkaChatEntry> = [];
       engine.chat.subscribe((content) => (chat = content));
 
-      engine.send("hello");
-      engine.send("again");
+      engine.pushUserPrompt("hello");
+      engine.pushUserPrompt("again");
 
-      expect(chat.map((entry) => entry.message.message)).toEqual(["hello", "again"]);
+      expect(chat.map((entry) => entry.message.message)).toEqual([
+        "hello",
+        "world",
+        "again",
+        "world",
+      ]);
     });
 
     it("gives a late subscriber the chat so far", () => {
@@ -38,12 +43,33 @@ describe("PatkaEngine", () => {
         generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
       });
       const engine = new PatkaEngine(patkaAgent);
-      engine.send("hello");
+      engine.pushUserPrompt("hello");
       let chat: ReadonlyArray<PatkaChatEntry> = [];
 
       engine.chat.subscribe((content) => (chat = content));
 
-      expect(chat.map((entry) => entry.message.message)).toEqual(["hello"]);
+      expect(chat.map((entry) => entry.message.message)).toEqual(["hello", "world"]);
     });
+  });
+
+  it("sends the prompt to the inference client", () => {
+    const generate = vi.fn(() => of({ message: "world", id: randomUUID() }));
+    const engine = new PatkaEngine(new PatkaAgent({ generate }));
+
+    engine.pushUserPrompt("hello");
+
+    expect(generate).toHaveBeenCalledWith({ message: "hello", id: expect.any(String) });
+  });
+
+  it("adds the inference response to the chat", () => {
+    const engine = new PatkaEngine(
+      new PatkaAgent({ generate: vi.fn(() => of({ message: "world", id: randomUUID() })) }),
+    );
+    let chat: ReadonlyArray<PatkaChatEntry> = [];
+    engine.chat.subscribe((content) => (chat = content));
+
+    engine.pushUserPrompt("hello");
+
+    expect(chat.map((entry) => entry.message.message)).toEqual(["hello", "world"]);
   });
 });

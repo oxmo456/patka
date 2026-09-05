@@ -18,7 +18,7 @@ export class Patka {
     );
     this.patkaUI = new PatkaCLI(blessed);
 
-    this.patkaUI.prompts.subscribe((prompt) => this.patkaEngine.send(prompt));
+    this.patkaUI.prompts.subscribe((prompt) => this.patkaEngine.pushUserPrompt(prompt));
     this.patkaEngine.chat.subscribe((chat) => this.patkaUI.updateChat(chat));
   }
 }
