@@ -5,11 +5,7 @@ import type { PatkaMessage } from "./patka-message.ts";
 export class PatkaChat {
   private readonly _entries = new BehaviorSubject<ReadonlyArray<PatkaChatEntry>>([]);
 
-  readonly changes: Observable<ReadonlyArray<PatkaChatEntry>> = this._entries.asObservable();
-
-  get entries(): ReadonlyArray<PatkaChatEntry> {
-    return this._entries.value;
-  }
+  readonly entries: Observable<ReadonlyArray<PatkaChatEntry>> = this._entries.asObservable();
 
   push(message: PatkaMessage): void {
     this._entries.next([...this._entries.value, { message }]);

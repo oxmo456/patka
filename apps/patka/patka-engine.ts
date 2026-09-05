@@ -8,7 +8,7 @@ export class PatkaEngine {
   private readonly patkaChat = new PatkaChat();
   private readonly patkaAgent: PatkaAgent;
 
-  readonly chat: Observable<ReadonlyArray<PatkaChatEntry>> = this.patkaChat.changes;
+  readonly chat: Observable<ReadonlyArray<PatkaChatEntry>> = this.patkaChat.entries;
 
   constructor(patkaAgent: PatkaAgent) {
     this.patkaAgent = patkaAgent;
