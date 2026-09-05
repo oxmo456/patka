@@ -1,5 +1,3 @@
-async function main() {
-  console.log("patka");
-}
+import { Patka } from "./patka.ts";
 
-main();
+new Patka();

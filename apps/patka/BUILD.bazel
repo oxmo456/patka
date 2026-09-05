@@ -12,7 +12,9 @@ ts_project(
     tsconfig = "tsconfig.json",
     deps = [
         "//:package_json",
+        "//:node_modules/@types/blessed",
         "//:node_modules/@types/node",
+        "//:node_modules/blessed",
         "//:node_modules/ollama",
         "//:node_modules/rxjs",
     ],
@@ -23,6 +25,7 @@ js_binary(
     data = [
         ":lib",
         "//:package_json",
+        "//:node_modules/blessed",
         "//:node_modules/ollama",
         "//:node_modules/rxjs",
     ],
@@ -37,6 +40,7 @@ vitest_bin.vitest_test(
     data = glob(["*.ts"]) + [
         "tsconfig.json",
         "//:package_json",
+        "//:node_modules/blessed",
         "//:node_modules/ollama",
         "//:node_modules/rxjs",
         "//:node_modules/vitest",

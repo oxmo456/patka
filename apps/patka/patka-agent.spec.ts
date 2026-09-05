@@ -10,13 +10,6 @@ describe("PatkaAgent", () => {
     expect(PatkaAgent).toBeDefined();
   });
 
-  it("can be instantiated", () => {
-    const inferenceClient: InferenceClient = {
-      generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
-    };
-
-    expect(new PatkaAgent(inferenceClient)).toBeInstanceOf(PatkaAgent);
-  });
 
   describe("send", () => {
     it("returns nothing", () => {

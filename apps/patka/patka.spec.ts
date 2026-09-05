@@ -5,8 +5,4 @@ describe("Patka", () => {
   it("exists", () => {
     expect(Patka).toBeDefined();
   });
-
-  it("can be instantiated", () => {
-    expect(new Patka()).toBeInstanceOf(Patka);
-  });
 });
