@@ -1,8 +1,9 @@
-import { randomUUID } from "node:crypto";
 import type { Observable } from "rxjs";
 import type { PatkaAgent } from "./patka-agent.ts";
 import { PatkaChat } from "./patka-chat.ts";
 import type { PatkaChatEntry } from "./patka-chat-entry.ts";
+
+const PENDING_RESPONSE = "...";
 
 export class PatkaEngine {
   private readonly patkaChat = new PatkaChat();
@@ -12,11 +13,14 @@ export class PatkaEngine {
 
   constructor(patkaAgent: PatkaAgent) {
     this.patkaAgent = patkaAgent;
-    this.patkaAgent.responses.subscribe((response) => this.patkaChat.push(response));
   }
 
   pushUserPrompt(prompt: string): void {
-    this.patkaChat.push({ message: prompt, id: randomUUID() });
-    this.patkaAgent.send(prompt);
+    this.patkaChat.push(prompt);
+    const pendingResponseId = this.patkaChat.push(PENDING_RESPONSE);
+
+    this.patkaAgent
+      .send({ message: prompt, id: pendingResponseId })
+      .subscribe((response) => this.patkaChat.update(pendingResponseId, response.message));
   }
 }

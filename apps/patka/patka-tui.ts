@@ -6,7 +6,7 @@ import type { PatkaUI } from "./patka-ui.ts";
 
 export type Blessed = Pick<typeof blessedModule, "screen" | "box" | "textbox">;
 
-export class PatkaCLI implements PatkaUI {
+export class PatkaTUI implements PatkaUI {
   private readonly _prompts = new ReplaySubject<string>();
   private readonly screen: Widgets.Screen;
   private readonly conversation: Widgets.BoxElement;

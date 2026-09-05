@@ -1,9 +1,10 @@
 import { describe, it, expect, vi } from "vitest";
 import { randomUUID } from "node:crypto";
-import { of } from "rxjs";
+import { of, Subject } from "rxjs";
 import { PatkaAgent } from "./patka-agent.ts";
 import { PatkaEngine } from "./patka-engine.ts";
 import type { PatkaChatEntry } from "./patka-chat-entry.ts";
+import type { PatkaMessage } from "./patka-message.ts";
 
 describe("PatkaEngine", () => {
   describe("chat", () => {
@@ -71,5 +72,49 @@ describe("PatkaEngine", () => {
     engine.pushUserPrompt("hello");
 
     expect(chat.map((entry) => entry.message.message)).toEqual(["hello", "world"]);
+  });
+
+  it("shows a pending response until the answer arrives", () => {
+    const responses = new Subject<PatkaMessage>();
+    const engine = new PatkaEngine(new PatkaAgent({ generate: () => responses }));
+    let chat: ReadonlyArray<PatkaChatEntry> = [];
+    engine.chat.subscribe((content) => (chat = content));
+
+    engine.pushUserPrompt("hello");
+
+    expect(chat.map((entry) => entry.message.message)).toEqual(["hello", "..."]);
+
+    responses.next({ message: "world", id: randomUUID() });
+
+    expect(chat.map((entry) => entry.message.message)).toEqual(["hello", "world"]);
+  });
+
+  it("answers every prompt in its own entry, even when they overlap", () => {
+    const answers: Array<Subject<PatkaMessage>> = [];
+    const engine = new PatkaEngine(
+      new PatkaAgent({
+        generate: () => {
+          const answer = new Subject<PatkaMessage>();
+          answers.push(answer);
+          return answer;
+        },
+      }),
+    );
+    let chat: ReadonlyArray<PatkaChatEntry> = [];
+    engine.chat.subscribe((content) => (chat = content));
+
+    engine.pushUserPrompt("first");
+    engine.pushUserPrompt("second");
+    answers[0]!.next({ message: "answer one", id: randomUUID() });
+    answers[0]!.complete();
+    answers[1]!.next({ message: "answer two", id: randomUUID() });
+    answers[1]!.complete();
+
+    expect(chat.map((entry) => entry.message.message)).toEqual([
+      "first",
+      "answer one",
+      "second",
+      "answer two",
+    ]);
   });
 });
