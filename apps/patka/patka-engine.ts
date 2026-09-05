@@ -4,10 +4,10 @@ import type { PatkaAgent } from "./patka-agent.ts";
 import type { PatkaChatEntry } from "./patka-chat-entry.ts";
 
 export class PatkaEngine {
-  private readonly _chat = new BehaviorSubject<PatkaChatEntry[]>([]);
+  private readonly _chat = new BehaviorSubject<ReadonlyArray<PatkaChatEntry>>([]);
   private readonly patkaAgent: PatkaAgent;
 
-  readonly chat: Observable<PatkaChatEntry[]> = this._chat.asObservable();
+  readonly chat: Observable<ReadonlyArray<PatkaChatEntry>> = this._chat.asObservable();
 
   constructor(patkaAgent: PatkaAgent) {
     this.patkaAgent = patkaAgent;

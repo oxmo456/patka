@@ -47,7 +47,7 @@ export class PatkaCLI implements PatkaUI {
     this.screen.render();
   }
 
-  updateChat(chat: PatkaChatEntry[]): void {
+  updateChat(chat: ReadonlyArray<PatkaChatEntry>): void {
     const lines = chat.map((entry) => entry.message.message);
     const blankLines = Math.max(0, Number(this.conversation.height) - lines.length);
 

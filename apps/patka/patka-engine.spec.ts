@@ -12,7 +12,7 @@ describe("PatkaEngine", () => {
         generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
       });
       const engine = new PatkaEngine(patkaAgent);
-      const received: PatkaChatEntry[][] = [];
+      const received: Array<ReadonlyArray<PatkaChatEntry>> = [];
 
       engine.chat.subscribe((chat) => received.push(chat));
 
@@ -24,7 +24,7 @@ describe("PatkaEngine", () => {
         generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
       });
       const engine = new PatkaEngine(patkaAgent);
-      let chat: PatkaChatEntry[] = [];
+      let chat: ReadonlyArray<PatkaChatEntry> = [];
       engine.chat.subscribe((content) => (chat = content));
 
       engine.send("hello");
@@ -39,7 +39,7 @@ describe("PatkaEngine", () => {
       });
       const engine = new PatkaEngine(patkaAgent);
       engine.send("hello");
-      let chat: PatkaChatEntry[] = [];
+      let chat: ReadonlyArray<PatkaChatEntry> = [];
 
       engine.chat.subscribe((content) => (chat = content));
 

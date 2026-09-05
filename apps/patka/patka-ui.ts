@@ -4,5 +4,5 @@ import type { PatkaChatEntry } from "./patka-chat-entry.ts";
 export interface PatkaUI {
   prompts: Observable<string>;
 
-  updateChat(chat: PatkaChatEntry[]): void;
+  updateChat(chat: ReadonlyArray<PatkaChatEntry>): void;
 }

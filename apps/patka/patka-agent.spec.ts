@@ -61,7 +61,7 @@ describe("PatkaAgent", () => {
       const answer: PatkaMessage = { message: "world", id: randomUUID() };
       const inferenceClient: InferenceClient = { generate: vi.fn(() => of(answer)) };
       const agent = new PatkaAgent(inferenceClient);
-      const received: PatkaMessage[] = [];
+      const received: Array<PatkaMessage> = [];
       agent.responses.subscribe((response) => received.push(response));
 
       agent.send("hello");
@@ -73,7 +73,7 @@ describe("PatkaAgent", () => {
       const answer: PatkaMessage = { message: "world", id: randomUUID() };
       const inferenceClient: InferenceClient = { generate: vi.fn(() => of(answer)) };
       const agent = new PatkaAgent(inferenceClient);
-      const received: PatkaMessage[] = [];
+      const received: Array<PatkaMessage> = [];
 
       agent.responses.subscribe((response) => received.push(response));
 
