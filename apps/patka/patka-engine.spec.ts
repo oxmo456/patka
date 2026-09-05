@@ -1,9 +1,9 @@
-import { describe, it, expect, vi } from "vitest";
 import { randomUUID } from "node:crypto";
 import { of, Subject } from "rxjs";
+import { describe, expect, it, vi } from "vitest";
 import { PatkaAgent } from "./patka-agent.ts";
-import { PatkaEngine } from "./patka-engine.ts";
 import type { PatkaChatEntry } from "./patka-chat-entry.ts";
+import { PatkaEngine } from "./patka-engine.ts";
 import type { PatkaMessage } from "./patka-message.ts";
 
 describe("PatkaEngine", () => {
@@ -105,10 +105,10 @@ describe("PatkaEngine", () => {
 
     engine.pushUserPrompt("first");
     engine.pushUserPrompt("second");
-    answers[0]!.next({ message: "answer one", id: randomUUID() });
-    answers[0]!.complete();
-    answers[1]!.next({ message: "answer two", id: randomUUID() });
-    answers[1]!.complete();
+    answers[0].next({ message: "answer one", id: randomUUID() });
+    answers[0].complete();
+    answers[1].next({ message: "answer two", id: randomUUID() });
+    answers[1].complete();
 
     expect(chat.map((entry) => entry.message.message)).toEqual([
       "first",

@@ -1,6 +1,6 @@
 import type blessedModule from "blessed";
 import type { Widgets } from "blessed";
-import { ReplaySubject, type Observable } from "rxjs";
+import { type Observable, ReplaySubject } from "rxjs";
 import type { PatkaChatEntry } from "./patka-chat-entry.ts";
 import type { PatkaUI } from "./patka-ui.ts";
 

@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node apps/patka/main.ts",
     "check": "tsc -p apps/patka --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "format": "biome check --write .",
+    "lint": "biome check ."
   },
   "dependencies": {
     "blessed": "^0.1.81",
@@ -14,6 +16,7 @@
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.12",
     "@types/blessed": "^0.1.27",
     "@types/node": "^24.0.0",
     "typescript": "5.9.3",

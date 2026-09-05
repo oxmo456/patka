@@ -1,6 +1,7 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@npm//:vitest/package_json.bzl", vitest_bin = "bin")
+load("//tools:lint.bzl", "biome_lint")
 
 ts_project(
     name = "lib",
@@ -46,3 +47,5 @@ vitest_bin.vitest_test(
         "//:node_modules/vitest",
     ],
 )
+
+biome_lint()

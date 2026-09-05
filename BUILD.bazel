@@ -9,3 +9,9 @@ js_library(
     srcs = ["package.json"],
     visibility = ["//visibility:public"],
 )
+
+js_library(
+    name = "biome_json",
+    srcs = ["biome.json"],
+    visibility = ["//visibility:public"],
+)

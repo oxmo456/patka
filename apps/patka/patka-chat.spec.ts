@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
 import { randomUUID } from "node:crypto";
+import { describe, expect, it } from "vitest";
 import { PatkaChat } from "./patka-chat.ts";
 import type { PatkaChatEntry } from "./patka-chat-entry.ts";
 
@@ -83,7 +83,7 @@ describe("PatkaChat", () => {
       const patkaChat = new PatkaChat();
       const id = patkaChat.push("...");
       const received: Array<string> = [];
-      patkaChat.entries.subscribe((entries) => received.push(entries[0]!.message.message));
+      patkaChat.entries.subscribe((entries) => received.push(entries[0].message.message));
 
       patkaChat.update(id, "the answer");
 

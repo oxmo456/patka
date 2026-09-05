@@ -1,7 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
 import { randomUUID } from "node:crypto";
-import { firstValueFrom } from "rxjs";
 import type { Ollama } from "ollama";
+import { firstValueFrom } from "rxjs";
+import { describe, expect, it, vi } from "vitest";
 import { OllamaInferenceClient } from "./ollama-inference-client.ts";
 
 describe("OllamaInferenceClient", () => {
@@ -26,9 +26,7 @@ describe("OllamaInferenceClient", () => {
     const response = await firstValueFrom(client.generate({ message: "hello", id }));
 
     expect(response.id).not.toBe(id);
-    expect(response.id).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
-    );
+    expect(response.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
   });
 
   it("asks the configured model with the message as the prompt", async () => {

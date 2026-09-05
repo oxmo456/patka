@@ -1,9 +1,9 @@
-import { describe, it, expect, vi } from "vitest";
 import { randomUUID } from "node:crypto";
 import { Observable, of } from "rxjs";
+import { describe, expect, it, vi } from "vitest";
 import type { InferenceClient } from "./inference-client.ts";
-import type { PatkaMessage } from "./patka-message.ts";
 import { PatkaAgent } from "./patka-agent.ts";
+import type { PatkaMessage } from "./patka-message.ts";
 
 describe("PatkaAgent", () => {
   it("exists", () => {

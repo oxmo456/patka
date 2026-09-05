@@ -2,8 +2,8 @@ import blessed from "blessed";
 import { Ollama } from "ollama";
 import { OllamaInferenceClient } from "./ollama-inference-client.ts";
 import { PatkaAgent } from "./patka-agent.ts";
-import { PatkaTUI } from "./patka-tui.ts";
 import { PatkaEngine } from "./patka-engine.ts";
+import { PatkaTUI } from "./patka-tui.ts";
 import type { PatkaUI } from "./patka-ui.ts";
 
 const MODEL = "qwen2.5-coder:latest";
