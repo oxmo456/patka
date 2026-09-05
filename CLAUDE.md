@@ -11,6 +11,10 @@ FIRST RULE IS TO FOLLOW THE RULES
 
 - favor functional programming IMMUTABILITY and PURE FUNCTIONS
 
+## NAMING
+
+- variable name MUST match TYPE name (ex: `const foo: Foo = new Foo()`)
+
 ## Git
 
 - NEVER COMMIT unless requested
