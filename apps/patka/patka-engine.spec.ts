@@ -5,14 +5,22 @@ import { PatkaAgent } from "./patka-agent.ts";
 import type { PatkaChatEntry } from "./patka-chat-entry.ts";
 import { PatkaEngine } from "./patka-engine.ts";
 import type { PatkaMessage } from "./patka-message.ts";
+import type { PatkaPrompt } from "./patka-prompt.ts";
+
+const aPrompt = (content: string): PatkaPrompt => ({
+  content,
+  timestamp: new Date(),
+  id: randomUUID(),
+});
 
 describe("PatkaEngine", () => {
   describe("chat", () => {
     it("starts empty", () => {
-      const patkaAgent = new PatkaAgent({
-        generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
-      });
-      const engine = new PatkaEngine(patkaAgent);
+      const engine = new PatkaEngine(
+        new PatkaAgent("patka", {
+          generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
+        }),
+      );
       const received: Array<ReadonlyArray<PatkaChatEntry>> = [];
 
       engine.chat.subscribe((chat) => received.push(chat));
@@ -20,101 +28,83 @@ describe("PatkaEngine", () => {
       expect(received).toEqual([[]]);
     });
 
-    it("holds prompts and responses in the order they happened", () => {
-      const patkaAgent = new PatkaAgent({
-        generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
-      });
-      const engine = new PatkaEngine(patkaAgent);
+    it("holds the prompt and the answer, in the order they happened", () => {
+      const engine = new PatkaEngine(
+        new PatkaAgent("patka", {
+          generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
+        }),
+      );
       let chat: ReadonlyArray<PatkaChatEntry> = [];
-      engine.chat.subscribe((content) => (chat = content));
+      engine.chat.subscribe((content) => {
+        chat = content;
+      });
 
-      engine.pushUserPrompt("hello");
-      engine.pushUserPrompt("again");
+      engine.askPatka(aPrompt("hello"));
 
-      expect(chat.map((entry) => entry.message.message)).toEqual([
-        "hello",
-        "world",
-        "again",
-        "world",
+      expect(chat.map((entry) => entry.message)).toEqual(["hello", "world"]);
+    });
+
+    it("names the author of every entry", () => {
+      const engine = new PatkaEngine(
+        new PatkaAgent("patka", {
+          generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
+        }),
+      );
+      let chat: ReadonlyArray<PatkaChatEntry> = [];
+      engine.chat.subscribe((content) => {
+        chat = content;
+      });
+
+      engine.askPatka(aPrompt("hello"));
+
+      expect(chat.map((entry) => entry.author)).toEqual(["you", "patka"]);
+    });
+
+    it("keeps the answer pending until it arrives", () => {
+      const answers = new Subject<PatkaMessage>();
+      const engine = new PatkaEngine(new PatkaAgent("patka", { generate: () => answers }));
+      let chat: ReadonlyArray<PatkaChatEntry> = [];
+      engine.chat.subscribe((content) => {
+        chat = content;
+      });
+
+      engine.askPatka(aPrompt("hello"));
+
+      expect(chat.map((entry) => entry.status)).toEqual(["complete", "pending"]);
+
+      answers.next({ message: "world", id: randomUUID() });
+
+      expect(chat.map((entry) => entry.status)).toEqual(["complete", "complete"]);
+      expect(chat.map((entry) => entry.message)).toEqual(["hello", "world"]);
+    });
+
+    it("gives every prompt its own answer, even when they overlap", () => {
+      const answers: Array<Subject<PatkaMessage>> = [];
+      const engine = new PatkaEngine(
+        new PatkaAgent("patka", {
+          generate: () => {
+            const answer = new Subject<PatkaMessage>();
+            answers.push(answer);
+            return answer;
+          },
+        }),
+      );
+      let chat: ReadonlyArray<PatkaChatEntry> = [];
+      engine.chat.subscribe((content) => {
+        chat = content;
+      });
+
+      engine.askPatka(aPrompt("first"));
+      engine.askPatka(aPrompt("second"));
+      answers[0].next({ message: "answer one", id: randomUUID() });
+      answers[1].next({ message: "answer two", id: randomUUID() });
+
+      expect(chat.map((entry) => entry.message)).toEqual([
+        "first",
+        "answer one",
+        "second",
+        "answer two",
       ]);
     });
-
-    it("gives a late subscriber the chat so far", () => {
-      const patkaAgent = new PatkaAgent({
-        generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
-      });
-      const engine = new PatkaEngine(patkaAgent);
-      engine.pushUserPrompt("hello");
-      let chat: ReadonlyArray<PatkaChatEntry> = [];
-
-      engine.chat.subscribe((content) => (chat = content));
-
-      expect(chat.map((entry) => entry.message.message)).toEqual(["hello", "world"]);
-    });
-  });
-
-  it("sends the prompt to the inference client", () => {
-    const generate = vi.fn(() => of({ message: "world", id: randomUUID() }));
-    const engine = new PatkaEngine(new PatkaAgent({ generate }));
-
-    engine.pushUserPrompt("hello");
-
-    expect(generate).toHaveBeenCalledWith({ message: "hello", id: expect.any(String) });
-  });
-
-  it("adds the inference response to the chat", () => {
-    const engine = new PatkaEngine(
-      new PatkaAgent({ generate: vi.fn(() => of({ message: "world", id: randomUUID() })) }),
-    );
-    let chat: ReadonlyArray<PatkaChatEntry> = [];
-    engine.chat.subscribe((content) => (chat = content));
-
-    engine.pushUserPrompt("hello");
-
-    expect(chat.map((entry) => entry.message.message)).toEqual(["hello", "world"]);
-  });
-
-  it("shows a pending response until the answer arrives", () => {
-    const responses = new Subject<PatkaMessage>();
-    const engine = new PatkaEngine(new PatkaAgent({ generate: () => responses }));
-    let chat: ReadonlyArray<PatkaChatEntry> = [];
-    engine.chat.subscribe((content) => (chat = content));
-
-    engine.pushUserPrompt("hello");
-
-    expect(chat.map((entry) => entry.message.message)).toEqual(["hello", "..."]);
-
-    responses.next({ message: "world", id: randomUUID() });
-
-    expect(chat.map((entry) => entry.message.message)).toEqual(["hello", "world"]);
-  });
-
-  it("answers every prompt in its own entry, even when they overlap", () => {
-    const answers: Array<Subject<PatkaMessage>> = [];
-    const engine = new PatkaEngine(
-      new PatkaAgent({
-        generate: () => {
-          const answer = new Subject<PatkaMessage>();
-          answers.push(answer);
-          return answer;
-        },
-      }),
-    );
-    let chat: ReadonlyArray<PatkaChatEntry> = [];
-    engine.chat.subscribe((content) => (chat = content));
-
-    engine.pushUserPrompt("first");
-    engine.pushUserPrompt("second");
-    answers[0].next({ message: "answer one", id: randomUUID() });
-    answers[0].complete();
-    answers[1].next({ message: "answer two", id: randomUUID() });
-    answers[1].complete();
-
-    expect(chat.map((entry) => entry.message.message)).toEqual([
-      "first",
-      "answer one",
-      "second",
-      "answer two",
-    ]);
   });
 });

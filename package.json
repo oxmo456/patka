@@ -6,9 +6,9 @@
   "scripts": {
     "start": "node apps/patka/main.ts",
     "check": "tsc -p apps/patka --noEmit",
-    "test": "vitest run",
-    "format": "biome check --write .",
-    "lint": "biome check ."
+    "test": "bazel test //...",
+    "format": "bazel run //:format",
+    "lint": "bazel test //:lint"
   },
   "dependencies": {
     "blessed": "^0.1.81",

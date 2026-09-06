@@ -3,58 +3,42 @@ import { describe, expect, it } from "vitest";
 import { PatkaChat } from "./patka-chat.ts";
 import type { PatkaChatEntry } from "./patka-chat-entry.ts";
 
+const anEntry = (message: string, id = randomUUID()): PatkaChatEntry => ({
+  id,
+  author: "you",
+  message,
+  status: "complete",
+});
+
 describe("PatkaChat", () => {
   describe("push", () => {
-    it("returns the id of the message it added", () => {
+    it("appends an entry the chat does not know yet", () => {
       const patkaChat = new PatkaChat();
       let entries: ReadonlyArray<PatkaChatEntry> = [];
-      patkaChat.entries.subscribe((content) => (entries = content));
+      patkaChat.entries.subscribe((content) => {
+        entries = content;
+      });
 
-      const id = patkaChat.push("hello");
+      patkaChat.push(anEntry("hello"));
+      patkaChat.push(anEntry("world"));
 
-      expect(entries.map((entry) => entry.message.id)).toEqual([id]);
+      expect(entries.map((entry) => entry.message)).toEqual(["hello", "world"]);
     });
 
-    it("returns a different id for every message", () => {
+    it("replaces the entry that already has that id, keeping its place", () => {
       const patkaChat = new PatkaChat();
-
-      expect(patkaChat.push("hello")).not.toBe(patkaChat.push("world"));
-    });
-  });
-
-  describe("update", () => {
-    it("replaces the message with that id, keeping its place", () => {
-      const patkaChat = new PatkaChat();
+      const id = randomUUID();
       let entries: ReadonlyArray<PatkaChatEntry> = [];
-      patkaChat.entries.subscribe((content) => (entries = content));
-      const id = patkaChat.push("...");
-      patkaChat.push("later");
+      patkaChat.entries.subscribe((content) => {
+        entries = content;
+      });
+      patkaChat.push({ id, author: "patka", message: "", status: "pending" });
+      patkaChat.push(anEntry("later"));
 
-      patkaChat.update(id, "the answer");
+      patkaChat.push({ id, author: "patka", message: "the answer", status: "complete" });
 
-      expect(entries.map((entry) => entry.message.message)).toEqual(["the answer", "later"]);
-    });
-
-    it("keeps the id of the message it updated", () => {
-      const patkaChat = new PatkaChat();
-      let entries: ReadonlyArray<PatkaChatEntry> = [];
-      patkaChat.entries.subscribe((content) => (entries = content));
-      const id = patkaChat.push("...");
-
-      patkaChat.update(id, "the answer");
-
-      expect(entries.map((entry) => entry.message.id)).toEqual([id]);
-    });
-
-    it("leaves the chat alone when the id is unknown", () => {
-      const patkaChat = new PatkaChat();
-      let entries: ReadonlyArray<PatkaChatEntry> = [];
-      patkaChat.entries.subscribe((content) => (entries = content));
-      patkaChat.push("hello");
-
-      patkaChat.update(randomUUID(), "the answer");
-
-      expect(entries.map((entry) => entry.message.message)).toEqual(["hello"]);
+      expect(entries.map((entry) => entry.message)).toEqual(["the answer", "later"]);
+      expect(entries.map((entry) => entry.status)).toEqual(["complete", "complete"]);
     });
   });
 
@@ -68,36 +52,28 @@ describe("PatkaChat", () => {
       expect(received).toEqual([[]]);
     });
 
-    it("holds every message that was pushed, in order", () => {
+    it("emits again when an entry is replaced", () => {
       const patkaChat = new PatkaChat();
-      let entries: ReadonlyArray<PatkaChatEntry> = [];
-      patkaChat.entries.subscribe((content) => (entries = content));
-
-      patkaChat.push("hello");
-      patkaChat.push("world");
-
-      expect(entries.map((entry) => entry.message.message)).toEqual(["hello", "world"]);
-    });
-
-    it("emits again when a message is updated", () => {
-      const patkaChat = new PatkaChat();
-      const id = patkaChat.push("...");
+      const id = randomUUID();
+      patkaChat.push({ id, author: "patka", message: "", status: "pending" });
       const received: Array<string> = [];
-      patkaChat.entries.subscribe((entries) => received.push(entries[0].message.message));
+      patkaChat.entries.subscribe((entries) => received.push(entries[0].status));
 
-      patkaChat.update(id, "the answer");
+      patkaChat.push({ id, author: "patka", message: "the answer", status: "complete" });
 
-      expect(received).toEqual(["...", "the answer"]);
+      expect(received).toEqual(["pending", "complete"]);
     });
 
     it("gives a late subscriber the entries so far", () => {
       const patkaChat = new PatkaChat();
-      patkaChat.push("hello");
+      patkaChat.push(anEntry("hello"));
       let entries: ReadonlyArray<PatkaChatEntry> = [];
 
-      patkaChat.entries.subscribe((content) => (entries = content));
+      patkaChat.entries.subscribe((content) => {
+        entries = content;
+      });
 
-      expect(entries.map((entry) => entry.message.message)).toEqual(["hello"]);
+      expect(entries.map((entry) => entry.message)).toEqual(["hello"]);
     });
   });
 });

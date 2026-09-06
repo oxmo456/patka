@@ -15,3 +15,13 @@ js_library(
     srcs = ["biome.json"],
     visibility = ["//visibility:public"],
 )
+
+alias(
+    name = "format",
+    actual = "//tools:format",
+)
+
+test_suite(
+    name = "lint",
+    tests = ["//apps/patka:lint"],
+)
