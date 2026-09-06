@@ -3,9 +3,11 @@ module(name = "patka")
 bazel_dep(name = "aspect_rules_js", version = "3.4.1")
 bazel_dep(name = "aspect_rules_ts", version = "3.10.1")
 bazel_dep(name = "rules_nodejs", version = "6.7.5")
+bazel_dep(name = "bazel_env.bzl", version = "0.8.0", dev_dependency = True)
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(node_version_from_nvmrc = "//:.nvmrc")
+use_repo(node, "nodejs_host")
 
 npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
 npm.npm_translate_lock(
@@ -18,3 +20,14 @@ use_repo(npm, "npm")
 ts = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ext")
 ts.deps(ts_version_from = "//:package.json")
 use_repo(ts, "npm_typescript")
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+ANT_VERSION = "1.31.0"
+
+http_archive(
+    name = "ant_cli",
+    build_file_content = """exports_files(["ant"])""",
+    sha256 = "2371e94fe0b74a3fec16f5f8e61e188d07007df7a26670d9eef3f0eaf89c0cca",
+    url = "https://github.com/anthropics/anthropic-cli/releases/download/v{version}/ant_{version}_macos_arm64.zip".format(version = ANT_VERSION),
+)
