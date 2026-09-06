@@ -4,16 +4,16 @@ import type { InferenceClient } from "../inference/inference-client.ts";
 import type { PatkaMessage } from "../inference/patka-message.ts";
 import { none, some } from "../option.ts";
 import type { PatkaUtterance } from "../patka-utterance.ts";
-import type { PatkaHistoryNode } from "./patka-history-node.ts";
+import type { PatkaConversation, PatkaConversationEntry } from "./patka-conversation.ts";
 import type { PatkaPromptFactory } from "./patka-prompt-factory.ts";
 
 export class PatkaAgent {
-  private readonly _history = new BehaviorSubject<ReadonlyArray<PatkaHistoryNode>>([]);
+  private readonly _history = new BehaviorSubject<PatkaConversation>([]);
   private readonly inferenceClient: InferenceClient;
   private readonly promptFactory: PatkaPromptFactory;
 
   readonly name: string;
-  readonly history: Observable<ReadonlyArray<PatkaHistoryNode>> = this._history.asObservable();
+  readonly history: Observable<PatkaConversation> = this._history.asObservable();
 
   constructor(name: string, inferenceClient: InferenceClient, promptFactory: PatkaPromptFactory) {
     this.name = name;
@@ -22,7 +22,7 @@ export class PatkaAgent {
   }
 
   handle(utterance: PatkaUtterance): void {
-    const answer: PatkaHistoryNode = { id: randomUUID(), role: "agent", utterance: none };
+    const answer: PatkaConversationEntry = { id: randomUUID(), role: "agent", utterance: none };
 
     this._history.next([
       ...this._history.value,

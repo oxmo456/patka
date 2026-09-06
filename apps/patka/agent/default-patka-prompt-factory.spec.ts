@@ -3,15 +3,15 @@ import { describe, expect, it } from "vitest";
 import { none, some } from "../option.ts";
 import type { PatkaRole } from "../patka-role.ts";
 import { DefaultPatkaPromptFactory } from "./default-patka-prompt-factory.ts";
-import type { PatkaHistoryNode } from "./patka-history-node.ts";
+import type { PatkaConversationEntry } from "./patka-conversation.ts";
 
-const spoken = (role: PatkaRole, content: string): PatkaHistoryNode => ({
+const spoken = (role: PatkaRole, content: string): PatkaConversationEntry => ({
   id: randomUUID(),
   role,
   utterance: some({ content, timestamp: new Date(), id: randomUUID() }),
 });
 
-const pending = (role: PatkaRole): PatkaHistoryNode => ({
+const pending = (role: PatkaRole): PatkaConversationEntry => ({
   id: randomUUID(),
   role,
   utterance: none,

@@ -1,6 +1,6 @@
 import { match } from "ts-pattern";
 import type { PatkaRole } from "../patka-role.ts";
-import type { PatkaHistoryNode } from "./patka-history-node.ts";
+import type { PatkaConversation, PatkaConversationEntry } from "./patka-conversation.ts";
 import type { PatkaPromptFactory } from "./patka-prompt-factory.ts";
 
 const INSTRUCTION =
@@ -12,7 +12,7 @@ const LABEL: Record<PatkaRole, string> = {
 };
 
 export class DefaultPatkaPromptFactory implements PatkaPromptFactory {
-  create(history: ReadonlyArray<PatkaHistoryNode>): string {
+  create(history: PatkaConversation): string {
     const spoken = history.flatMap((node) =>
       match(node.utterance)
         .with({ type: "some" }, (utterance) => [`${LABEL[node.role]}: ${utterance.value.content}`])

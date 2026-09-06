@@ -1,5 +1,5 @@
-import type { PatkaHistoryNode } from "./patka-history-node.ts";
+import type { PatkaConversation, PatkaConversationEntry } from "./patka-conversation.ts";
 
 export interface PatkaPromptFactory {
-  create(history: ReadonlyArray<PatkaHistoryNode>): string;
+  create(history: PatkaConversation): string;
 }

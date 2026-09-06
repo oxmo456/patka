@@ -7,7 +7,7 @@ import { isSome } from "../option.ts";
 import type { PatkaUtterance } from "../patka-utterance.ts";
 import { DefaultPatkaPromptFactory } from "./default-patka-prompt-factory.ts";
 import { PatkaAgent } from "./patka-agent.ts";
-import type { PatkaHistoryNode } from "./patka-history-node.ts";
+import type { PatkaConversation, PatkaConversationEntry } from "./patka-conversation.ts";
 
 const anUtterance = (content: string): PatkaUtterance => ({
   content,
@@ -15,7 +15,7 @@ const anUtterance = (content: string): PatkaUtterance => ({
   id: randomUUID(),
 });
 
-const spoken = (history: ReadonlyArray<PatkaHistoryNode>): ReadonlyArray<string> =>
+const spoken = (history: PatkaConversation): ReadonlyArray<string> =>
   history.map((node) => (isSome(node.utterance) ? node.utterance.value.content : "<pending>"));
 
 describe("PatkaAgent", () => {
@@ -36,7 +36,7 @@ describe("PatkaAgent", () => {
         { generate: vi.fn(() => of({ message: "world", id: randomUUID() })) },
         new DefaultPatkaPromptFactory(),
       );
-      const received: Array<ReadonlyArray<PatkaHistoryNode>> = [];
+      const received: Array<PatkaConversation> = [];
 
       agent.history.subscribe((history) => received.push(history));
 
@@ -50,7 +50,7 @@ describe("PatkaAgent", () => {
         { generate: () => answers },
         new DefaultPatkaPromptFactory(),
       );
-      let history: ReadonlyArray<PatkaHistoryNode> = [];
+      let history: PatkaConversation = [];
       agent.history.subscribe((content) => {
         history = content;
       });
@@ -68,7 +68,7 @@ describe("PatkaAgent", () => {
         { generate: () => answers },
         new DefaultPatkaPromptFactory(),
       );
-      let history: ReadonlyArray<PatkaHistoryNode> = [];
+      let history: PatkaConversation = [];
       agent.history.subscribe((content) => {
         history = content;
       });
@@ -87,7 +87,7 @@ describe("PatkaAgent", () => {
         { generate: vi.fn(() => of({ message: "world", id: randomUUID() })) },
         new DefaultPatkaPromptFactory(),
       );
-      let history: ReadonlyArray<PatkaHistoryNode> = [];
+      let history: PatkaConversation = [];
       agent.history.subscribe((content) => {
         history = content;
       });
@@ -106,7 +106,7 @@ describe("PatkaAgent", () => {
         },
         new DefaultPatkaPromptFactory(),
       );
-      let history: ReadonlyArray<PatkaHistoryNode> = [];
+      let history: PatkaConversation = [];
       agent.history.subscribe((content) => {
         history = content;
       });

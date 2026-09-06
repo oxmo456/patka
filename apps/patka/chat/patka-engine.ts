@@ -1,14 +1,14 @@
 import type { Observable } from "rxjs";
 import { match } from "ts-pattern";
 import type { PatkaAgent } from "../agent/patka-agent.ts";
-import type { PatkaHistoryNode } from "../agent/patka-history-node.ts";
+import type { PatkaConversation, PatkaConversationEntry } from "../agent/patka-conversation.ts";
 import type { PatkaUtterance } from "../patka-utterance.ts";
 import { PatkaChat } from "./patka-chat.ts";
 import type { PatkaChatEntry, PatkaChatEntryStatus } from "./patka-chat-entry.ts";
 
 const USER = "you";
 
-const toChatEntry = (node: PatkaHistoryNode, author: string): PatkaChatEntry => ({
+const toChatEntry = (node: PatkaConversationEntry, author: string): PatkaChatEntry => ({
   id: node.id,
   role: node.role,
   author: node.role === "user" ? USER : author,
@@ -30,7 +30,7 @@ export class PatkaEngine {
 
   constructor(patkaAgent: PatkaAgent) {
     this.patkaAgent = patkaAgent;
-    patkaAgent.history.subscribe((history: ReadonlyArray<PatkaHistoryNode>): void => {
+    patkaAgent.history.subscribe((history: PatkaConversation): void => {
       for (const node of history) {
         this.patkaChat.push(toChatEntry(node, patkaAgent.name));
       }
