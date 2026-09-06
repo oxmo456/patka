@@ -1,4 +1,4 @@
+import { extractInferenceClientOption } from "./inference/patka-inference.ts";
 import { Patka } from "./patka.ts";
-import { extractInferenceClientOption } from "./patka-inference.ts";
 
 new Patka(extractInferenceClientOption(process.argv));

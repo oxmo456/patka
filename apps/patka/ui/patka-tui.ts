@@ -3,7 +3,7 @@ import type blessedModule from "blessed";
 import type { Widgets } from "blessed";
 import { type Observable, ReplaySubject } from "rxjs";
 import { match } from "ts-pattern";
-import type { PatkaChatEntry } from "./patka-chat-entry.ts";
+import type { PatkaChatEntry } from "../chat/patka-chat-entry.ts";
 import type { PatkaUI } from "./patka-ui.ts";
 import type { PatkaUserInput } from "./patka-user-input.ts";
 

@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
 import { of, Subject, throwError } from "rxjs";
 import { describe, expect, it, vi } from "vitest";
+import type { InferenceClient } from "../inference/inference-client.ts";
+import type { PatkaMessage } from "../inference/patka-message.ts";
+import { isSome } from "../option.ts";
+import type { PatkaUtterance } from "../patka-utterance.ts";
 import { DefaultPatkaPromptFactory } from "./default-patka-prompt-factory.ts";
-import type { InferenceClient } from "./inference-client.ts";
-import { isSome } from "./option.ts";
 import { PatkaAgent } from "./patka-agent.ts";
 import type { PatkaHistoryNode } from "./patka-history-node.ts";
-import type { PatkaMessage } from "./patka-message.ts";
-import type { PatkaUtterance } from "./patka-utterance.ts";
 
 const anUtterance = (content: string): PatkaUtterance => ({
   content,

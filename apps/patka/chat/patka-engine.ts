@@ -1,10 +1,10 @@
 import type { Observable } from "rxjs";
 import { match } from "ts-pattern";
-import type { PatkaAgent } from "./patka-agent.ts";
+import type { PatkaAgent } from "../agent/patka-agent.ts";
+import type { PatkaHistoryNode } from "../agent/patka-history-node.ts";
+import type { PatkaUtterance } from "../patka-utterance.ts";
 import { PatkaChat } from "./patka-chat.ts";
 import type { PatkaChatEntry, PatkaChatEntryStatus } from "./patka-chat-entry.ts";
-import type { PatkaHistoryNode } from "./patka-history-node.ts";
-import type { PatkaUtterance } from "./patka-utterance.ts";
 
 const USER = "you";
 

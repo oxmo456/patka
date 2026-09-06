@@ -1,7 +1,7 @@
 import { match } from "ts-pattern";
+import type { PatkaRole } from "../patka-role.ts";
 import type { PatkaHistoryNode } from "./patka-history-node.ts";
 import type { PatkaPromptFactory } from "./patka-prompt-factory.ts";
-import type { PatkaRole } from "./patka-role.ts";
 
 const INSTRUCTION =
   "Answer with the fewest words possible. No preamble, no restatement of the question, no markdown, no closing offer to help.";

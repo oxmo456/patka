@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
+import { none, some } from "../option.ts";
+import type { PatkaRole } from "../patka-role.ts";
 import { DefaultPatkaPromptFactory } from "./default-patka-prompt-factory.ts";
-import { none, some } from "./option.ts";
 import type { PatkaHistoryNode } from "./patka-history-node.ts";
-import type { PatkaRole } from "./patka-role.ts";
 
 const spoken = (role: PatkaRole, content: string): PatkaHistoryNode => ({
   id: randomUUID(),

@@ -1,13 +1,19 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary")
-load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@npm//:vitest/package_json.bzl", vitest_bin = "bin")
 load("//tools:lint.bzl", "biome_lint")
+
+ts_config(
+    name = "tsconfig",
+    src = "tsconfig.json",
+    visibility = ["//apps/patka:__subpackages__"],
+)
 
 ts_project(
     name = "lib",
     srcs = glob(
-        ["*.ts"],
-        exclude = ["*.spec.ts"],
+        ["**/*.ts"],
+        exclude = ["**/*.spec.ts"],
     ),
     transpiler = "tsc",
     tsconfig = "tsconfig.json",
@@ -40,7 +46,7 @@ vitest_bin.vitest_test(
     name = "patka_test",
     args = ["run"],
     chdir = package_name(),
-    data = glob(["*.ts"]) + [
+    data = glob(["**/*.ts"]) + [
         "tsconfig.json",
         "//:package_json",
         "//:node_modules/blessed",

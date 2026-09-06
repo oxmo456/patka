@@ -1,5 +1,5 @@
 import type { UUID } from "node:crypto";
-import type { PatkaRole } from "./patka-role.ts";
+import type { PatkaRole } from "../patka-role.ts";
 
 export type PatkaChatEntryStatus = "pending" | "complete" | "failed";
 

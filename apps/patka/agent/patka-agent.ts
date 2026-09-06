@@ -1,11 +1,11 @@
 import { randomUUID, type UUID } from "node:crypto";
 import { BehaviorSubject, type Observable } from "rxjs";
-import type { InferenceClient } from "./inference-client.ts";
-import { none, some } from "./option.ts";
+import type { InferenceClient } from "../inference/inference-client.ts";
+import type { PatkaMessage } from "../inference/patka-message.ts";
+import { none, some } from "../option.ts";
+import type { PatkaUtterance } from "../patka-utterance.ts";
 import type { PatkaHistoryNode } from "./patka-history-node.ts";
-import type { PatkaMessage } from "./patka-message.ts";
 import type { PatkaPromptFactory } from "./patka-prompt-factory.ts";
-import type { PatkaUtterance } from "./patka-utterance.ts";
 
 export class PatkaAgent {
   private readonly _history = new BehaviorSubject<ReadonlyArray<PatkaHistoryNode>>([]);

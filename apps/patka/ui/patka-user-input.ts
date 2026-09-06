@@ -1,5 +1,5 @@
 import type { UUID } from "node:crypto";
-import type { PatkaUtterance } from "./patka-utterance.ts";
+import type { PatkaUtterance } from "../patka-utterance.ts";
 
 export type PatkaUserInput = {
   readonly content: string;
