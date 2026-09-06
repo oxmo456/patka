@@ -1,8 +1,8 @@
 import type { Observable } from "rxjs";
-import { isSome } from "./option.ts";
+import { match } from "ts-pattern";
 import type { PatkaAgent } from "./patka-agent.ts";
 import { PatkaChat } from "./patka-chat.ts";
-import type { PatkaChatEntry } from "./patka-chat-entry.ts";
+import type { PatkaChatEntry, PatkaChatEntryStatus } from "./patka-chat-entry.ts";
 import type { PatkaHistoryNode } from "./patka-history-node.ts";
 import type { PatkaUtterance } from "./patka-utterance.ts";
 
@@ -12,8 +12,14 @@ const toChatEntry = (node: PatkaHistoryNode, author: string): PatkaChatEntry => 
   id: node.id,
   role: node.role,
   author: node.role === "user" ? USER : author,
-  message: isSome(node.utterance) ? node.utterance.value.content : "",
-  status: isSome(node.utterance) ? "complete" : "pending",
+  message: match(node.utterance)
+    .with({ type: "some" }, (utterance) => utterance.value.content)
+    .with({ type: "none" }, () => "")
+    .exhaustive(),
+  status: match(node.utterance)
+    .with({ type: "some" }, (): PatkaChatEntryStatus => "complete")
+    .with({ type: "none" }, (): PatkaChatEntryStatus => "pending")
+    .exhaustive(),
 });
 
 export class PatkaEngine {

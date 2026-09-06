@@ -125,7 +125,7 @@ describe("PatkaAgent", () => {
       agent.handle(anUtterance("hello"));
 
       expect(inferenceClient.generate).toHaveBeenCalledWith({
-        message: ["User: hello", "Assistant:"].join("\n"),
+        message: expect.stringContaining(["User: hello", "Assistant:"].join("\n")),
         id: expect.any(String),
       });
     });

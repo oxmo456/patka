@@ -18,6 +18,7 @@ ts_project(
         "//:node_modules/blessed",
         "//:node_modules/ollama",
         "//:node_modules/rxjs",
+        "//:node_modules/ts-pattern",
     ],
 )
 
@@ -29,6 +30,7 @@ js_binary(
         "//:node_modules/blessed",
         "//:node_modules/ollama",
         "//:node_modules/rxjs",
+        "//:node_modules/ts-pattern",
     ],
     entry_point = "main.js",
     visibility = ["//visibility:public"],
@@ -44,6 +46,7 @@ vitest_bin.vitest_test(
         "//:node_modules/blessed",
         "//:node_modules/ollama",
         "//:node_modules/rxjs",
+        "//:node_modules/ts-pattern",
         "//:node_modules/vitest",
     ],
 )

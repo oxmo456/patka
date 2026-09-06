@@ -18,14 +18,18 @@ const pending = (role: PatkaRole): PatkaHistoryNode => ({
 });
 
 describe("DefaultPatkaPromptFactory", () => {
+  it("tells the model to keep its answer short", () => {
+    expect(new DefaultPatkaPromptFactory().create([])).toContain("fewest words possible");
+  });
+
   it("asks for an answer when nothing has been said", () => {
-    expect(new DefaultPatkaPromptFactory().create([])).toBe("Assistant:");
+    expect(new DefaultPatkaPromptFactory().create([]).endsWith("\n\nAssistant:")).toBe(true);
   });
 
   it("labels who said what", () => {
     const history = [spoken("user", "hello"), spoken("agent", "hi there")];
 
-    expect(new DefaultPatkaPromptFactory().create(history)).toBe(
+    expect(new DefaultPatkaPromptFactory().create(history)).toContain(
       ["User: hello", "Assistant: hi there", "Assistant:"].join("\n"),
     );
   });
@@ -33,7 +37,7 @@ describe("DefaultPatkaPromptFactory", () => {
   it("leaves out the nodes nobody has filled yet", () => {
     const history = [spoken("user", "hello"), pending("agent")];
 
-    expect(new DefaultPatkaPromptFactory().create(history)).toBe(
+    expect(new DefaultPatkaPromptFactory().create(history)).toContain(
       ["User: hello", "Assistant:"].join("\n"),
     );
   });
@@ -46,7 +50,7 @@ describe("DefaultPatkaPromptFactory", () => {
       pending("agent"),
     ];
 
-    expect(new DefaultPatkaPromptFactory().create(history)).toBe(
+    expect(new DefaultPatkaPromptFactory().create(history)).toContain(
       [
         "User: my name is Zaphod",
         "Assistant: nice to meet you",

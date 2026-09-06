@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type blessedModule from "blessed";
 import type { Widgets } from "blessed";
 import { type Observable, ReplaySubject } from "rxjs";
+import { match } from "ts-pattern";
 import type { PatkaChatEntry } from "./patka-chat-entry.ts";
 import type { PatkaUI } from "./patka-ui.ts";
 import type { PatkaUserInput } from "./patka-user-input.ts";
@@ -41,10 +42,16 @@ const wrap = (text: string, width: number): ReadonlyArray<string> => {
 };
 
 const toBubble = (entry: PatkaChatEntry, width: number): ReadonlyArray<string> => {
-  const text = entry.status === "pending" ? PENDING_RESPONSE : entry.message;
+  const text = match(entry.status)
+    .with("pending", () => PENDING_RESPONSE)
+    .with("complete", "failed", () => entry.message)
+    .exhaustive();
   const lines = wrap(text, Math.max(8, Math.floor(width * BUBBLE_RATIO) - 2));
   const bubbleWidth = Math.max(...lines.map((line) => line.length));
-  const style = entry.role === "user" ? USER_STYLE : AGENT_STYLE;
+  const style = match(entry.role)
+    .with("user", () => USER_STYLE)
+    .with("agent", () => AGENT_STYLE)
+    .exhaustive();
 
   return lines.map((line) => `${style} ${line.padEnd(bubbleWidth)} {/}`);
 };
