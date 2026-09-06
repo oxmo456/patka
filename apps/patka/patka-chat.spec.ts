@@ -5,6 +5,7 @@ import type { PatkaChatEntry } from "./patka-chat-entry.ts";
 
 const anEntry = (message: string, id = randomUUID()): PatkaChatEntry => ({
   id,
+  origin: "user",
   author: "you",
   message,
   status: "complete",
@@ -32,10 +33,16 @@ describe("PatkaChat", () => {
       patkaChat.entries.subscribe((content) => {
         entries = content;
       });
-      patkaChat.push({ id, author: "patka", message: "", status: "pending" });
+      patkaChat.push({ id, origin: "agent", author: "patka", message: "", status: "pending" });
       patkaChat.push(anEntry("later"));
 
-      patkaChat.push({ id, author: "patka", message: "the answer", status: "complete" });
+      patkaChat.push({
+        id,
+        origin: "agent",
+        author: "patka",
+        message: "the answer",
+        status: "complete",
+      });
 
       expect(entries.map((entry) => entry.message)).toEqual(["the answer", "later"]);
       expect(entries.map((entry) => entry.status)).toEqual(["complete", "complete"]);
@@ -55,11 +62,17 @@ describe("PatkaChat", () => {
     it("emits again when an entry is replaced", () => {
       const patkaChat = new PatkaChat();
       const id = randomUUID();
-      patkaChat.push({ id, author: "patka", message: "", status: "pending" });
+      patkaChat.push({ id, origin: "agent", author: "patka", message: "", status: "pending" });
       const received: Array<string> = [];
       patkaChat.entries.subscribe((entries) => received.push(entries[0].status));
 
-      patkaChat.push({ id, author: "patka", message: "the answer", status: "complete" });
+      patkaChat.push({
+        id,
+        origin: "agent",
+        author: "patka",
+        message: "the answer",
+        status: "complete",
+      });
 
       expect(received).toEqual(["pending", "complete"]);
     });

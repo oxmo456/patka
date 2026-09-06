@@ -10,8 +10,44 @@ export type Blessed = Pick<typeof blessedModule, "screen" | "box" | "textbox">;
 
 const PENDING_RESPONSE = "...";
 
-const toLine = (entry: PatkaChatEntry): string =>
-  `${entry.author}: ${entry.status === "pending" ? PENDING_RESPONSE : entry.message}`;
+const BUBBLE_RATIO = 0.6;
+
+const USER_STYLE = "{white-bg}{blue-fg}";
+
+const AGENT_STYLE = "{blue-bg}{white-fg}{bold}";
+
+const wrap = (text: string, width: number): ReadonlyArray<string> => {
+  const lines: Array<string> = [];
+  let line = "";
+
+  for (const word of text.split(/\s+/).filter((candidate) => candidate.length > 0)) {
+    for (let rest: string = word; rest.length > 0; rest = rest.slice(width)) {
+      const chunk = rest.slice(0, width);
+
+      if (line.length === 0) {
+        line = chunk;
+      } else if (line.length + 1 + chunk.length <= width) {
+        line = `${line} ${chunk}`;
+      } else {
+        lines.push(line);
+        line = chunk;
+      }
+    }
+  }
+
+  lines.push(line);
+
+  return lines;
+};
+
+const toBubble = (entry: PatkaChatEntry, width: number): ReadonlyArray<string> => {
+  const text = entry.status === "pending" ? PENDING_RESPONSE : entry.message;
+  const lines = wrap(text, Math.max(8, Math.floor(width * BUBBLE_RATIO) - 2));
+  const bubbleWidth = Math.max(...lines.map((line) => line.length));
+  const style = entry.origin === "user" ? USER_STYLE : AGENT_STYLE;
+
+  return lines.map((line) => `${style} ${line.padEnd(bubbleWidth)} {/}`);
+};
 
 export class PatkaTUI implements PatkaUI {
   private readonly _userInputs = new ReplaySubject<PatkaUserInput>();
@@ -28,8 +64,10 @@ export class PatkaTUI implements PatkaUI {
       width: "100%",
       height: "100%-3",
       content: "",
+      tags: true,
       scrollable: true,
       alwaysScroll: true,
+      style: { fg: "white", bg: "blue" },
     });
     const promptInput = blessed.textbox({
       bottom: 0,
@@ -38,6 +76,7 @@ export class PatkaTUI implements PatkaUI {
       height: 3,
       border: "line",
       inputOnFocus: true,
+      style: { fg: "white", bg: "blue", border: { fg: "white", bg: "blue" } },
     });
 
     promptInput.on("submit", (prompt: string) => {
@@ -55,7 +94,8 @@ export class PatkaTUI implements PatkaUI {
   }
 
   updateChat(chat: ReadonlyArray<PatkaChatEntry>): void {
-    const lines = chat.map(toLine);
+    const width = Number(this.conversation.width);
+    const lines = chat.flatMap((entry) => [...toBubble(entry, width), ""]);
     const blankLines = Math.max(0, Number(this.conversation.height) - lines.length);
 
     this.conversation.setContent([...new Array(blankLines).fill(""), ...lines].join("\n"));

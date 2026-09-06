@@ -44,7 +44,7 @@ describe("PatkaEngine", () => {
       expect(chat.map((entry) => entry.message)).toEqual(["hello", "world"]);
     });
 
-    it("names the author of every entry", () => {
+    it("names the author and origin of every entry", () => {
       const engine = new PatkaEngine(
         new PatkaAgent("patka", {
           generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
@@ -58,6 +58,7 @@ describe("PatkaEngine", () => {
       engine.handle(anUtterance("hello"));
 
       expect(chat.map((entry) => entry.author)).toEqual(["you", "patka"]);
+      expect(chat.map((entry) => entry.origin)).toEqual(["user", "agent"]);
     });
 
     it("keeps the answer pending until it arrives", () => {
