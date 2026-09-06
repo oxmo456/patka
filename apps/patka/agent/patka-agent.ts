@@ -40,7 +40,6 @@ export class PatkaAgent {
             id: randomUUID(),
           });
         },
-        // an agent that cannot answer leaves its node empty
         error: (): void => {},
       });
   }
