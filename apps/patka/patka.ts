@@ -1,5 +1,6 @@
 import blessed from "blessed";
 import { Ollama } from "ollama";
+import { DefaultPatkaPromptFactory } from "./default-patka-prompt-factory.ts";
 import { OllamaInferenceClient } from "./ollama-inference-client.ts";
 import { PatkaAgent } from "./patka-agent.ts";
 import { PatkaEngine } from "./patka-engine.ts";
@@ -15,7 +16,11 @@ export class Patka {
 
   constructor() {
     this.patkaEngine = new PatkaEngine(
-      new PatkaAgent("patka", new OllamaInferenceClient(MODEL, new Ollama())),
+      new PatkaAgent(
+        "patka",
+        new OllamaInferenceClient(MODEL, new Ollama()),
+        new DefaultPatkaPromptFactory(),
+      ),
     );
     this.patkaUI = new PatkaTUI(blessed);
 

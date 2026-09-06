@@ -44,7 +44,7 @@ const toBubble = (entry: PatkaChatEntry, width: number): ReadonlyArray<string> =
   const text = entry.status === "pending" ? PENDING_RESPONSE : entry.message;
   const lines = wrap(text, Math.max(8, Math.floor(width * BUBBLE_RATIO) - 2));
   const bubbleWidth = Math.max(...lines.map((line) => line.length));
-  const style = entry.origin === "user" ? USER_STYLE : AGENT_STYLE;
+  const style = entry.role === "user" ? USER_STYLE : AGENT_STYLE;
 
   return lines.map((line) => `${style} ${line.padEnd(bubbleWidth)} {/}`);
 };

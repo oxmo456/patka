@@ -5,7 +5,7 @@ import type { PatkaChatEntry } from "./patka-chat-entry.ts";
 
 const anEntry = (message: string, id = randomUUID()): PatkaChatEntry => ({
   id,
-  origin: "user",
+  role: "user",
   author: "you",
   message,
   status: "complete",
@@ -33,12 +33,12 @@ describe("PatkaChat", () => {
       patkaChat.entries.subscribe((content) => {
         entries = content;
       });
-      patkaChat.push({ id, origin: "agent", author: "patka", message: "", status: "pending" });
+      patkaChat.push({ id, role: "agent", author: "patka", message: "", status: "pending" });
       patkaChat.push(anEntry("later"));
 
       patkaChat.push({
         id,
-        origin: "agent",
+        role: "agent",
         author: "patka",
         message: "the answer",
         status: "complete",
@@ -62,13 +62,13 @@ describe("PatkaChat", () => {
     it("emits again when an entry is replaced", () => {
       const patkaChat = new PatkaChat();
       const id = randomUUID();
-      patkaChat.push({ id, origin: "agent", author: "patka", message: "", status: "pending" });
+      patkaChat.push({ id, role: "agent", author: "patka", message: "", status: "pending" });
       const received: Array<string> = [];
       patkaChat.entries.subscribe((entries) => received.push(entries[0].status));
 
       patkaChat.push({
         id,
-        origin: "agent",
+        role: "agent",
         author: "patka",
         message: "the answer",
         status: "complete",

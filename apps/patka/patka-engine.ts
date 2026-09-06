@@ -2,34 +2,19 @@ import type { Observable } from "rxjs";
 import { isSome } from "./option.ts";
 import type { PatkaAgent } from "./patka-agent.ts";
 import { PatkaChat } from "./patka-chat.ts";
-import type { PatkaChatEntry, PatkaChatEntryStatus } from "./patka-chat-entry.ts";
-import type { PatkaExchange, PatkaExchangeStatus } from "./patka-exchange.ts";
+import type { PatkaChatEntry } from "./patka-chat-entry.ts";
+import type { PatkaHistoryNode } from "./patka-history-node.ts";
 import type { PatkaUtterance } from "./patka-utterance.ts";
 
 const USER = "you";
 
-const CHAT_ENTRY_STATUS: Record<PatkaExchangeStatus, PatkaChatEntryStatus> = {
-  pending: "pending",
-  answered: "complete",
-  failed: "failed",
-};
-
-const toChatEntries = (exchange: PatkaExchange, author: string): ReadonlyArray<PatkaChatEntry> => [
-  {
-    id: exchange.utterance.id,
-    origin: "user",
-    author: USER,
-    message: exchange.utterance.content,
-    status: "complete",
-  },
-  {
-    id: exchange.id,
-    origin: "agent",
-    author,
-    message: isSome(exchange.response) ? exchange.response.value.content : "",
-    status: CHAT_ENTRY_STATUS[exchange.status],
-  },
-];
+const toChatEntry = (node: PatkaHistoryNode, author: string): PatkaChatEntry => ({
+  id: node.id,
+  role: node.role,
+  author: node.role === "user" ? USER : author,
+  message: isSome(node.utterance) ? node.utterance.value.content : "",
+  status: isSome(node.utterance) ? "complete" : "pending",
+});
 
 export class PatkaEngine {
   private readonly patkaChat = new PatkaChat();
@@ -39,9 +24,9 @@ export class PatkaEngine {
 
   constructor(patkaAgent: PatkaAgent) {
     this.patkaAgent = patkaAgent;
-    patkaAgent.exchanges.subscribe((exchange: PatkaExchange): void => {
-      for (const entry of toChatEntries(exchange, patkaAgent.name)) {
-        this.patkaChat.push(entry);
+    patkaAgent.history.subscribe((history: ReadonlyArray<PatkaHistoryNode>): void => {
+      for (const node of history) {
+        this.patkaChat.push(toChatEntry(node, patkaAgent.name));
       }
     });
   }

@@ -1,12 +1,11 @@
 import type { UUID } from "node:crypto";
+import type { PatkaRole } from "./patka-role.ts";
 
 export type PatkaChatEntryStatus = "pending" | "complete" | "failed";
 
-export type PatkaChatEntryOrigin = "user" | "agent";
-
 export type PatkaChatEntry = {
   readonly id: UUID;
-  readonly origin: PatkaChatEntryOrigin;
+  readonly role: PatkaRole;
   readonly author: string;
   readonly message: string;
   readonly status: PatkaChatEntryStatus;

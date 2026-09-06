@@ -1,43 +1,55 @@
-import { randomUUID } from "node:crypto";
-import { type Observable, Subject } from "rxjs";
+import { randomUUID, type UUID } from "node:crypto";
+import { BehaviorSubject, type Observable } from "rxjs";
 import type { InferenceClient } from "./inference-client.ts";
 import { none, some } from "./option.ts";
-import type { PatkaExchange } from "./patka-exchange.ts";
+import type { PatkaHistoryNode } from "./patka-history-node.ts";
 import type { PatkaMessage } from "./patka-message.ts";
+import type { PatkaPromptFactory } from "./patka-prompt-factory.ts";
 import type { PatkaUtterance } from "./patka-utterance.ts";
 
 export class PatkaAgent {
-  private readonly _exchanges = new Subject<PatkaExchange>();
+  private readonly _history = new BehaviorSubject<ReadonlyArray<PatkaHistoryNode>>([]);
   private readonly inferenceClient: InferenceClient;
+  private readonly promptFactory: PatkaPromptFactory;
 
   readonly name: string;
-  readonly exchanges: Observable<PatkaExchange> = this._exchanges.asObservable();
+  readonly history: Observable<ReadonlyArray<PatkaHistoryNode>> = this._history.asObservable();
 
-  constructor(name: string, inferenceClient: InferenceClient) {
+  constructor(name: string, inferenceClient: InferenceClient, promptFactory: PatkaPromptFactory) {
     this.name = name;
     this.inferenceClient = inferenceClient;
+    this.promptFactory = promptFactory;
   }
 
   handle(utterance: PatkaUtterance): void {
-    const exchange: PatkaExchange = {
-      id: randomUUID(),
-      utterance,
-      status: "pending",
-      response: none,
-    };
+    const answer: PatkaHistoryNode = { id: randomUUID(), role: "agent", utterance: none };
 
-    this._exchanges.next(exchange);
-    this.inferenceClient.generate({ message: utterance.content, id: exchange.id }).subscribe({
-      next: (response: PatkaMessage): void => {
-        this._exchanges.next({
-          ...exchange,
-          status: "answered",
-          response: some({ content: response.message, timestamp: new Date(), id: randomUUID() }),
-        });
-      },
-      error: (): void => {
-        this._exchanges.next({ ...exchange, status: "failed", response: none });
-      },
-    });
+    this._history.next([
+      ...this._history.value,
+      { id: randomUUID(), role: "user", utterance: some(utterance) },
+      answer,
+    ]);
+
+    this.inferenceClient
+      .generate({ message: this.promptFactory.create(this._history.value), id: answer.id })
+      .subscribe({
+        next: (response: PatkaMessage): void => {
+          this.fill(answer.id, {
+            content: response.message,
+            timestamp: new Date(),
+            id: randomUUID(),
+          });
+        },
+        // an agent that cannot answer leaves its node empty
+        error: (): void => {},
+      });
+  }
+
+  private fill(id: UUID, utterance: PatkaUtterance): void {
+    this._history.next(
+      this._history.value.map((node) =>
+        node.id === id ? { ...node, utterance: some(utterance) } : node,
+      ),
+    );
   }
 }
