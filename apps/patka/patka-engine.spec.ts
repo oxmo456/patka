@@ -5,9 +5,9 @@ import { PatkaAgent } from "./patka-agent.ts";
 import type { PatkaChatEntry } from "./patka-chat-entry.ts";
 import { PatkaEngine } from "./patka-engine.ts";
 import type { PatkaMessage } from "./patka-message.ts";
-import type { PatkaPrompt } from "./patka-prompt.ts";
+import type { PatkaUtterance } from "./patka-utterance.ts";
 
-const aPrompt = (content: string): PatkaPrompt => ({
+const anUtterance = (content: string): PatkaUtterance => ({
   content,
   timestamp: new Date(),
   id: randomUUID(),
@@ -28,7 +28,7 @@ describe("PatkaEngine", () => {
       expect(received).toEqual([[]]);
     });
 
-    it("holds the prompt and the answer, in the order they happened", () => {
+    it("holds the utterance and the answer, in the order they happened", () => {
       const engine = new PatkaEngine(
         new PatkaAgent("patka", {
           generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
@@ -39,7 +39,7 @@ describe("PatkaEngine", () => {
         chat = content;
       });
 
-      engine.askPatka(aPrompt("hello"));
+      engine.handle(anUtterance("hello"));
 
       expect(chat.map((entry) => entry.message)).toEqual(["hello", "world"]);
     });
@@ -55,7 +55,7 @@ describe("PatkaEngine", () => {
         chat = content;
       });
 
-      engine.askPatka(aPrompt("hello"));
+      engine.handle(anUtterance("hello"));
 
       expect(chat.map((entry) => entry.author)).toEqual(["you", "patka"]);
     });
@@ -68,7 +68,7 @@ describe("PatkaEngine", () => {
         chat = content;
       });
 
-      engine.askPatka(aPrompt("hello"));
+      engine.handle(anUtterance("hello"));
 
       expect(chat.map((entry) => entry.status)).toEqual(["complete", "pending"]);
 
@@ -78,7 +78,7 @@ describe("PatkaEngine", () => {
       expect(chat.map((entry) => entry.message)).toEqual(["hello", "world"]);
     });
 
-    it("gives every prompt its own answer, even when they overlap", () => {
+    it("gives every utterance its own answer, even when they overlap", () => {
       const answers: Array<Subject<PatkaMessage>> = [];
       const engine = new PatkaEngine(
         new PatkaAgent("patka", {
@@ -94,8 +94,8 @@ describe("PatkaEngine", () => {
         chat = content;
       });
 
-      engine.askPatka(aPrompt("first"));
-      engine.askPatka(aPrompt("second"));
+      engine.handle(anUtterance("first"));
+      engine.handle(anUtterance("second"));
       answers[0].next({ message: "answer one", id: randomUUID() });
       answers[1].next({ message: "answer two", id: randomUUID() });
 

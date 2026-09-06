@@ -5,7 +5,7 @@ import { PatkaAgent } from "./patka-agent.ts";
 import { PatkaEngine } from "./patka-engine.ts";
 import { PatkaTUI } from "./patka-tui.ts";
 import type { PatkaUI } from "./patka-ui.ts";
-import { toPatkaPrompt } from "./patka-ui-prompt.ts";
+import { toPatkaUtterance } from "./patka-user-input.ts";
 
 const MODEL = "qwen2.5-coder:latest";
 
@@ -19,8 +19,8 @@ export class Patka {
     );
     this.patkaUI = new PatkaTUI(blessed);
 
-    this.patkaUI.prompts.subscribe((uiPrompt) =>
-      this.patkaEngine.askPatka(toPatkaPrompt(uiPrompt)),
+    this.patkaUI.userInputs.subscribe((userInput) =>
+      this.patkaEngine.handle(toPatkaUtterance(userInput)),
     );
     this.patkaEngine.chat.subscribe((chat) => this.patkaUI.updateChat(chat));
   }

@@ -4,7 +4,7 @@ import type { Widgets } from "blessed";
 import { type Observable, ReplaySubject } from "rxjs";
 import type { PatkaChatEntry } from "./patka-chat-entry.ts";
 import type { PatkaUI } from "./patka-ui.ts";
-import type { PatkaUIPrompt } from "./patka-ui-prompt.ts";
+import type { PatkaUserInput } from "./patka-user-input.ts";
 
 export type Blessed = Pick<typeof blessedModule, "screen" | "box" | "textbox">;
 
@@ -14,11 +14,11 @@ const toLine = (entry: PatkaChatEntry): string =>
   `${entry.author}: ${entry.status === "pending" ? PENDING_RESPONSE : entry.message}`;
 
 export class PatkaTUI implements PatkaUI {
-  private readonly _prompts = new ReplaySubject<PatkaUIPrompt>();
+  private readonly _userInputs = new ReplaySubject<PatkaUserInput>();
   private readonly screen: Widgets.Screen;
   private readonly conversation: Widgets.BoxElement;
 
-  readonly prompts: Observable<PatkaUIPrompt> = this._prompts.asObservable();
+  readonly userInputs: Observable<PatkaUserInput> = this._userInputs.asObservable();
 
   constructor(blessed: Blessed) {
     this.screen = blessed.screen({ smartCSR: true, title: "patka" });
@@ -41,7 +41,7 @@ export class PatkaTUI implements PatkaUI {
     });
 
     promptInput.on("submit", (prompt: string) => {
-      this._prompts.next({ content: prompt, timestamp: new Date(), id: randomUUID() });
+      this._userInputs.next({ content: prompt, timestamp: new Date(), id: randomUUID() });
       promptInput.clearValue();
       promptInput.focus();
       this.screen.render();

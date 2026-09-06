@@ -1,37 +1,42 @@
 import { randomUUID } from "node:crypto";
 import { type Observable, Subject } from "rxjs";
 import type { InferenceClient } from "./inference-client.ts";
+import { none, some } from "./option.ts";
+import type { PatkaExchange } from "./patka-exchange.ts";
 import type { PatkaMessage } from "./patka-message.ts";
-import type { PatkaPrompt } from "./patka-prompt.ts";
-import type { PatkaTurn } from "./patka-turn.ts";
+import type { PatkaUtterance } from "./patka-utterance.ts";
 
 export class PatkaAgent {
-  private readonly _turns = new Subject<PatkaTurn>();
+  private readonly _exchanges = new Subject<PatkaExchange>();
   private readonly inferenceClient: InferenceClient;
 
   readonly name: string;
-  readonly turns: Observable<PatkaTurn> = this._turns.asObservable();
+  readonly exchanges: Observable<PatkaExchange> = this._exchanges.asObservable();
 
   constructor(name: string, inferenceClient: InferenceClient) {
     this.name = name;
     this.inferenceClient = inferenceClient;
   }
 
-  ask(prompt: PatkaPrompt): void {
-    const turn: PatkaTurn = {
+  handle(utterance: PatkaUtterance): void {
+    const exchange: PatkaExchange = {
       id: randomUUID(),
-      prompt,
+      utterance,
       status: "pending",
-      response: undefined,
+      response: none,
     };
 
-    this._turns.next(turn);
-    this.inferenceClient.generate({ message: prompt.content, id: turn.id }).subscribe({
+    this._exchanges.next(exchange);
+    this.inferenceClient.generate({ message: utterance.content, id: exchange.id }).subscribe({
       next: (response: PatkaMessage): void => {
-        this._turns.next({ ...turn, status: "answered", response: response.message });
+        this._exchanges.next({
+          ...exchange,
+          status: "answered",
+          response: some({ content: response.message, timestamp: new Date(), id: randomUUID() }),
+        });
       },
       error: (): void => {
-        this._turns.next({ ...turn, status: "failed", response: undefined });
+        this._exchanges.next({ ...exchange, status: "failed", response: none });
       },
     });
   }
