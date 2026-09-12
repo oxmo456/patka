@@ -41,14 +41,14 @@ const wrap = (text: string, width: number): ReadonlyArray<string> => {
   return lines;
 };
 
-const toBubble = (entry: PatkaChatEntry, width: number): ReadonlyArray<string> => {
-  const text = match(entry.status)
+const toBubble = (patkaChatEntry: PatkaChatEntry, width: number): ReadonlyArray<string> => {
+  const text = match(patkaChatEntry.status)
     .with('pending', () => PENDING_RESPONSE)
-    .with('complete', 'failed', () => entry.message)
+    .with('complete', 'failed', () => patkaChatEntry.message)
     .exhaustive();
   const lines = wrap(text, Math.max(8, Math.floor(width * BUBBLE_RATIO) - 2));
   const bubbleWidth = Math.max(...lines.map((line) => line.length));
-  const style = match(entry.role)
+  const style = match(patkaChatEntry.role)
     .with('user', () => USER_STYLE)
     .with('agent', () => AGENT_STYLE)
     .exhaustive();
@@ -100,9 +100,12 @@ export class PatkaTUI implements PatkaUI {
     this.screen.render();
   }
 
-  updateChat(chat: ReadonlyArray<PatkaChatEntry>): void {
+  updateChat(patkaChatEntries: ReadonlyArray<PatkaChatEntry>): void {
     const width = Number(this.conversation.width);
-    const lines = chat.flatMap((entry) => [...toBubble(entry, width), '']);
+    const lines = patkaChatEntries.flatMap((patkaChatEntry) => [
+      ...toBubble(patkaChatEntry, width),
+      '',
+    ]);
     const blankLines = Math.max(0, Number(this.conversation.height) - lines.length);
 
     this.conversation.setContent([...new Array(blankLines).fill(''), ...lines].join('\n'));

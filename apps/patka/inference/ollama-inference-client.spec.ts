@@ -9,9 +9,11 @@ describe('OllamaInferenceClient', () => {
     const ollama = {
       generate: vi.fn(async () => ({response: 'world'})),
     } as unknown as Ollama;
-    const client = new OllamaInferenceClient('llama3', ollama);
+    const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
 
-    const response = await firstValueFrom(client.generate({message: 'hello', id: randomUUID()}));
+    const response = await firstValueFrom(
+      ollamaInferenceClient.generate({message: 'hello', id: randomUUID()}),
+    );
 
     expect(response.message).toBe('world');
   });
@@ -20,10 +22,10 @@ describe('OllamaInferenceClient', () => {
     const ollama = {
       generate: vi.fn(async () => ({response: 'world'})),
     } as unknown as Ollama;
-    const client = new OllamaInferenceClient('llama3', ollama);
+    const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
     const id = randomUUID();
 
-    const response = await firstValueFrom(client.generate({message: 'hello', id}));
+    const response = await firstValueFrom(ollamaInferenceClient.generate({message: 'hello', id}));
 
     expect(response.id).not.toBe(id);
     expect(response.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
@@ -33,9 +35,9 @@ describe('OllamaInferenceClient', () => {
     const ollama = {
       generate: vi.fn(async () => ({response: 'world'})),
     } as unknown as Ollama;
-    const client = new OllamaInferenceClient('llama3', ollama);
+    const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
 
-    await firstValueFrom(client.generate({message: 'hello', id: randomUUID()}));
+    await firstValueFrom(ollamaInferenceClient.generate({message: 'hello', id: randomUUID()}));
 
     expect(ollama.generate).toHaveBeenCalledWith({
       model: 'llama3',
@@ -47,9 +49,9 @@ describe('OllamaInferenceClient', () => {
     const ollama = {
       generate: vi.fn(async () => ({response: 'world'})),
     } as unknown as Ollama;
-    const client = new OllamaInferenceClient('llama3', ollama);
+    const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
 
-    client.generate({message: 'hello', id: randomUUID()});
+    ollamaInferenceClient.generate({message: 'hello', id: randomUUID()});
 
     expect(ollama.generate).not.toHaveBeenCalled();
   });

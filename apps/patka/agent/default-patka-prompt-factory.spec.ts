@@ -34,30 +34,30 @@ describe('DefaultPatkaPromptFactory', () => {
   });
 
   it('labels who said what', () => {
-    const history = [spoken('user', 'hello'), spoken('agent', 'hi there')];
+    const patkaConversation = [spoken('user', 'hello'), spoken('agent', 'hi there')];
 
-    expect(new DefaultPatkaPromptFactory(new PatkaTools([])).create(history)).toContain(
+    expect(new DefaultPatkaPromptFactory(new PatkaTools([])).create(patkaConversation)).toContain(
       ['User: hello', 'Assistant: hi there', 'Assistant:'].join('\n'),
     );
   });
 
   it('leaves out the nodes nobody has filled yet', () => {
-    const history = [spoken('user', 'hello'), pending('agent')];
+    const patkaConversation = [spoken('user', 'hello'), pending('agent')];
 
-    expect(new DefaultPatkaPromptFactory(new PatkaTools([])).create(history)).toContain(
+    expect(new DefaultPatkaPromptFactory(new PatkaTools([])).create(patkaConversation)).toContain(
       ['User: hello', 'Assistant:'].join('\n'),
     );
   });
 
   it('keeps the whole conversation, in order', () => {
-    const history = [
+    const patkaConversation = [
       spoken('user', 'my name is Zaphod'),
       spoken('agent', 'nice to meet you'),
       spoken('user', 'what is my name?'),
       pending('agent'),
     ];
 
-    expect(new DefaultPatkaPromptFactory(new PatkaTools([])).create(history)).toContain(
+    expect(new DefaultPatkaPromptFactory(new PatkaTools([])).create(patkaConversation)).toContain(
       [
         'User: my name is Zaphod',
         'Assistant: nice to meet you',
@@ -74,11 +74,11 @@ describe('DefaultPatkaPromptFactory', () => {
   });
 
   it('presents every tool it was given', () => {
-    const factory = new DefaultPatkaPromptFactory(
+    const defaultPatkaPromptFactory = new DefaultPatkaPromptFactory(
       new PatkaTools([new ListFiles(), new ReadFile()]),
     );
 
-    const prompt = factory.create([]);
+    const prompt = defaultPatkaPromptFactory.create([]);
 
     expect(prompt).toContain('You can use these tools:');
     expect(prompt).toContain('- list_files: Lists the files');
@@ -87,18 +87,22 @@ describe('DefaultPatkaPromptFactory', () => {
   });
 
   it('gives the model each tool input and output schema', () => {
-    const factory = new DefaultPatkaPromptFactory(new PatkaTools([new ReadFile()]));
+    const defaultPatkaPromptFactory = new DefaultPatkaPromptFactory(
+      new PatkaTools([new ReadFile()]),
+    );
 
-    const prompt = factory.create([]);
+    const prompt = defaultPatkaPromptFactory.create([]);
 
     expect(prompt).toContain('"required":["path"]');
     expect(prompt).toContain('"type":"string"');
   });
 
   it('keeps the instruction before the tools, and the conversation after', () => {
-    const factory = new DefaultPatkaPromptFactory(new PatkaTools([new ListFiles()]));
+    const defaultPatkaPromptFactory = new DefaultPatkaPromptFactory(
+      new PatkaTools([new ListFiles()]),
+    );
 
-    const prompt = factory.create([]);
+    const prompt = defaultPatkaPromptFactory.create([]);
 
     expect(prompt.indexOf('fewest words possible')).toBeLessThan(prompt.indexOf('You can use'));
     expect(prompt.indexOf('You can use')).toBeLessThan(prompt.indexOf('Assistant:'));

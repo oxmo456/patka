@@ -21,13 +21,13 @@ export class AnthropicInferenceClient implements InferenceClient {
     this.anthropic = anthropic;
   }
 
-  generate(message: PatkaMessage): Observable<PatkaMessage> {
+  generate(patkaMessage: PatkaMessage): Observable<PatkaMessage> {
     return defer(() =>
       from(
         this.anthropic.messages.create({
           model: this.model,
           max_tokens: MAX_TOKENS,
-          messages: [{role: 'user', content: message.message}],
+          messages: [{role: 'user', content: patkaMessage.message}],
         }),
       ),
     ).pipe(map((response) => ({message: toContent(response), id: randomUUID()})));

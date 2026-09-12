@@ -14,32 +14,33 @@ import type {PatkaPromptFactory} from './patka-prompt-factory.ts';
 const ASSISTANT = 'Assistant';
 
 export class PatkaAgent {
-  private readonly _history = new BehaviorSubject<PatkaConversation>([]);
+  private readonly _patkaConversation = new BehaviorSubject<PatkaConversation>([]);
   private readonly inferenceClient: InferenceClient;
-  private readonly promptFactory: PatkaPromptFactory;
+  private readonly patkaPromptFactory: PatkaPromptFactory;
   private readonly patkaTools: PatkaTools;
-  private readonly protocol = new PatkaToolProtocol();
+  private readonly patkaToolProtocol = new PatkaToolProtocol();
 
   readonly name: string;
-  readonly history: Observable<PatkaConversation> = this._history.asObservable();
+  readonly patkaConversation: Observable<PatkaConversation> =
+    this._patkaConversation.asObservable();
 
   constructor(name: string, inferenceClient: InferenceClient, patkaTools: PatkaTools) {
     this.name = name;
     this.inferenceClient = inferenceClient;
     this.patkaTools = patkaTools;
-    this.promptFactory = new DefaultPatkaPromptFactory(patkaTools);
+    this.patkaPromptFactory = new DefaultPatkaPromptFactory(patkaTools);
   }
 
-  handle(utterance: PatkaUtterance): void {
+  handle(patkaUtterance: PatkaUtterance): void {
     const answer: PatkaConversationEntry = {id: randomUUID(), role: 'agent', utterance: none};
 
-    this._history.next([
-      ...this._history.value,
-      {id: randomUUID(), role: 'user', utterance: some(utterance)},
+    this._patkaConversation.next([
+      ...this._patkaConversation.value,
+      {id: randomUUID(), role: 'user', utterance: some(patkaUtterance)},
       answer,
     ]);
 
-    const prompt = this.promptFactory.create(this._history.value);
+    const prompt = this.patkaPromptFactory.create(this._patkaConversation.value);
 
     this.generate(prompt)
       .pipe(switchMap((reply) => this.useToolIfAsked(prompt, reply, answer.id)))
@@ -54,27 +55,27 @@ export class PatkaAgent {
   private generate(prompt: string): Observable<string> {
     return this.inferenceClient
       .generate({message: prompt, id: randomUUID()})
-      .pipe(map((response: PatkaMessage) => response.message));
+      .pipe(map((patkaMessage: PatkaMessage) => patkaMessage.message));
   }
 
   private useToolIfAsked(prompt: string, reply: string, answerId: UUID): Observable<string> {
-    if (!this.protocol.isAPatkaToolInvocation(reply)) {
+    if (!this.patkaToolProtocol.isAPatkaToolInvocation(reply)) {
       return of(reply);
     }
 
-    const asked = this.protocol.parse(reply);
+    const asked = this.patkaToolProtocol.parse(reply);
 
     if (!isSuccess(asked)) {
       return of(reply);
     }
 
     return defer(() => {
-      this.say(answerId, this.protocol.progress(asked.value));
+      this.say(answerId, this.patkaToolProtocol.progress(asked.value));
 
       return this.patkaTools.invoke(asked.value.name, asked.value.input);
     }).pipe(
       switchMap((output) =>
-        this.generate(`${prompt} ${this.protocol.outcome(reply, output)}\n${ASSISTANT}:`),
+        this.generate(`${prompt} ${this.patkaToolProtocol.outcome(reply, output)}\n${ASSISTANT}:`),
       ),
     );
   }
@@ -83,10 +84,12 @@ export class PatkaAgent {
     this.fill(id, {content, timestamp: new Date(), id: randomUUID()});
   }
 
-  private fill(id: UUID, utterance: PatkaUtterance): void {
-    this._history.next(
-      this._history.value.map((node) =>
-        node.id === id ? {...node, utterance: some(utterance)} : node,
+  private fill(id: UUID, patkaUtterance: PatkaUtterance): void {
+    this._patkaConversation.next(
+      this._patkaConversation.value.map((patkaConversationEntry) =>
+        patkaConversationEntry.id === id
+          ? {...patkaConversationEntry, utterance: some(patkaUtterance)}
+          : patkaConversationEntry,
       ),
     );
   }

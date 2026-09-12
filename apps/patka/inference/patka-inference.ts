@@ -28,8 +28,10 @@ export const extractInferenceClientOption = (
     )
     .otherwise((): PatkaInferenceClientOption => 'ollama');
 
-export const buildInferenceClient = (inference: PatkaInferenceClientOption): InferenceClient =>
-  match(inference)
+export const buildInferenceClient = (
+  patkaInferenceClientOption: PatkaInferenceClientOption,
+): InferenceClient =>
+  match(patkaInferenceClientOption)
     .with('claude', () => new ClaudeInferenceClient(CLAUDE_COMMAND))
     .with('ollama', () => new OllamaInferenceClient(OLLAMA_MODEL, new Ollama()))
     .with('anthropic', () => new AnthropicInferenceClient(ANTHROPIC_MODEL, new Anthropic()))

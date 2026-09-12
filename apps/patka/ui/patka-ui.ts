@@ -5,5 +5,5 @@ import type {PatkaUserInput} from './patka-user-input.ts';
 export interface PatkaUI {
   userInputs: Observable<PatkaUserInput>;
 
-  updateChat(chat: ReadonlyArray<PatkaChatEntry>): void;
+  updateChat(patkaChatEntries: ReadonlyArray<PatkaChatEntry>): void;
 }

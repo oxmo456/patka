@@ -12,9 +12,11 @@ describe('AnthropicInferenceClient', () => {
     const anthropic = anAnthropic(async () => ({
       content: [{type: 'text', text: 'world'}],
     }));
-    const client = new AnthropicInferenceClient('claude-opus-5', anthropic);
+    const anthropicInferenceClient = new AnthropicInferenceClient('claude-opus-5', anthropic);
 
-    const response = await firstValueFrom(client.generate({message: 'hello', id: randomUUID()}));
+    const response = await firstValueFrom(
+      anthropicInferenceClient.generate({message: 'hello', id: randomUUID()}),
+    );
 
     expect(response.message).toBe('world');
   });
@@ -27,18 +29,23 @@ describe('AnthropicInferenceClient', () => {
         {type: 'text', text: 'world'},
       ],
     }));
-    const client = new AnthropicInferenceClient('claude-opus-5', anthropic);
+    const anthropicInferenceClient = new AnthropicInferenceClient('claude-opus-5', anthropic);
 
-    const response = await firstValueFrom(client.generate({message: 'hello', id: randomUUID()}));
+    const response = await firstValueFrom(
+      anthropicInferenceClient.generate({message: 'hello', id: randomUUID()}),
+    );
 
     expect(response.message).toBe('hello world');
   });
 
   it('asks the configured model with the message as the prompt', async () => {
     const create = vi.fn(async () => ({content: [{type: 'text', text: 'world'}]}));
-    const client = new AnthropicInferenceClient('claude-opus-5', anAnthropic(create));
+    const anthropicInferenceClient = new AnthropicInferenceClient(
+      'claude-opus-5',
+      anAnthropic(create),
+    );
 
-    await firstValueFrom(client.generate({message: 'hello', id: randomUUID()}));
+    await firstValueFrom(anthropicInferenceClient.generate({message: 'hello', id: randomUUID()}));
 
     expect(create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -50,9 +57,12 @@ describe('AnthropicInferenceClient', () => {
 
   it('does not call the api until subscribed', () => {
     const create = vi.fn(async () => ({content: [{type: 'text', text: 'world'}]}));
-    const client = new AnthropicInferenceClient('claude-opus-5', anAnthropic(create));
+    const anthropicInferenceClient = new AnthropicInferenceClient(
+      'claude-opus-5',
+      anAnthropic(create),
+    );
 
-    client.generate({message: 'hello', id: randomUUID()});
+    anthropicInferenceClient.generate({message: 'hello', id: randomUUID()});
 
     expect(create).not.toHaveBeenCalled();
   });

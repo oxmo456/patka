@@ -16,17 +16,19 @@ export class Patka {
   private readonly patkaEngine: PatkaEngine;
   private readonly patkaUI: PatkaUI;
 
-  constructor(inference: PatkaInferenceClientOption) {
+  constructor(patkaInferenceClientOption: PatkaInferenceClientOption) {
     const patkaTools = new PatkaTools([new ListFiles(), new ReadFile()]);
 
     this.patkaEngine = new PatkaEngine(
-      new PatkaAgent('patka', buildInferenceClient(inference), patkaTools),
+      new PatkaAgent('ROOT', buildInferenceClient(patkaInferenceClientOption), patkaTools),
     );
     this.patkaUI = new PatkaTUI(blessed);
 
-    this.patkaUI.userInputs.subscribe((userInput) =>
-      this.patkaEngine.handle(toPatkaUtterance(userInput)),
+    this.patkaUI.userInputs.subscribe((patkaUserInput) =>
+      this.patkaEngine.handle(toPatkaUtterance(patkaUserInput)),
     );
-    this.patkaEngine.chat.subscribe((chat) => this.patkaUI.updateChat(chat));
+    this.patkaEngine.patkaChatEntries.subscribe((patkaChatEntries) =>
+      this.patkaUI.updateChat(patkaChatEntries),
+    );
   }
 }

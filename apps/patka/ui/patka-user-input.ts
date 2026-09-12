@@ -7,8 +7,8 @@ export type PatkaUserInput = {
   readonly id: UUID;
 };
 
-export const toPatkaUtterance = (userInput: PatkaUserInput): PatkaUtterance => ({
-  content: userInput.content,
-  timestamp: userInput.timestamp,
-  id: userInput.id,
+export const toPatkaUtterance = (patkaUserInput: PatkaUserInput): PatkaUtterance => ({
+  content: patkaUserInput.content,
+  timestamp: patkaUserInput.timestamp,
+  id: patkaUserInput.id,
 });

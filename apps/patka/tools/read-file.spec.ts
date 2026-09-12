@@ -20,14 +20,14 @@ const withAFile = async <T>(content: string, run: () => Promise<T>): Promise<T> 
 
 describe('ReadFile', () => {
   it('carries a manual for the model', () => {
-    const tool = new ReadFile();
+    const readFile = new ReadFile();
 
-    expect(tool.manual.name).toBe('read_file');
-    expect(tool.manual.summary).toContain('Reads');
-    expect(tool.manual.usage).not.toBe('');
-    expect(tool.manual.input.required).toEqual(['path']);
-    expect(tool.manual.input.properties).toHaveProperty('path');
-    expect(tool.manual.output.type).toBe('string');
+    expect(readFile.manual.name).toBe('read_file');
+    expect(readFile.manual.summary).toContain('Reads');
+    expect(readFile.manual.usage).not.toBe('');
+    expect(readFile.manual.input.required).toEqual(['path']);
+    expect(readFile.manual.input.properties).toHaveProperty('path');
+    expect(readFile.manual.output.type).toBe('string');
   });
 
   it('emits what the file holds', async () => {

@@ -25,17 +25,17 @@ describe('PatkaTools', () => {
   });
 
   it('lists the manual of every tool it holds', () => {
-    const tools = new PatkaTools([new ListFiles(), new ReadFile()]);
+    const patkaTools = new PatkaTools([new ListFiles(), new ReadFile()]);
 
-    expect(tools.manuals().map((manual) => manual.name)).toEqual(['list_files', 'read_file']);
+    expect(patkaTools.manuals().map((manual) => manual.name)).toEqual(['list_files', 'read_file']);
   });
 
   it('invokes the tool that carries that name', async () => {
     const listFiles = aTool('list_files', 'listed');
     const readFile = aTool('read_file', 'read');
-    const tools = new PatkaTools([listFiles, readFile]);
+    const patkaTools = new PatkaTools([listFiles, readFile]);
 
-    const output = await firstValueFrom(tools.invoke('read_file', {path: 'note.txt'}));
+    const output = await firstValueFrom(patkaTools.invoke('read_file', {path: 'note.txt'}));
 
     expect(output).toBe('read');
     expect(readFile.invoke).toHaveBeenCalledWith({path: 'note.txt'});
@@ -43,18 +43,18 @@ describe('PatkaTools', () => {
   });
 
   it('fails when no tool carries that name', async () => {
-    const tools = new PatkaTools([aTool('list_files', 'listed')]);
+    const patkaTools = new PatkaTools([aTool('list_files', 'listed')]);
 
-    await expect(firstValueFrom(tools.invoke('write_file', {}))).rejects.toThrow(
+    await expect(firstValueFrom(patkaTools.invoke('write_file', {}))).rejects.toThrow(
       'patka has no tool named "write_file"',
     );
   });
 
   it('does not invoke anything until subscribed', () => {
     const listFiles = aTool('list_files', 'listed');
-    const tools = new PatkaTools([listFiles]);
+    const patkaTools = new PatkaTools([listFiles]);
 
-    tools.invoke('list_files', {});
+    patkaTools.invoke('list_files', {});
 
     expect(listFiles.invoke).not.toHaveBeenCalled();
   });

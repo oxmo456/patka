@@ -22,8 +22,8 @@ export class PatkaToolProtocol {
     return INVOCATION.test(reply);
   }
 
-  progress(invocation: PatkaToolInvocation): string {
-    return `using ${invocation.name}(${JSON.stringify(invocation.input)})…`;
+  progress(patkaToolInvocation: PatkaToolInvocation): string {
+    return `using ${patkaToolInvocation.name}(${JSON.stringify(patkaToolInvocation.input)})…`;
   }
 
   outcome(reply: string, output: JsonValue): string {

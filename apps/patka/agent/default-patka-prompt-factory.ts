@@ -16,41 +16,43 @@ const LABEL: Record<PatkaRole, string> = {
   agent: 'Assistant',
 };
 
-const present = (manual: PatkaToolManual): string =>
+const present = (patkaToolManual: PatkaToolManual): string =>
   [
-    `- ${manual.name}: ${manual.summary}`,
-    `  usage: ${manual.usage}`,
-    `  input: ${JSON.stringify(manual.input)}`,
-    `  output: ${JSON.stringify(manual.output)}`,
+    `- ${patkaToolManual.name}: ${patkaToolManual.summary}`,
+    `  usage: ${patkaToolManual.usage}`,
+    `  input: ${JSON.stringify(patkaToolManual.input)}`,
+    `  output: ${JSON.stringify(patkaToolManual.output)}`,
   ].join('\n');
 
 export class DefaultPatkaPromptFactory implements PatkaPromptFactory {
   private readonly patkaTools: PatkaTools;
-  private readonly protocol = new PatkaToolProtocol();
+  private readonly patkaToolProtocol = new PatkaToolProtocol();
 
   constructor(patkaTools: PatkaTools) {
     this.patkaTools = patkaTools;
   }
 
   private header(): string {
-    const manuals = this.patkaTools.manuals();
+    const patkaToolManuals = this.patkaTools.manuals();
 
-    return manuals.length === 0
+    return patkaToolManuals.length === 0
       ? INSTRUCTION
       : [
           INSTRUCTION,
           '',
           TOOLS_INTRODUCTION,
-          ...manuals.map(present),
+          ...patkaToolManuals.map(present),
           '',
-          this.protocol.manual,
+          this.patkaToolProtocol.manual,
         ].join('\n');
   }
 
-  create(history: PatkaConversation): string {
-    const spoken = history.flatMap((node) =>
-      match(node.utterance)
-        .with({type: 'some'}, (utterance) => [`${LABEL[node.role]}: ${utterance.value.content}`])
+  create(patkaConversation: PatkaConversation): string {
+    const spoken = patkaConversation.flatMap((patkaConversationEntry) =>
+      match(patkaConversationEntry.utterance)
+        .with({type: 'some'}, (utterance) => [
+          `${LABEL[patkaConversationEntry.role]}: ${utterance.value.content}`,
+        ])
         .with({type: 'none'}, () => [])
         .exhaustive(),
     );

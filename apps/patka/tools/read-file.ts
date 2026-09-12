@@ -29,13 +29,13 @@ export class ReadFile implements PatkaTool<ReadFileInput, string> {
     },
   };
 
-  invoke(input: ReadFileInput): Observable<string> {
+  invoke(readFileInput: ReadFileInput): Observable<string> {
     return defer(() => {
-      if (isPathAbsolute(input.path)) {
-        throw new Error(`read_file only accepts a relative path, given "${input.path}"`);
+      if (isPathAbsolute(readFileInput.path)) {
+        throw new Error(`read_file only accepts a relative path, given "${readFileInput.path}"`);
       }
 
-      return from(readFile(input.path, 'utf8'));
+      return from(readFile(readFileInput.path, 'utf8'));
     });
   }
 }

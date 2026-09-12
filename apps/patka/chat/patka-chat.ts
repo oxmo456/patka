@@ -2,18 +2,21 @@ import {BehaviorSubject, type Observable} from 'rxjs';
 import type {PatkaChatEntry} from './patka-chat-entry.ts';
 
 export class PatkaChat {
-  private readonly _entries = new BehaviorSubject<ReadonlyArray<PatkaChatEntry>>([]);
+  private readonly _patkaChatEntries = new BehaviorSubject<ReadonlyArray<PatkaChatEntry>>([]);
 
-  readonly entries: Observable<ReadonlyArray<PatkaChatEntry>> = this._entries.asObservable();
+  readonly patkaChatEntries: Observable<ReadonlyArray<PatkaChatEntry>> =
+    this._patkaChatEntries.asObservable();
 
-  push(entry: PatkaChatEntry): void {
-    const entries = this._entries.value;
-    const known = entries.some((existing) => existing.id === entry.id);
+  push(patkaChatEntry: PatkaChatEntry): void {
+    const patkaChatEntries = this._patkaChatEntries.value;
+    const known = patkaChatEntries.some((existing) => existing.id === patkaChatEntry.id);
 
-    this._entries.next(
+    this._patkaChatEntries.next(
       known
-        ? entries.map((existing) => (existing.id === entry.id ? entry : existing))
-        : [...entries, entry],
+        ? patkaChatEntries.map((existing) =>
+            existing.id === patkaChatEntry.id ? patkaChatEntry : existing,
+          )
+        : [...patkaChatEntries, patkaChatEntry],
     );
   }
 }

@@ -8,15 +8,18 @@ import type {PatkaChatEntry, PatkaChatEntryStatus} from './patka-chat-entry.ts';
 
 const USER = 'you';
 
-const toChatEntry = (node: PatkaConversationEntry, author: string): PatkaChatEntry => ({
-  id: node.id,
-  role: node.role,
-  author: node.role === 'user' ? USER : author,
-  message: match(node.utterance)
+const toPatkaChatEntry = (
+  patkaConversationEntry: PatkaConversationEntry,
+  author: string,
+): PatkaChatEntry => ({
+  id: patkaConversationEntry.id,
+  role: patkaConversationEntry.role,
+  author: patkaConversationEntry.role === 'user' ? USER : author,
+  message: match(patkaConversationEntry.utterance)
     .with({type: 'some'}, (utterance) => utterance.value.content)
     .with({type: 'none'}, () => '')
     .exhaustive(),
-  status: match(node.utterance)
+  status: match(patkaConversationEntry.utterance)
     .with({type: 'some'}, (): PatkaChatEntryStatus => 'complete')
     .with({type: 'none'}, (): PatkaChatEntryStatus => 'pending')
     .exhaustive(),
@@ -26,18 +29,19 @@ export class PatkaEngine {
   private readonly patkaChat = new PatkaChat();
   private readonly patkaAgent: PatkaAgent;
 
-  readonly chat: Observable<ReadonlyArray<PatkaChatEntry>> = this.patkaChat.entries;
+  readonly patkaChatEntries: Observable<ReadonlyArray<PatkaChatEntry>> =
+    this.patkaChat.patkaChatEntries;
 
   constructor(patkaAgent: PatkaAgent) {
     this.patkaAgent = patkaAgent;
-    patkaAgent.history.subscribe((history: PatkaConversation): void => {
-      for (const node of history) {
-        this.patkaChat.push(toChatEntry(node, patkaAgent.name));
+    patkaAgent.patkaConversation.subscribe((patkaConversation: PatkaConversation): void => {
+      for (const patkaConversationEntry of patkaConversation) {
+        this.patkaChat.push(toPatkaChatEntry(patkaConversationEntry, patkaAgent.name));
       }
     });
   }
 
-  handle(utterance: PatkaUtterance): void {
-    this.patkaAgent.handle(utterance);
+  handle(patkaUtterance: PatkaUtterance): void {
+    this.patkaAgent.handle(patkaUtterance);
   }
 }

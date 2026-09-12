@@ -24,9 +24,9 @@ export class ClaudeInferenceClient implements InferenceClient {
     this.command = command;
   }
 
-  generate(message: PatkaMessage): Observable<PatkaMessage> {
+  generate(patkaMessage: PatkaMessage): Observable<PatkaMessage> {
     return new Observable((subscriber: Subscriber<PatkaMessage>) => {
-      const claude = spawn(this.command, [...ARGUMENTS, message.message]);
+      const claude = spawn(this.command, [...ARGUMENTS, patkaMessage.message]);
       let answer = '';
 
       claude.stdout.on('data', (chunk: Buffer): void => {

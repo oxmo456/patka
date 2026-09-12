@@ -30,13 +30,13 @@ export class ListFiles implements PatkaTool<ListFilesInput, ReadonlyArray<string
     },
   };
 
-  invoke(input: ListFilesInput): Observable<ReadonlyArray<string>> {
+  invoke(listFilesInput: ListFilesInput): Observable<ReadonlyArray<string>> {
     return defer(() => {
-      if (isPathAbsolute(input.path)) {
-        throw new Error(`list_files only accepts a relative path, given "${input.path}"`);
+      if (isPathAbsolute(listFilesInput.path)) {
+        throw new Error(`list_files only accepts a relative path, given "${listFilesInput.path}"`);
       }
 
-      return from(readdir(input.path, {withFileTypes: true}));
+      return from(readdir(listFilesInput.path, {withFileTypes: true}));
     }).pipe(
       map((entries) =>
         entries.map((entry) => (entry.isDirectory() ? `${entry.name}/` : entry.name)).sort(),
