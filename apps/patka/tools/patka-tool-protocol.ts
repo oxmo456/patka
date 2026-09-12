@@ -1,0 +1,44 @@
+import type {JsonObject, JsonValue} from '../json.ts';
+import {attempt, failure, type Try} from '../try.ts';
+
+const MARKER = '$$$invoke';
+
+const INVOCATION = /\$\$\$invoke\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*,\s*(\{[\s\S]*\})\s*\)/;
+
+export type PatkaToolInvocation = {
+  readonly name: string;
+  readonly input: JsonObject;
+};
+
+export class PatkaToolProtocol {
+  readonly manual: string = [
+    'If you want to use a tool, reply with a single line and nothing else:',
+    `${MARKER}(tool_name, {"key": "value"})`,
+    `For example: ${MARKER}(read_file, {"path": "notes.txt"})`,
+    'The input must be a JSON object matching that tool input schema.',
+  ].join('\n');
+
+  isAPatkaToolInvocation(reply: string): boolean {
+    return INVOCATION.test(reply);
+  }
+
+  progress(invocation: PatkaToolInvocation): string {
+    return `using ${invocation.name}(${JSON.stringify(invocation.input)})…`;
+  }
+
+  outcome(reply: string, output: JsonValue): string {
+    return [
+      reply,
+      `Tool output: ${JSON.stringify(output)}`,
+      'Answer the user now, using that output. Do not use another tool.',
+    ].join('\n');
+  }
+
+  parse(reply: string): Try<PatkaToolInvocation> {
+    const found = INVOCATION.exec(reply);
+
+    return found === null
+      ? failure(new Error(`no tool invocation to read in "${reply}"`))
+      : attempt(() => ({name: found[1], input: JSON.parse(found[2])}));
+  }
+}

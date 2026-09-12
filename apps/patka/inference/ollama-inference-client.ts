@@ -1,8 +1,8 @@
-import { randomUUID } from "node:crypto";
-import type { Ollama } from "ollama";
-import { defer, from, map, type Observable } from "rxjs";
-import type { InferenceClient } from "./inference-client.ts";
-import type { PatkaMessage } from "./patka-message.ts";
+import {randomUUID} from 'node:crypto';
+import type {Ollama} from 'ollama';
+import {defer, from, map, type Observable} from 'rxjs';
+import type {InferenceClient} from './inference-client.ts';
+import type {PatkaMessage} from './patka-message.ts';
 
 export class OllamaInferenceClient implements InferenceClient {
   private readonly model: string;
@@ -21,6 +21,6 @@ export class OllamaInferenceClient implements InferenceClient {
           prompt: message.message,
         }),
       ),
-    ).pipe(map((response) => ({ message: response.response, id: randomUUID() })));
+    ).pipe(map((response) => ({message: response.response, id: randomUUID()})));
   }
 }

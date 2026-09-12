@@ -1,0 +1,57 @@
+import {mkdir, mkdtemp, writeFile} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {firstValueFrom} from 'rxjs';
+import {describe, expect, it} from 'vitest';
+import {ListFiles} from './list-files.ts';
+
+const inADirectory = async <T>(run: () => Promise<T>): Promise<T> => {
+  const path = await mkdtemp(join(tmpdir(), 'patka-list-'));
+  await writeFile(join(path, 'second.ts'), '');
+  await writeFile(join(path, 'first.ts'), '');
+  await mkdir(join(path, 'nested'));
+  const before = process.cwd();
+  process.chdir(path);
+
+  try {
+    return await run();
+  } finally {
+    process.chdir(before);
+  }
+};
+
+describe('ListFiles', () => {
+  it('carries a manual for the model', () => {
+    const tool = new ListFiles();
+
+    expect(tool.manual.name).toBe('list_files');
+    expect(tool.manual.summary).toContain('Lists the files');
+    expect(tool.manual.usage).not.toBe('');
+    expect(tool.manual.input.required).toEqual(['path']);
+    expect(tool.manual.input.properties).toHaveProperty('path');
+    expect(tool.manual.output.type).toBe('array');
+    expect(tool.manual.output.items).toEqual({type: 'string'});
+  });
+
+  it('lists what the directory holds, in order', async () => {
+    const listing = await inADirectory(() => firstValueFrom(new ListFiles().invoke({path: '.'})));
+
+    expect(listing).toEqual(['first.ts', 'nested/', 'second.ts']);
+  });
+
+  it('refuses an absolute path', async () => {
+    await expect(firstValueFrom(new ListFiles().invoke({path: tmpdir()}))).rejects.toThrow(
+      'only accepts a relative path',
+    );
+  });
+
+  it('fails when the directory does not exist', async () => {
+    await expect(
+      firstValueFrom(new ListFiles().invoke({path: 'patka-does-not-exist'})),
+    ).rejects.toThrow();
+  });
+
+  it('does not touch the disk until subscribed', () => {
+    expect(() => new ListFiles().invoke({path: 'patka-does-not-exist'})).not.toThrow();
+  });
+});

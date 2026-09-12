@@ -1,12 +1,13 @@
-import { randomUUID } from "node:crypto";
-import { of, Subject } from "rxjs";
-import { describe, expect, it, vi } from "vitest";
-import { DefaultPatkaPromptFactory } from "../agent/default-patka-prompt-factory.ts";
-import { PatkaAgent } from "../agent/patka-agent.ts";
-import type { PatkaMessage } from "../inference/patka-message.ts";
-import type { PatkaUtterance } from "../patka-utterance.ts";
-import type { PatkaChatEntry } from "./patka-chat-entry.ts";
-import { PatkaEngine } from "./patka-engine.ts";
+import {randomUUID} from 'node:crypto';
+import {of, Subject} from 'rxjs';
+import {describe, expect, it, vi} from 'vitest';
+import {DefaultPatkaPromptFactory} from '../agent/default-patka-prompt-factory.ts';
+import {PatkaAgent} from '../agent/patka-agent.ts';
+import type {PatkaMessage} from '../inference/patka-message.ts';
+import type {PatkaUtterance} from '../patka-utterance.ts';
+import {PatkaTools} from '../tools/patka-tools.ts';
+import type {PatkaChatEntry} from './patka-chat-entry.ts';
+import {PatkaEngine} from './patka-engine.ts';
 
 const anUtterance = (content: string): PatkaUtterance => ({
   content,
@@ -14,16 +15,16 @@ const anUtterance = (content: string): PatkaUtterance => ({
   id: randomUUID(),
 });
 
-describe("PatkaEngine", () => {
-  describe("chat", () => {
-    it("starts empty", () => {
+describe('PatkaEngine', () => {
+  describe('chat', () => {
+    it('starts empty', () => {
       const engine = new PatkaEngine(
         new PatkaAgent(
-          "patka",
+          'patka',
           {
-            generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
+            generate: vi.fn(() => of({message: 'world', id: randomUUID()})),
           },
-          new DefaultPatkaPromptFactory(),
+          new PatkaTools([]),
         ),
       );
       const received: Array<ReadonlyArray<PatkaChatEntry>> = [];
@@ -33,14 +34,14 @@ describe("PatkaEngine", () => {
       expect(received).toEqual([[]]);
     });
 
-    it("holds the utterance and the answer, in the order they happened", () => {
+    it('holds the utterance and the answer, in the order they happened', () => {
       const engine = new PatkaEngine(
         new PatkaAgent(
-          "patka",
+          'patka',
           {
-            generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
+            generate: vi.fn(() => of({message: 'world', id: randomUUID()})),
           },
-          new DefaultPatkaPromptFactory(),
+          new PatkaTools([]),
         ),
       );
       let chat: ReadonlyArray<PatkaChatEntry> = [];
@@ -48,19 +49,19 @@ describe("PatkaEngine", () => {
         chat = content;
       });
 
-      engine.handle(anUtterance("hello"));
+      engine.handle(anUtterance('hello'));
 
-      expect(chat.map((entry) => entry.message)).toEqual(["hello", "world"]);
+      expect(chat.map((entry) => entry.message)).toEqual(['hello', 'world']);
     });
 
-    it("names the author and role of every entry", () => {
+    it('names the author and role of every entry', () => {
       const engine = new PatkaEngine(
         new PatkaAgent(
-          "patka",
+          'patka',
           {
-            generate: vi.fn(() => of({ message: "world", id: randomUUID() })),
+            generate: vi.fn(() => of({message: 'world', id: randomUUID()})),
           },
-          new DefaultPatkaPromptFactory(),
+          new PatkaTools([]),
         ),
       );
       let chat: ReadonlyArray<PatkaChatEntry> = [];
@@ -68,37 +69,37 @@ describe("PatkaEngine", () => {
         chat = content;
       });
 
-      engine.handle(anUtterance("hello"));
+      engine.handle(anUtterance('hello'));
 
-      expect(chat.map((entry) => entry.author)).toEqual(["you", "patka"]);
-      expect(chat.map((entry) => entry.role)).toEqual(["user", "agent"]);
+      expect(chat.map((entry) => entry.author)).toEqual(['you', 'patka']);
+      expect(chat.map((entry) => entry.role)).toEqual(['user', 'agent']);
     });
 
-    it("keeps the answer pending until it arrives", () => {
+    it('keeps the answer pending until it arrives', () => {
       const answers = new Subject<PatkaMessage>();
       const engine = new PatkaEngine(
-        new PatkaAgent("patka", { generate: () => answers }, new DefaultPatkaPromptFactory()),
+        new PatkaAgent('patka', {generate: () => answers}, new PatkaTools([])),
       );
       let chat: ReadonlyArray<PatkaChatEntry> = [];
       engine.chat.subscribe((content) => {
         chat = content;
       });
 
-      engine.handle(anUtterance("hello"));
+      engine.handle(anUtterance('hello'));
 
-      expect(chat.map((entry) => entry.status)).toEqual(["complete", "pending"]);
+      expect(chat.map((entry) => entry.status)).toEqual(['complete', 'pending']);
 
-      answers.next({ message: "world", id: randomUUID() });
+      answers.next({message: 'world', id: randomUUID()});
 
-      expect(chat.map((entry) => entry.status)).toEqual(["complete", "complete"]);
-      expect(chat.map((entry) => entry.message)).toEqual(["hello", "world"]);
+      expect(chat.map((entry) => entry.status)).toEqual(['complete', 'complete']);
+      expect(chat.map((entry) => entry.message)).toEqual(['hello', 'world']);
     });
 
-    it("gives every utterance its own answer, even when they overlap", () => {
+    it('gives every utterance its own answer, even when they overlap', () => {
       const answers: Array<Subject<PatkaMessage>> = [];
       const engine = new PatkaEngine(
         new PatkaAgent(
-          "patka",
+          'patka',
           {
             generate: () => {
               const answer = new Subject<PatkaMessage>();
@@ -106,7 +107,7 @@ describe("PatkaEngine", () => {
               return answer;
             },
           },
-          new DefaultPatkaPromptFactory(),
+          new PatkaTools([]),
         ),
       );
       let chat: ReadonlyArray<PatkaChatEntry> = [];
@@ -114,16 +115,16 @@ describe("PatkaEngine", () => {
         chat = content;
       });
 
-      engine.handle(anUtterance("first"));
-      engine.handle(anUtterance("second"));
-      answers[0].next({ message: "answer one", id: randomUUID() });
-      answers[1].next({ message: "answer two", id: randomUUID() });
+      engine.handle(anUtterance('first'));
+      engine.handle(anUtterance('second'));
+      answers[0].next({message: 'answer one', id: randomUUID()});
+      answers[1].next({message: 'answer two', id: randomUUID()});
 
       expect(chat.map((entry) => entry.message)).toEqual([
-        "first",
-        "answer one",
-        "second",
-        "answer two",
+        'first',
+        'answer one',
+        'second',
+        'answer two',
       ]);
     });
   });

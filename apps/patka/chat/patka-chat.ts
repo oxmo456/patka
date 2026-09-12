@@ -1,5 +1,5 @@
-import { BehaviorSubject, type Observable } from "rxjs";
-import type { PatkaChatEntry } from "./patka-chat-entry.ts";
+import {BehaviorSubject, type Observable} from 'rxjs';
+import type {PatkaChatEntry} from './patka-chat-entry.ts';
 
 export class PatkaChat {
   private readonly _entries = new BehaviorSubject<ReadonlyArray<PatkaChatEntry>>([]);

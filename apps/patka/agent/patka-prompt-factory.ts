@@ -1,4 +1,4 @@
-import type { PatkaConversation, PatkaConversationEntry } from "./patka-conversation.ts";
+import type {PatkaConversation} from './patka-conversation.ts';
 
 export interface PatkaPromptFactory {
   create(history: PatkaConversation): string;

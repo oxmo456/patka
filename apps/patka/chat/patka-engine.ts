@@ -1,24 +1,24 @@
-import type { Observable } from "rxjs";
-import { match } from "ts-pattern";
-import type { PatkaAgent } from "../agent/patka-agent.ts";
-import type { PatkaConversation, PatkaConversationEntry } from "../agent/patka-conversation.ts";
-import type { PatkaUtterance } from "../patka-utterance.ts";
-import { PatkaChat } from "./patka-chat.ts";
-import type { PatkaChatEntry, PatkaChatEntryStatus } from "./patka-chat-entry.ts";
+import type {Observable} from 'rxjs';
+import {match} from 'ts-pattern';
+import type {PatkaAgent} from '../agent/patka-agent.ts';
+import type {PatkaConversation, PatkaConversationEntry} from '../agent/patka-conversation.ts';
+import type {PatkaUtterance} from '../patka-utterance.ts';
+import {PatkaChat} from './patka-chat.ts';
+import type {PatkaChatEntry, PatkaChatEntryStatus} from './patka-chat-entry.ts';
 
-const USER = "you";
+const USER = 'you';
 
 const toChatEntry = (node: PatkaConversationEntry, author: string): PatkaChatEntry => ({
   id: node.id,
   role: node.role,
-  author: node.role === "user" ? USER : author,
+  author: node.role === 'user' ? USER : author,
   message: match(node.utterance)
-    .with({ type: "some" }, (utterance) => utterance.value.content)
-    .with({ type: "none" }, () => "")
+    .with({type: 'some'}, (utterance) => utterance.value.content)
+    .with({type: 'none'}, () => '')
     .exhaustive(),
   status: match(node.utterance)
-    .with({ type: "some" }, (): PatkaChatEntryStatus => "complete")
-    .with({ type: "none" }, (): PatkaChatEntryStatus => "pending")
+    .with({type: 'some'}, (): PatkaChatEntryStatus => 'complete')
+    .with({type: 'none'}, (): PatkaChatEntryStatus => 'pending')
     .exhaustive(),
 });
 

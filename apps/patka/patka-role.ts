@@ -1,1 +1,1 @@
-export type PatkaRole = "user" | "agent";
+export type PatkaRole = 'user' | 'agent';
