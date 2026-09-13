@@ -7,6 +7,7 @@ import {inject, injectable} from 'tsyringe';
 import type {PatkaChatEntry} from '../chat/patka-chat-entry.ts';
 import {attempt} from '../try.ts';
 import {BLESSED} from './blessed.token.ts';
+import {toMarkdownLines, visibleLength} from './patka-markdown.ts';
 import type {PatkaUI} from './patka-ui.ts';
 import type {PatkaUserInput} from './patka-user-input.ts';
 
@@ -18,7 +19,7 @@ const BUBBLE_RATIO = 0.6;
 
 const USER_STYLE = '{white-bg}{blue-fg}';
 
-const AGENT_STYLE = '{blue-bg}{white-fg}{bold}';
+const AGENT_STYLE = '{blue-bg}{white-fg}';
 
 const CHAT_WIDTH = '50%';
 
@@ -39,15 +40,19 @@ const wrap = (text: string, width: number): ReadonlyArray<string> => {
 
   for (const word of text.split(/\s+/).filter((candidate) => candidate.length > 0)) {
     for (let rest: string = word; rest.length > 0; rest = rest.slice(width)) {
-      const chunk = rest.slice(0, width);
+      const chunk = visibleLength(rest) <= width ? rest : rest.slice(0, width);
 
       if (line.length === 0) {
         line = chunk;
-      } else if (line.length + 1 + chunk.length <= width) {
+      } else if (visibleLength(line) + 1 + visibleLength(chunk) <= width) {
         line = `${line} ${chunk}`;
       } else {
         lines.push(line);
         line = chunk;
+      }
+
+      if (chunk === rest) {
+        break;
       }
     }
   }
@@ -62,14 +67,15 @@ const toBubble = (patkaChatEntry: PatkaChatEntry, width: number): ReadonlyArray<
     .with('pending', () => PENDING_RESPONSE)
     .with('complete', 'failed', () => patkaChatEntry.message)
     .exhaustive();
-  const lines = wrap(text, Math.max(8, Math.floor(width * BUBBLE_RATIO) - 2));
-  const bubbleWidth = Math.max(...lines.map((line) => line.length));
+  const bubbleWidth = Math.max(8, Math.floor(width * BUBBLE_RATIO) - 2);
+  const lines = toMarkdownLines(text).flatMap((line) => wrap(line, bubbleWidth));
+  const widest = Math.max(...lines.map(visibleLength));
   const style = match(patkaChatEntry.role)
     .with('user', () => USER_STYLE)
     .with('agent', () => AGENT_STYLE)
     .exhaustive();
 
-  return lines.map((line) => `${style} ${line.padEnd(bubbleWidth)} {/}`);
+  return lines.map((line) => `${style} ${line}${' '.repeat(widest - visibleLength(line))} {/}`);
 };
 
 const toDetailLines = (record: Record<string, unknown>, width: number): ReadonlyArray<string> =>

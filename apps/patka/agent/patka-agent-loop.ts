@@ -39,10 +39,7 @@ export class PatkaAgentLoop {
   }
 
   private round(prompt: string, count: number): Observable<string> {
-    return this.generate(prompt)
-        .pipe(
-            switchMap((reply) => this.afterReply(prompt, reply, count))
-        );
+    return this.generate(prompt).pipe(switchMap((reply) => this.afterReply(prompt, reply, count)));
   }
 
   private afterReply(prompt: string, reply: string, count: number): Observable<string> {

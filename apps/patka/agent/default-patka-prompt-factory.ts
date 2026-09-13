@@ -7,7 +7,7 @@ import type {PatkaConversation} from './patka-conversation.ts';
 import type {PatkaPromptFactory} from './patka-prompt-factory.ts';
 
 const INSTRUCTION =
-  'Answer with the fewest words possible. No preamble, no restatement of the question, no markdown, no closing offer to help.';
+  'Answer with the fewest words possible. No preamble, no restatement of the question, no closing offer to help. Write the answer in markdown.';
 
 const TOOLS_INTRODUCTION = 'You can use these tools:';
 
