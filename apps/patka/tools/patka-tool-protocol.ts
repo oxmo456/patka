@@ -30,7 +30,7 @@ export class PatkaToolProtocol {
     return [
       reply,
       `Tool output: ${JSON.stringify(output)}`,
-      'Answer the user now, using that output. Do not use another tool.',
+      'Answer the user now, using that output. Use another tool only if you still cannot answer.',
     ].join('\n');
   }
 

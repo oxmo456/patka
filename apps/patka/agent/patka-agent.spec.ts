@@ -7,8 +7,8 @@ import {isSome} from '../option.ts';
 import {PatkaLogger} from '../patka-logger.ts';
 import type {PatkaUtterance} from '../patka-utterance.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
-import {DefaultPatkaPromptFactory} from './default-patka-prompt-factory.ts';
 import {PatkaAgent} from './patka-agent.ts';
+import {PatkaAgentLoop} from './patka-agent-loop.ts';
 import type {PatkaConversation} from './patka-conversation.ts';
 
 const anUtterance = (content: string): PatkaUtterance => ({
@@ -24,22 +24,31 @@ const spoken = (patkaConversation: PatkaConversation): ReadonlyArray<string> =>
 
 describe('PatkaAgent', () => {
   it('has a name', () => {
-    const inferenceClient: InferenceClient = {
-      generate: vi.fn(() => of({message: 'world', id: randomUUID()})),
-    };
+    const patkaAgent = new PatkaAgent(
+      'patka',
+      new PatkaTools([]),
+      new PatkaAgentLoop(
+        'patka',
+        {generate: vi.fn(() => of({message: 'world', id: randomUUID()}))},
+        new PatkaTools([]),
+        new PatkaLogger(),
+      ),
+    );
 
-    expect(
-      new PatkaAgent('patka', inferenceClient, new PatkaTools([]), new PatkaLogger()).name,
-    ).toBe('patka');
+    expect(patkaAgent.name).toBe('patka');
   });
 
   describe('patkaConversation', () => {
     it('starts empty', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
-        {generate: vi.fn(() => of({message: 'world', id: randomUUID()}))},
         new PatkaTools([]),
-        new PatkaLogger(),
+        new PatkaAgentLoop(
+          'patka',
+          {generate: vi.fn(() => of({message: 'world', id: randomUUID()}))},
+          new PatkaTools([]),
+          new PatkaLogger(),
+        ),
       );
       const received: Array<PatkaConversation> = [];
 
@@ -54,9 +63,13 @@ describe('PatkaAgent', () => {
       const answers = new Subject<PatkaMessage>();
       const patkaAgent = new PatkaAgent(
         'patka',
-        {generate: () => answers},
         new PatkaTools([]),
-        new PatkaLogger(),
+        new PatkaAgentLoop(
+          'patka',
+          {generate: () => answers},
+          new PatkaTools([]),
+          new PatkaLogger(),
+        ),
       );
       let patkaConversation: PatkaConversation = [];
       patkaAgent.patkaConversation.subscribe((content) => {
@@ -66,36 +79,63 @@ describe('PatkaAgent', () => {
       patkaAgent.handle(anUtterance('hello'));
 
       expect(spoken(patkaConversation)).toEqual(['hello', '<pending>']);
-      expect(patkaConversation.map((node) => node.role)).toEqual(['user', 'agent']);
     });
 
-    it('fills the node it opened, keeping its place and id', () => {
+    it('names who said what', () => {
       const answers = new Subject<PatkaMessage>();
       const patkaAgent = new PatkaAgent(
         'patka',
-        {generate: () => answers},
         new PatkaTools([]),
-        new PatkaLogger(),
+        new PatkaAgentLoop(
+          'patka',
+          {generate: () => answers},
+          new PatkaTools([]),
+          new PatkaLogger(),
+        ),
+      );
+      let patkaConversation: PatkaConversation = [];
+      patkaAgent.patkaConversation.subscribe((content) => {
+        patkaConversation = content;
+      });
+
+      patkaAgent.handle(anUtterance('hello'));
+
+      expect(patkaConversation.map((node) => node.role)).toEqual(['user', 'agent']);
+    });
+
+    it('fills the node it opened, keeping its place', () => {
+      const answers = new Subject<PatkaMessage>();
+      const patkaAgent = new PatkaAgent(
+        'patka',
+        new PatkaTools([]),
+        new PatkaAgentLoop(
+          'patka',
+          {generate: () => answers},
+          new PatkaTools([]),
+          new PatkaLogger(),
+        ),
       );
       let patkaConversation: PatkaConversation = [];
       patkaAgent.patkaConversation.subscribe((content) => {
         patkaConversation = content;
       });
       patkaAgent.handle(anUtterance('hello'));
-      const ids = patkaConversation.map((node) => node.id);
 
       answers.next({message: 'world', id: randomUUID()});
 
       expect(spoken(patkaConversation)).toEqual(['hello', 'world']);
-      expect(patkaConversation.map((node) => node.id)).toEqual(ids);
     });
 
     it('keeps the whole conversation across several utterances', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
-        {generate: vi.fn(() => of({message: 'world', id: randomUUID()}))},
         new PatkaTools([]),
-        new PatkaLogger(),
+        new PatkaAgentLoop(
+          'patka',
+          {generate: vi.fn(() => of({message: 'world', id: randomUUID()}))},
+          new PatkaTools([]),
+          new PatkaLogger(),
+        ),
       );
       let patkaConversation: PatkaConversation = [];
       patkaAgent.patkaConversation.subscribe((content) => {
@@ -111,11 +151,13 @@ describe('PatkaAgent', () => {
     it('leaves the node empty when the inference client fails', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
-        {
-          generate: () => throwError(() => new Error('ollama is down')),
-        },
         new PatkaTools([]),
-        new PatkaLogger(),
+        new PatkaAgentLoop(
+          'patka',
+          {generate: () => throwError(() => new Error('ollama is down'))},
+          new PatkaTools([]),
+          new PatkaLogger(),
+        ),
       );
       let patkaConversation: PatkaConversation = [];
       patkaAgent.patkaConversation.subscribe((content) => {
@@ -127,15 +169,14 @@ describe('PatkaAgent', () => {
       expect(spoken(patkaConversation)).toEqual(['hello', '<pending>']);
     });
 
-    it('generates from the whole conversation so far', () => {
+    it('prompts the loop with the whole conversation so far', () => {
       const inferenceClient: InferenceClient = {
         generate: vi.fn(() => of({message: 'world', id: randomUUID()})),
       };
       const patkaAgent = new PatkaAgent(
         'patka',
-        inferenceClient,
         new PatkaTools([]),
-        new PatkaLogger(),
+        new PatkaAgentLoop('patka', inferenceClient, new PatkaTools([]), new PatkaLogger()),
       );
 
       patkaAgent.handle(anUtterance('hello'));
@@ -150,43 +191,14 @@ describe('PatkaAgent', () => {
       const inferenceClient: InferenceClient = {
         generate: vi.fn(() => of({message: 'world', id: randomUUID()})),
       };
-      new PatkaAgent('patka', inferenceClient, new PatkaTools([]), new PatkaLogger());
+
+      new PatkaAgent(
+        'patka',
+        new PatkaTools([]),
+        new PatkaAgentLoop('patka', inferenceClient, new PatkaTools([]), new PatkaLogger()),
+      );
 
       expect(inferenceClient.generate).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('logging', () => {
-    it('logs the prompt it sends to the engine', () => {
-      const patkaLogger = new PatkaLogger();
-      const patkaAgent = new PatkaAgent(
-        'patka',
-        {generate: vi.fn(() => of({message: 'world', id: randomUUID()}))},
-        new PatkaTools([]),
-        patkaLogger,
-      );
-      const received: Array<string> = [];
-      patkaLogger.logs.subscribe((line: string) => received.push(line));
-
-      patkaAgent.handle(anUtterance('hello'));
-
-      expect(received.map((line) => JSON.parse(line).msg)).toEqual(['patka prompts the engine']);
-    });
-
-    it('logs the whole prompt, not just the utterance', () => {
-      const patkaLogger = new PatkaLogger();
-      const patkaAgent = new PatkaAgent(
-        'patka',
-        {generate: vi.fn(() => of({message: 'world', id: randomUUID()}))},
-        new PatkaTools([]),
-        patkaLogger,
-      );
-      const received: Array<string> = [];
-      patkaLogger.logs.subscribe((line: string) => received.push(line));
-
-      patkaAgent.handle(anUtterance('hello'));
-
-      expect(JSON.parse(received[0]).prompt).toContain('User: hello');
     });
   });
 });

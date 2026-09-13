@@ -1,8 +1,8 @@
 import {randomUUID} from 'node:crypto';
 import {of, Subject} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
-import {DefaultPatkaPromptFactory} from '../agent/default-patka-prompt-factory.ts';
 import {PatkaAgent} from '../agent/patka-agent.ts';
+import {PatkaAgentLoop} from '../agent/patka-agent-loop.ts';
 import type {PatkaMessage} from '../inference/patka-message.ts';
 import {PatkaLogger} from '../patka-logger.ts';
 import type {PatkaUtterance} from '../patka-utterance.ts';
@@ -22,11 +22,13 @@ describe('PatkaEngine', () => {
       const patkaEngine = new PatkaEngine(
         new PatkaAgent(
           'patka',
-          {
-            generate: vi.fn(() => of({message: 'world', id: randomUUID()})),
-          },
           new PatkaTools([]),
-          new PatkaLogger(),
+          new PatkaAgentLoop(
+            'patka',
+            {generate: vi.fn(() => of({message: 'world', id: randomUUID()}))},
+            new PatkaTools([]),
+            new PatkaLogger(),
+          ),
         ),
       );
       const received: Array<ReadonlyArray<PatkaChatEntry>> = [];
@@ -40,11 +42,13 @@ describe('PatkaEngine', () => {
       const patkaEngine = new PatkaEngine(
         new PatkaAgent(
           'patka',
-          {
-            generate: vi.fn(() => of({message: 'world', id: randomUUID()})),
-          },
           new PatkaTools([]),
-          new PatkaLogger(),
+          new PatkaAgentLoop(
+            'patka',
+            {generate: vi.fn(() => of({message: 'world', id: randomUUID()}))},
+            new PatkaTools([]),
+            new PatkaLogger(),
+          ),
         ),
       );
       let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
@@ -64,11 +68,13 @@ describe('PatkaEngine', () => {
       const patkaEngine = new PatkaEngine(
         new PatkaAgent(
           'patka',
-          {
-            generate: vi.fn(() => of({message: 'world', id: randomUUID()})),
-          },
           new PatkaTools([]),
-          new PatkaLogger(),
+          new PatkaAgentLoop(
+            'patka',
+            {generate: vi.fn(() => of({message: 'world', id: randomUUID()}))},
+            new PatkaTools([]),
+            new PatkaLogger(),
+          ),
         ),
       );
       let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
@@ -91,7 +97,16 @@ describe('PatkaEngine', () => {
     it('keeps the answer pending until it arrives', () => {
       const answers = new Subject<PatkaMessage>();
       const patkaEngine = new PatkaEngine(
-        new PatkaAgent('patka', {generate: () => answers}, new PatkaTools([]), new PatkaLogger()),
+        new PatkaAgent(
+          'patka',
+          new PatkaTools([]),
+          new PatkaAgentLoop(
+            'patka',
+            {generate: () => answers},
+            new PatkaTools([]),
+            new PatkaLogger(),
+          ),
+        ),
       );
       let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
       patkaEngine.patkaChatEntries.subscribe((content) => {
@@ -122,15 +137,19 @@ describe('PatkaEngine', () => {
       const patkaEngine = new PatkaEngine(
         new PatkaAgent(
           'patka',
-          {
-            generate: () => {
-              const answer = new Subject<PatkaMessage>();
-              answers.push(answer);
-              return answer;
-            },
-          },
           new PatkaTools([]),
-          new PatkaLogger(),
+          new PatkaAgentLoop(
+            'patka',
+            {
+              generate: () => {
+                const answer = new Subject<PatkaMessage>();
+                answers.push(answer);
+                return answer;
+              },
+            },
+            new PatkaTools([]),
+            new PatkaLogger(),
+          ),
         ),
       );
       let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
