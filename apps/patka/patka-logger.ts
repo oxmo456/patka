@@ -17,11 +17,11 @@ export class PatkaLogger {
 
   readonly logs: Observable<string> = this._logs.asObservable();
 
-  info(details: JsonObject, message: string): void {
+  info(message: string, details: JsonObject = {}): void {
     this.logger.info(details, message);
   }
 
-  error(details: JsonObject, message: string): void {
+  error(message: string, details: JsonObject = {}): void {
     this.logger.error(details, message);
   }
 }

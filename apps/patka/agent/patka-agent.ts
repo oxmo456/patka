@@ -65,7 +65,7 @@ export class PatkaAgent {
   }
 
   private generate(prompt: string): Observable<string> {
-    this.patkaLogger.info({prompt}, `${this.name} prompts the engine`);
+    this.patkaLogger.info(`${this.name} prompts the engine`, {prompt});
 
     return this.inferenceClient
       .generate({message: prompt, id: randomUUID()})

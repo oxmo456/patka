@@ -21,7 +21,7 @@ export class Patka {
     this.patkaUI = patkaUI;
     this.patkaLogger = patkaLogger;
 
-    this.patkaLogger.info({}, 'patka starts');
+    this.patkaLogger.info('patka starts');
 
     this.patkaUI.userInputs.subscribe((patkaUserInput) =>
       this.patkaEngine.handle(toPatkaUtterance(patkaUserInput)),
