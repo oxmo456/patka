@@ -15,6 +15,7 @@ import type {PatkaUI} from './ui/patka-ui.ts';
 const aPatkaUI = (): PatkaUI => ({
   userInputs: of(),
   updateChat: vi.fn(),
+  updateLogs: vi.fn(),
 });
 
 describe('Patka', () => {

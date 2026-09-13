@@ -5,6 +5,7 @@ import {type Observable, ReplaySubject} from 'rxjs';
 import {match} from 'ts-pattern';
 import {inject, injectable} from 'tsyringe';
 import type {PatkaChatEntry} from '../chat/patka-chat-entry.ts';
+import {attempt} from '../try.ts';
 import {BLESSED} from './blessed.token.ts';
 import type {PatkaUI} from './patka-ui.ts';
 import type {PatkaUserInput} from './patka-user-input.ts';
@@ -18,6 +19,19 @@ const BUBBLE_RATIO = 0.6;
 const USER_STYLE = '{white-bg}{blue-fg}';
 
 const AGENT_STYLE = '{blue-bg}{white-fg}{bold}';
+
+const CHAT_WIDTH = '50%';
+
+const LEVEL_STYLE: Record<number, string> = {
+  30: '{green-fg}',
+  40: '{yellow-fg}',
+  50: '{red-fg}',
+};
+
+const PINO_OWN_FIELDS: ReadonlySet<string> = new Set(['level', 'time', 'pid', 'hostname', 'msg']);
+
+const escapeTags = (text: string): string =>
+  text.replace(/[{}]/g, (brace) => (brace === '{' ? '{open}' : '{close}'));
 
 const wrap = (text: string, width: number): ReadonlyArray<string> => {
   const lines: Array<string> = [];
@@ -58,11 +72,40 @@ const toBubble = (patkaChatEntry: PatkaChatEntry, width: number): ReadonlyArray<
   return lines.map((line) => `${style} ${line.padEnd(bubbleWidth)} {/}`);
 };
 
+const toDetailLines = (record: Record<string, unknown>, width: number): ReadonlyArray<string> =>
+  Object.entries(record)
+    .filter(([key]) => !PINO_OWN_FIELDS.has(key))
+    .flatMap(([key, value]) =>
+      `${key}: ${typeof value === 'string' ? value : JSON.stringify(value)}`
+        .split('\n')
+        .flatMap((line) => wrap(line, width - 2))
+        .map((line) => `  ${escapeTags(line)}`),
+    );
+
+const toLogLines = (log: string, width: number): ReadonlyArray<string> =>
+  match(
+    attempt(
+      () => JSON.parse(log) as Record<string, unknown> & {level: number; time: number; msg: string},
+    ),
+  )
+    .with({type: 'success'}, ({value}) => {
+      const style = LEVEL_STYLE[value.level] ?? '';
+      const time = new Date(value.time).toISOString().slice(11, 19);
+      const head = wrap(`${time} ${value.msg}`, width).map(
+        (line) => `${style}${escapeTags(line)}{/}`,
+      );
+
+      return [...head, ...toDetailLines(value, width)];
+    })
+    .with({type: 'failure'}, () => wrap(log, width).map(escapeTags))
+    .exhaustive();
+
 @injectable()
 export class PatkaTUI implements PatkaUI {
   private readonly _userInputs = new ReplaySubject<PatkaUserInput>();
   private readonly screen: Widgets.Screen;
   private readonly conversation: Widgets.BoxElement;
+  private readonly logs: Widgets.BoxElement;
 
   readonly userInputs: Observable<PatkaUserInput> = this._userInputs.asObservable();
 
@@ -71,7 +114,7 @@ export class PatkaTUI implements PatkaUI {
     this.conversation = blessed.box({
       top: 0,
       left: 0,
-      width: '100%',
+      width: CHAT_WIDTH,
       height: '100%-3',
       content: '',
       tags: true,
@@ -79,10 +122,29 @@ export class PatkaTUI implements PatkaUI {
       alwaysScroll: true,
       style: {fg: 'white', bg: 'blue'},
     });
+    this.logs = blessed.box({
+      top: 0,
+      left: CHAT_WIDTH,
+      right: 0,
+      height: '100%',
+      content: '',
+      tags: true,
+      scrollable: true,
+      alwaysScroll: true,
+      mouse: true,
+      border: 'line',
+      label: ' logs ',
+      style: {
+        fg: 'white',
+        bg: 'blue',
+        border: {fg: 'white', bg: 'blue'},
+        label: {fg: 'white', bg: 'blue'},
+      },
+    });
     const promptInput = blessed.textbox({
       bottom: 0,
       left: 0,
-      width: '100%',
+      width: CHAT_WIDTH,
       height: 3,
       border: 'line',
       inputOnFocus: true,
@@ -97,6 +159,7 @@ export class PatkaTUI implements PatkaUI {
     });
 
     this.screen.append(this.conversation);
+    this.screen.append(this.logs);
     this.screen.append(promptInput);
     this.screen.key(['escape', 'C-c'], () => process.exit(0));
     promptInput.focus();
@@ -113,6 +176,21 @@ export class PatkaTUI implements PatkaUI {
 
     this.conversation.setContent([...new Array(blankLines).fill(''), ...lines].join('\n'));
     this.conversation.setScrollPerc(100);
+    this.screen.render();
+  }
+
+  updateLogs(logs: ReadonlyArray<string>): void {
+    const width = Math.max(8, Number(this.logs.width) - 2);
+    const lines = logs.flatMap((log) => toLogLines(log, width));
+    const blankLines = Math.max(0, Number(this.logs.height) - lines.length);
+    const wasAtBottom = this.logs.getScrollPerc() === 100;
+
+    this.logs.setContent([...new Array(blankLines).fill(''), ...lines].join('\n'));
+
+    if (wasAtBottom) {
+      this.logs.setScrollPerc(100);
+    }
+
     this.screen.render();
   }
 }

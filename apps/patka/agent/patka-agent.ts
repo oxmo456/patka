@@ -5,6 +5,7 @@ import {INFERENCE_CLIENT} from '../inference/inference-client.token.ts';
 import type {InferenceClient} from '../inference/inference-client.ts';
 import type {PatkaMessage} from '../inference/patka-message.ts';
 import {none, some} from '../option.ts';
+import {PatkaLogger} from '../patka-logger.ts';
 import type {PatkaUtterance} from '../patka-utterance.ts';
 import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
@@ -22,6 +23,7 @@ export class PatkaAgent {
   private readonly inferenceClient: InferenceClient;
   private readonly patkaPromptFactory: PatkaPromptFactory;
   private readonly patkaTools: PatkaTools;
+  private readonly patkaLogger: PatkaLogger;
   private readonly patkaToolProtocol = new PatkaToolProtocol();
 
   readonly name: string;
@@ -32,10 +34,12 @@ export class PatkaAgent {
     @inject(AGENT_NAME) name: string,
     @inject(INFERENCE_CLIENT) inferenceClient: InferenceClient,
     @inject(PatkaTools) patkaTools: PatkaTools,
+    @inject(PatkaLogger) patkaLogger: PatkaLogger,
   ) {
     this.name = name;
     this.inferenceClient = inferenceClient;
     this.patkaTools = patkaTools;
+    this.patkaLogger = patkaLogger;
     this.patkaPromptFactory = new DefaultPatkaPromptFactory(patkaTools);
   }
 
@@ -61,6 +65,8 @@ export class PatkaAgent {
   }
 
   private generate(prompt: string): Observable<string> {
+    this.patkaLogger.info({prompt}, `${this.name} prompts the engine`);
+
     return this.inferenceClient
       .generate({message: prompt, id: randomUUID()})
       .pipe(map((patkaMessage: PatkaMessage) => patkaMessage.message));

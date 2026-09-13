@@ -6,4 +6,6 @@ export interface PatkaUI {
   userInputs: Observable<PatkaUserInput>;
 
   updateChat(patkaChatEntries: ReadonlyArray<PatkaChatEntry>): void;
+
+  updateLogs(logs: ReadonlyArray<string>): void;
 }

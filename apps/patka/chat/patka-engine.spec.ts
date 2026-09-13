@@ -4,6 +4,7 @@ import {describe, expect, it, vi} from 'vitest';
 import {DefaultPatkaPromptFactory} from '../agent/default-patka-prompt-factory.ts';
 import {PatkaAgent} from '../agent/patka-agent.ts';
 import type {PatkaMessage} from '../inference/patka-message.ts';
+import {PatkaLogger} from '../patka-logger.ts';
 import type {PatkaUtterance} from '../patka-utterance.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
 import type {PatkaChatEntry} from './patka-chat-entry.ts';
@@ -25,6 +26,7 @@ describe('PatkaEngine', () => {
             generate: vi.fn(() => of({message: 'world', id: randomUUID()})),
           },
           new PatkaTools([]),
+          new PatkaLogger(),
         ),
       );
       const received: Array<ReadonlyArray<PatkaChatEntry>> = [];
@@ -42,6 +44,7 @@ describe('PatkaEngine', () => {
             generate: vi.fn(() => of({message: 'world', id: randomUUID()})),
           },
           new PatkaTools([]),
+          new PatkaLogger(),
         ),
       );
       let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
@@ -65,6 +68,7 @@ describe('PatkaEngine', () => {
             generate: vi.fn(() => of({message: 'world', id: randomUUID()})),
           },
           new PatkaTools([]),
+          new PatkaLogger(),
         ),
       );
       let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
@@ -87,7 +91,7 @@ describe('PatkaEngine', () => {
     it('keeps the answer pending until it arrives', () => {
       const answers = new Subject<PatkaMessage>();
       const patkaEngine = new PatkaEngine(
-        new PatkaAgent('patka', {generate: () => answers}, new PatkaTools([])),
+        new PatkaAgent('patka', {generate: () => answers}, new PatkaTools([]), new PatkaLogger()),
       );
       let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
       patkaEngine.patkaChatEntries.subscribe((content) => {
@@ -126,6 +130,7 @@ describe('PatkaEngine', () => {
             },
           },
           new PatkaTools([]),
+          new PatkaLogger(),
         ),
       );
       let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];

@@ -1,3 +1,4 @@
+import {scan} from 'rxjs';
 import {inject, injectable} from 'tsyringe';
 import {PatkaEngine} from './chat/patka-engine.ts';
 import {PatkaLogger} from './patka-logger.ts';
@@ -28,5 +29,8 @@ export class Patka {
     this.patkaEngine.patkaChatEntries.subscribe((patkaChatEntries) =>
       this.patkaUI.updateChat(patkaChatEntries),
     );
+    this.patkaLogger.logs
+      .pipe(scan((logs: ReadonlyArray<string>, log: string) => [...logs, log].slice(-100), []))
+      .subscribe((logs) => this.patkaUI.updateLogs(logs));
   }
 }
