@@ -1,32 +1,26 @@
-import blessed from 'blessed';
-import {PatkaAgent} from './agent/patka-agent.ts';
+import {inject, injectable} from 'tsyringe';
 import {PatkaEngine} from './chat/patka-engine.ts';
-import {
-  buildInferenceClient,
-  type PatkaInferenceClientOption,
-} from './inference/patka-inference.ts';
 import {PatkaLogger} from './patka-logger.ts';
-import {ListFiles} from './tools/list-files.ts';
-import {PatkaTools} from './tools/patka-tools.ts';
-import {ReadFile} from './tools/read-file.ts';
-import {PatkaTUI} from './ui/patka-tui.ts';
+import {PATKA_UI} from './ui/patka-ui.token.ts';
 import type {PatkaUI} from './ui/patka-ui.ts';
 import {toPatkaUtterance} from './ui/patka-user-input.ts';
 
+@injectable()
 export class Patka {
-  private readonly patkaLogger = new PatkaLogger();
   private readonly patkaEngine: PatkaEngine;
   private readonly patkaUI: PatkaUI;
+  private readonly patkaLogger: PatkaLogger;
 
-  constructor(patkaInferenceClientOption: PatkaInferenceClientOption) {
-    this.patkaLogger.info({inference: patkaInferenceClientOption}, 'patka starts');
+  constructor(
+    @inject(PatkaEngine) patkaEngine: PatkaEngine,
+    @inject(PATKA_UI) patkaUI: PatkaUI,
+    @inject(PatkaLogger) patkaLogger: PatkaLogger,
+  ) {
+    this.patkaEngine = patkaEngine;
+    this.patkaUI = patkaUI;
+    this.patkaLogger = patkaLogger;
 
-    const patkaTools = new PatkaTools([new ListFiles(), new ReadFile()]);
-
-    this.patkaEngine = new PatkaEngine(
-      new PatkaAgent('ROOT', buildInferenceClient(patkaInferenceClientOption), patkaTools),
-    );
-    this.patkaUI = new PatkaTUI(blessed);
+    this.patkaLogger.info({}, 'patka starts');
 
     this.patkaUI.userInputs.subscribe((patkaUserInput) =>
       this.patkaEngine.handle(toPatkaUtterance(patkaUserInput)),

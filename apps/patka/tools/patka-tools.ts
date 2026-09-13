@@ -1,12 +1,15 @@
 import {defer, type Observable} from 'rxjs';
+import {injectAll, injectable} from 'tsyringe';
 import type {JsonObject, JsonValue} from '../json.ts';
+import {PATKA_TOOL} from './patka-tool.token.ts';
 import type {PatkaTool} from './patka-tool.ts';
 import type {PatkaToolManual} from './patka-tool-manual.ts';
 
+@injectable()
 export class PatkaTools {
   private readonly patkaTools: ReadonlyArray<PatkaTool<JsonObject, JsonValue>>;
 
-  constructor(patkaTools: ReadonlyArray<PatkaTool<JsonObject, JsonValue>>) {
+  constructor(@injectAll(PATKA_TOOL) patkaTools: ReadonlyArray<PatkaTool<JsonObject, JsonValue>>) {
     this.patkaTools = patkaTools;
   }
 

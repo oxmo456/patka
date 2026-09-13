@@ -1,6 +1,7 @@
 import type {Observable} from 'rxjs';
 import {match} from 'ts-pattern';
-import type {PatkaAgent} from '../agent/patka-agent.ts';
+import {inject, injectable} from 'tsyringe';
+import {PatkaAgent} from '../agent/patka-agent.ts';
 import type {PatkaConversation, PatkaConversationEntry} from '../agent/patka-conversation.ts';
 import type {PatkaUtterance} from '../patka-utterance.ts';
 import {PatkaChat} from './patka-chat.ts';
@@ -25,6 +26,7 @@ const toPatkaChatEntry = (
     .exhaustive(),
 });
 
+@injectable()
 export class PatkaEngine {
   private readonly patkaChat = new PatkaChat();
   private readonly patkaAgent: PatkaAgent;
@@ -32,7 +34,7 @@ export class PatkaEngine {
   readonly patkaChatEntries: Observable<ReadonlyArray<PatkaChatEntry>> =
     this.patkaChat.patkaChatEntries;
 
-  constructor(patkaAgent: PatkaAgent) {
+  constructor(@inject(PatkaAgent) patkaAgent: PatkaAgent) {
     this.patkaAgent = patkaAgent;
     patkaAgent.patkaConversation.subscribe((patkaConversation: PatkaConversation): void => {
       for (const patkaConversationEntry of patkaConversation) {

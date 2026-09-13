@@ -1,18 +1,22 @@
 import {randomUUID, type UUID} from 'node:crypto';
 import {BehaviorSubject, defer, map, type Observable, of, switchMap} from 'rxjs';
+import {inject, injectable} from 'tsyringe';
+import {INFERENCE_CLIENT} from '../inference/inference-client.token.ts';
 import type {InferenceClient} from '../inference/inference-client.ts';
 import type {PatkaMessage} from '../inference/patka-message.ts';
 import {none, some} from '../option.ts';
 import type {PatkaUtterance} from '../patka-utterance.ts';
 import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
-import type {PatkaTools} from '../tools/patka-tools.ts';
+import {PatkaTools} from '../tools/patka-tools.ts';
 import {isSuccess} from '../try.ts';
+import {AGENT_NAME} from './agent-name.token.ts';
 import {DefaultPatkaPromptFactory} from './default-patka-prompt-factory.ts';
 import type {PatkaConversation, PatkaConversationEntry} from './patka-conversation.ts';
 import type {PatkaPromptFactory} from './patka-prompt-factory.ts';
 
 const ASSISTANT = 'Assistant';
 
+@injectable()
 export class PatkaAgent {
   private readonly _patkaConversation = new BehaviorSubject<PatkaConversation>([]);
   private readonly inferenceClient: InferenceClient;
@@ -24,7 +28,11 @@ export class PatkaAgent {
   readonly patkaConversation: Observable<PatkaConversation> =
     this._patkaConversation.asObservable();
 
-  constructor(name: string, inferenceClient: InferenceClient, patkaTools: PatkaTools) {
+  constructor(
+    @inject(AGENT_NAME) name: string,
+    @inject(INFERENCE_CLIENT) inferenceClient: InferenceClient,
+    @inject(PatkaTools) patkaTools: PatkaTools,
+  ) {
     this.name = name;
     this.inferenceClient = inferenceClient;
     this.patkaTools = patkaTools;

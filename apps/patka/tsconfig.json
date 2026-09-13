@@ -5,7 +5,8 @@
     "moduleResolution": "nodenext",
     "strict": true,
     "allowImportingTsExtensions": true,
-    "erasableSyntaxOnly": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "verbatimModuleSyntax": true,
     "rewriteRelativeImportExtensions": true
   },

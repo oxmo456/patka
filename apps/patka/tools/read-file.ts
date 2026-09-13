@@ -1,6 +1,7 @@
 import {readFile} from 'node:fs/promises';
 import {isAbsolute as isPathAbsolute} from 'node:path';
 import {defer, from, type Observable} from 'rxjs';
+import {injectable} from 'tsyringe';
 import type {PatkaTool} from './patka-tool.ts';
 import type {PatkaToolManual} from './patka-tool-manual.ts';
 
@@ -8,6 +9,7 @@ export type ReadFileInput = {
   readonly path: string;
 };
 
+@injectable()
 export class ReadFile implements PatkaTool<ReadFileInput, string> {
   readonly manual: PatkaToolManual = {
     name: 'read_file',

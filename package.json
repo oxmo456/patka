@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node apps/patka/main.ts",
+    "start": "bazel run //apps/patka:patka",
     "check": "tsc -p apps/patka --noEmit",
     "test": "bazel test //...",
     "format": "bazel run //:format",
@@ -15,8 +15,10 @@
     "blessed": "^0.1.81",
     "ollama": "^0.6.3",
     "pino": "^10.3.1",
+    "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
-    "ts-pattern": "^5.9.0"
+    "ts-pattern": "^5.9.0",
+    "tsyringe": "^4.10.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.12",

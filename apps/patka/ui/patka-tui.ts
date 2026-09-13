@@ -3,7 +3,9 @@ import type blessedModule from 'blessed';
 import type {Widgets} from 'blessed';
 import {type Observable, ReplaySubject} from 'rxjs';
 import {match} from 'ts-pattern';
+import {inject, injectable} from 'tsyringe';
 import type {PatkaChatEntry} from '../chat/patka-chat-entry.ts';
+import {BLESSED} from './blessed.token.ts';
 import type {PatkaUI} from './patka-ui.ts';
 import type {PatkaUserInput} from './patka-user-input.ts';
 
@@ -56,6 +58,7 @@ const toBubble = (patkaChatEntry: PatkaChatEntry, width: number): ReadonlyArray<
   return lines.map((line) => `${style} ${line.padEnd(bubbleWidth)} {/}`);
 };
 
+@injectable()
 export class PatkaTUI implements PatkaUI {
   private readonly _userInputs = new ReplaySubject<PatkaUserInput>();
   private readonly screen: Widgets.Screen;
@@ -63,7 +66,7 @@ export class PatkaTUI implements PatkaUI {
 
   readonly userInputs: Observable<PatkaUserInput> = this._userInputs.asObservable();
 
-  constructor(blessed: Blessed) {
+  constructor(@inject(BLESSED) blessed: Blessed) {
     this.screen = blessed.screen({smartCSR: true, title: 'patka'});
     this.conversation = blessed.box({
       top: 0,
