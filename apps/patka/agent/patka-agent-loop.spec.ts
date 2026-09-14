@@ -108,7 +108,7 @@ describe('PatkaAgentLoop', () => {
     expect(prompts[2]).toContain('Tool output: "hello"');
   });
 
-  it('stops asking the engine after five rounds', () => {
+  it('stops asking the engine after a hundred rounds', () => {
     const generate = vi.fn(() =>
       of({message: '$$$invoke(read_file, {"path": "note.txt"})', id: randomUUID()}),
     );
@@ -121,7 +121,7 @@ describe('PatkaAgentLoop', () => {
 
     patkaAgentLoop.handle('User: read the note').subscribe();
 
-    expect(generate).toHaveBeenCalledTimes(5);
+    expect(generate).toHaveBeenCalledTimes(100);
   });
 
   it('gives back the reply as it is when the input is not valid json', () => {

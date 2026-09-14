@@ -60,4 +60,16 @@ describe('PatkaToolProtocol', () => {
     expect(patkaToolProtocol.isAPatkaToolInvocation('Paris')).toBe(false);
     expect(patkaToolProtocol.isAPatkaToolInvocation('$$$invoke without an input')).toBe(false);
   });
+
+  it('tells the model never to guess a tool input', () => {
+    const manual = new PatkaToolProtocol().manual;
+
+    expect(manual).toContain('Never invoke a tool as a guess.');
+  });
+
+  it('tells the model to ask a question when the request is not actionable', () => {
+    const manual = new PatkaToolProtocol().manual;
+
+    expect(manual).toContain('ask the user a question instead');
+  });
 });

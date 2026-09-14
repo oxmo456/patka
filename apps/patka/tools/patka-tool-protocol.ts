@@ -16,6 +16,8 @@ export class PatkaToolProtocol {
     `${MARKER}(tool_name, {"key": "value"})`,
     `For example: ${MARKER}(read_file, {"path": "notes.txt"})`,
     'The input must be a JSON object matching that tool input schema.',
+    'Never invoke a tool as a guess. Every input you give it must come from the request.',
+    'If the request is empty, ambiguous, or not actionable, ask the user a question instead.',
   ].join('\n');
 
   isAPatkaToolInvocation(reply: string): boolean {

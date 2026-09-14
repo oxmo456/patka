@@ -12,7 +12,7 @@ import {AGENT_NAME} from './agent-name.token.ts';
 
 const ASSISTANT = 'Assistant';
 
-const MAX_ROUNDS = 5;
+const MAX_ROUNDS = 100;
 
 @injectable()
 export class PatkaAgentLoop {

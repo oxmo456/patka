@@ -15,8 +15,6 @@ export type Blessed = Pick<typeof blessedModule, 'screen' | 'box' | 'textbox'>;
 
 const PENDING_RESPONSE = '...';
 
-const BUBBLE_RATIO = 0.6;
-
 const USER_STYLE = '{white-bg}{blue-fg}';
 
 const AGENT_STYLE = '{blue-bg}{white-fg}';
@@ -67,15 +65,16 @@ const toBubble = (patkaChatEntry: PatkaChatEntry, width: number): ReadonlyArray<
     .with('pending', () => PENDING_RESPONSE)
     .with('complete', 'failed', () => patkaChatEntry.message)
     .exhaustive();
-  const bubbleWidth = Math.max(8, Math.floor(width * BUBBLE_RATIO) - 2);
+  const bubbleWidth = Math.max(8, width - 2);
   const lines = toMarkdownLines(text).flatMap((line) => wrap(line, bubbleWidth));
-  const widest = Math.max(...lines.map(visibleLength));
   const style = match(patkaChatEntry.role)
     .with('user', () => USER_STYLE)
     .with('agent', () => AGENT_STYLE)
     .exhaustive();
 
-  return lines.map((line) => `${style} ${line}${' '.repeat(widest - visibleLength(line))} {/}`);
+  return lines.map(
+    (line) => `${style} ${line}${' '.repeat(bubbleWidth - visibleLength(line))} {/}`,
+  );
 };
 
 const toDetailLines = (record: Record<string, unknown>, width: number): ReadonlyArray<string> =>
