@@ -18,9 +18,11 @@ describe('PatkaContext', () => {
     const received: Array<PatkaContextEntry> = [];
     patkaContext.entries.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
 
-    patkaContext.append({type: 'PatkaReply', id: randomUUID(), content: 'Paris'});
+    patkaContext.append({type: 'PatkaInferenceClientResponse', id: randomUUID(), content: 'Paris'});
 
-    expect(received.map((patkaContextEntry) => patkaContextEntry.type)).toEqual(['PatkaReply']);
+    expect(received.map((patkaContextEntry) => patkaContextEntry.type)).toEqual([
+      'PatkaInferenceClientResponse',
+    ]);
   });
 
   it('gives what it appends in order', () => {
@@ -55,8 +57,12 @@ describe('PatkaContext', () => {
 
   it('gives a late subscriber everything it appended before', () => {
     const patkaContext = new PatkaContext();
-    patkaContext.append({type: 'PatkaReply', id: randomUUID(), content: 'Paris'});
-    patkaContext.append({type: 'PatkaReply', id: randomUUID(), content: 'Berlin'});
+    patkaContext.append({type: 'PatkaInferenceClientResponse', id: randomUUID(), content: 'Paris'});
+    patkaContext.append({
+      type: 'PatkaInferenceClientResponse',
+      id: randomUUID(),
+      content: 'Berlin',
+    });
     const received: Array<PatkaContextEntry> = [];
 
     patkaContext.entries.subscribe((patkaContextEntry) => received.push(patkaContextEntry));

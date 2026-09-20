@@ -46,7 +46,7 @@ describe('Patka', () => {
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {
-      useValue: {generate: () => of({message: 'Paris', id: randomUUID()})},
+      useValue: {generate: () => of({content: 'Paris'})},
     });
     child.register(PATKA_TOOL, {useClass: ListFiles});
     child.register(PATKA_TOOL, {useClass: ReadFile});
@@ -67,7 +67,7 @@ describe('Patka', () => {
 
     expect(received.map((patkaContextEntry) => patkaContextEntry.type)).toEqual([
       'PatkaUserUtterance',
-      'PatkaReply',
+      'PatkaInferenceClientResponse',
     ]);
   });
 
@@ -77,7 +77,7 @@ describe('Patka', () => {
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {
-      useValue: {generate: () => of({message: 'Paris', id: randomUUID()})},
+      useValue: {generate: () => of({content: 'Paris'})},
     });
     child.register(PATKA_TOOL, {useClass: ListFiles});
     child.register(PATKA_TOOL, {useClass: ReadFile});

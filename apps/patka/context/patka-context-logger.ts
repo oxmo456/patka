@@ -1,4 +1,4 @@
-import {Subscription} from 'rxjs';
+import type {Subscription} from 'rxjs';
 import {match} from 'ts-pattern';
 import {inject, injectable} from 'tsyringe';
 import type {Disposable} from '../disposable.ts';
@@ -10,7 +10,7 @@ import type {PatkaContextEntry} from './patka-context-entry.ts';
 const toDetails = (patkaContextEntry: PatkaContextEntry): JsonObject =>
   match(patkaContextEntry)
     .with({type: 'PatkaUserUtterance'}, ({utterance}) => ({content: utterance.content}))
-    .with({type: 'PatkaReply'}, ({content}) => ({content}))
+    .with({type: 'PatkaInferenceClientResponse'}, ({content}) => ({content}))
     .with({type: 'PatkaToolCall'}, ({name, input}) => ({name, input}))
     .with({type: 'PatkaToolResult'}, ({name, output}) => ({name, output}))
     .exhaustive();
@@ -19,7 +19,7 @@ const toDetails = (patkaContextEntry: PatkaContextEntry): JsonObject =>
 export class PatkaContextLogger implements Disposable {
   private readonly patkaContext: PatkaContext;
   private readonly patkaLogger: PatkaLogger;
-  private readonly subscription = new Subscription();
+  private logEntries: Subscription | undefined;
 
   constructor(
     @inject(PatkaContext) patkaContext: PatkaContext,
@@ -30,14 +30,14 @@ export class PatkaContextLogger implements Disposable {
   }
 
   start(): void {
-    this.subscription.add(
-      this.patkaContext.entries.subscribe((patkaContextEntry: PatkaContextEntry): void => {
+    this.logEntries = this.patkaContext.entries.subscribe(
+      (patkaContextEntry: PatkaContextEntry): void => {
         this.patkaLogger.info(patkaContextEntry.type, toDetails(patkaContextEntry));
-      }),
+      },
     );
   }
 
   dispose(): void {
-    this.subscription.unsubscribe();
+    this.logEntries?.unsubscribe();
   }
 }

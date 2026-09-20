@@ -1,4 +1,3 @@
-import {randomUUID} from 'node:crypto';
 import type {Ollama} from 'ollama';
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
@@ -11,24 +10,9 @@ describe('OllamaInferenceClient', () => {
     } as unknown as Ollama;
     const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
 
-    const response = await firstValueFrom(
-      ollamaInferenceClient.generate({message: 'hello', id: randomUUID()}),
-    );
+    const response = await firstValueFrom(ollamaInferenceClient.generate({prompt: 'hello'}));
 
-    expect(response.message).toBe('world');
-  });
-
-  it('gives the generated message its own id', async () => {
-    const ollama = {
-      generate: vi.fn(async () => ({response: 'world'})),
-    } as unknown as Ollama;
-    const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
-    const id = randomUUID();
-
-    const response = await firstValueFrom(ollamaInferenceClient.generate({message: 'hello', id}));
-
-    expect(response.id).not.toBe(id);
-    expect(response.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    expect(response.content).toBe('world');
   });
 
   it('asks the configured model with the message as the prompt', async () => {
@@ -37,7 +21,7 @@ describe('OllamaInferenceClient', () => {
     } as unknown as Ollama;
     const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
 
-    await firstValueFrom(ollamaInferenceClient.generate({message: 'hello', id: randomUUID()}));
+    await firstValueFrom(ollamaInferenceClient.generate({prompt: 'hello'}));
 
     expect(ollama.generate).toHaveBeenCalledWith({
       model: 'llama3',
@@ -51,7 +35,7 @@ describe('OllamaInferenceClient', () => {
     } as unknown as Ollama;
     const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
 
-    ollamaInferenceClient.generate({message: 'hello', id: randomUUID()});
+    ollamaInferenceClient.generate({prompt: 'hello'});
 
     expect(ollama.generate).not.toHaveBeenCalled();
   });

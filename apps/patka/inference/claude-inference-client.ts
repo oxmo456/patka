@@ -1,8 +1,8 @@
 import {spawn} from 'node:child_process';
-import {randomUUID} from 'node:crypto';
 import {Observable, type Subscriber} from 'rxjs';
 import type {InferenceClient} from './inference-client.ts';
-import type {PatkaMessage} from './patka-message.ts';
+import type {InferenceClientInput} from './inference-client-input.ts';
+import type {InferenceClientResponse} from './inference-client-response.ts';
 
 const SYSTEM_PROMPT =
   'You are a language model. Continue the conversation, answering directly from your own knowledge.';
@@ -24,9 +24,9 @@ export class ClaudeInferenceClient implements InferenceClient {
     this.command = command;
   }
 
-  generate(patkaMessage: PatkaMessage): Observable<PatkaMessage> {
-    return new Observable((subscriber: Subscriber<PatkaMessage>) => {
-      const claude = spawn(this.command, [...ARGUMENTS, patkaMessage.message]);
+  generate(inferenceClientInput: InferenceClientInput): Observable<InferenceClientResponse> {
+    return new Observable((subscriber: Subscriber<InferenceClientResponse>) => {
+      const claude = spawn(this.command, [...ARGUMENTS, inferenceClientInput.prompt]);
       let answer = '';
 
       claude.stdout.on('data', (chunk: Buffer): void => {
@@ -39,7 +39,7 @@ export class ClaudeInferenceClient implements InferenceClient {
 
       claude.on('close', (code: number | null): void => {
         if (code === 0) {
-          subscriber.next({message: answer.trim(), id: randomUUID()});
+          subscriber.next({content: answer.trim()});
           subscriber.complete();
         } else {
           subscriber.error(new Error(`${this.command} exited with code ${code}`));

@@ -13,7 +13,7 @@ const said = (content: string): PatkaContextEntry => ({
 });
 
 const answered = (content: string): PatkaContextEntry => ({
-  type: 'PatkaReply',
+  type: 'PatkaInferenceClientResponse',
   id: randomUUID(),
   content,
 });

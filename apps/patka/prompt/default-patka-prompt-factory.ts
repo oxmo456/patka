@@ -25,7 +25,7 @@ const presentManual = (patkaToolManual: PatkaToolManual): string =>
 const present = (patkaContextEntry: PatkaContextEntry): ReadonlyArray<string> =>
   match(patkaContextEntry)
     .with({type: 'PatkaUserUtterance'}, ({utterance}) => [`${USER}: ${utterance.content}`])
-    .with({type: 'PatkaReply'}, ({content}) => [`${ASSISTANT}: ${content}`])
+    .with({type: 'PatkaInferenceClientResponse'}, ({content}) => [`${ASSISTANT}: ${content}`])
     .with({type: 'PatkaToolCall'}, () => [])
     .with({type: 'PatkaToolResult'}, ({output}) => [`Tool output: ${JSON.stringify(output)}`])
     .exhaustive();
