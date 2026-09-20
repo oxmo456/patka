@@ -1,8 +1,8 @@
-import {randomUUID} from 'node:crypto';
 import type Anthropic from '@anthropic-ai/sdk';
 import {defer, from, map, type Observable} from 'rxjs';
 import type {InferenceClient} from './inference-client.ts';
-import type {PatkaMessage} from './patka-message.ts';
+import type {InferenceClientInput} from './inference-client-input.ts';
+import type {InferenceClientResponse} from './inference-client-response.ts';
 
 const MAX_TOKENS = 16000;
 
@@ -21,15 +21,15 @@ export class AnthropicInferenceClient implements InferenceClient {
     this.anthropic = anthropic;
   }
 
-  generate(patkaMessage: PatkaMessage): Observable<PatkaMessage> {
+  generate(inferenceClientInput: InferenceClientInput): Observable<InferenceClientResponse> {
     return defer(() =>
       from(
         this.anthropic.messages.create({
           model: this.model,
           max_tokens: MAX_TOKENS,
-          messages: [{role: 'user', content: patkaMessage.message}],
+          messages: [{role: 'user', content: inferenceClientInput.prompt}],
         }),
       ),
-    ).pipe(map((response) => ({message: toContent(response), id: randomUUID()})));
+    ).pipe(map((response) => ({content: toContent(response)})));
   }
 }

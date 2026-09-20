@@ -57,7 +57,11 @@ describe('PatkaEngine', () => {
         patkaChatEntries = content;
       });
 
-      patkaContext.append({type: 'PatkaReply', id: randomUUID(), content: 'world'});
+      patkaContext.append({
+        type: 'PatkaInferenceClientResponse',
+        id: randomUUID(),
+        content: 'world',
+      });
 
       expect(patkaChatEntries.map((entry) => entry.author)).toEqual(['patka']);
     });
@@ -111,7 +115,11 @@ describe('PatkaEngine', () => {
         id: randomUUID(),
         utterance: {content: 'hello', timestamp: new Date(), id: randomUUID()},
       });
-      patkaContext.append({type: 'PatkaReply', id: randomUUID(), content: 'world'});
+      patkaContext.append({
+        type: 'PatkaInferenceClientResponse',
+        id: randomUUID(),
+        content: 'world',
+      });
 
       expect(patkaChatEntries.map((entry) => entry.role)).toEqual(['user', 'agent']);
     });

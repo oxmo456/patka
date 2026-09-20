@@ -1,8 +1,8 @@
-import {randomUUID} from 'node:crypto';
 import type {Ollama} from 'ollama';
 import {defer, from, map, type Observable} from 'rxjs';
 import type {InferenceClient} from './inference-client.ts';
-import type {PatkaMessage} from './patka-message.ts';
+import type {InferenceClientInput} from './inference-client-input.ts';
+import type {InferenceClientResponse} from './inference-client-response.ts';
 
 export class OllamaInferenceClient implements InferenceClient {
   private readonly model: string;
@@ -13,14 +13,14 @@ export class OllamaInferenceClient implements InferenceClient {
     this.ollama = ollama;
   }
 
-  generate(patkaMessage: PatkaMessage): Observable<PatkaMessage> {
+  generate(inferenceClientInput: InferenceClientInput): Observable<InferenceClientResponse> {
     return defer(() =>
       from(
         this.ollama.generate({
           model: this.model,
-          prompt: patkaMessage.message,
+          prompt: inferenceClientInput.prompt,
         }),
       ),
-    ).pipe(map((response) => ({message: response.response, id: randomUUID()})));
+    ).pipe(map((response) => ({content: response.response})));
   }
 }

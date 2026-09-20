@@ -1,21 +1,21 @@
 import {randomUUID} from 'node:crypto';
-import {catchError, concatMap, EMPTY, map, type Observable, of, scan} from 'rxjs';
+import {concatMap, EMPTY, map, type Observable, of, scan} from 'rxjs';
 import {match} from 'ts-pattern';
 import {inject, injectable} from 'tsyringe';
 import {PATKA_CONTEXT_ENTRIES} from '../context/patka-context-entries.token.ts';
 import type {
   PatkaContextEntry,
-  PatkaReply,
+  PatkaInferenceClientResponse,
   PatkaToolCall,
   PatkaToolResult,
 } from '../context/patka-context-entry.ts';
 import {INFERENCE_CLIENT} from '../inference/inference-client.token.ts';
 import type {InferenceClient} from '../inference/inference-client.ts';
+import {DefaultPatkaPromptFactory} from '../prompt/default-patka-prompt-factory.ts';
+import type {PatkaPromptFactory} from '../prompt/patka-prompt-factory.ts';
 import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
 import {AGENT_NAME} from './agent-name.token.ts';
-import {DefaultPatkaPromptFactory} from './default-patka-prompt-factory.ts';
-import type {PatkaPromptFactory} from './patka-prompt-factory.ts';
 
 @injectable()
 export class PatkaAgent {
@@ -57,7 +57,9 @@ export class PatkaAgent {
     return match(lastPatkaContextEntry)
       .with({type: 'PatkaUserUtterance'}, () => this.generate(patkaContextEntries))
       .with({type: 'PatkaToolResult'}, () => this.generate(patkaContextEntries))
-      .with({type: 'PatkaReply'}, (patkaReply) => this.afterReply(patkaReply))
+      .with({type: 'PatkaInferenceClientResponse'}, (patkaInferenceClientResponse) =>
+        this.processInferenceClientResponse(patkaInferenceClientResponse),
+      )
       .with({type: 'PatkaToolCall'}, (patkaToolCall) => this.useTool(patkaToolCall))
       .exhaustive();
   }
@@ -67,20 +69,21 @@ export class PatkaAgent {
   ): Observable<PatkaContextEntry> {
     const prompt = this.patkaPromptFactory.create(patkaContextEntries);
 
-    return this.inferenceClient.generate({message: prompt, id: randomUUID()}).pipe(
+    return this.inferenceClient.generate({prompt}).pipe(
       map(
-        (patkaMessage): PatkaReply => ({
-          type: 'PatkaReply',
+        (inferenceClientResponse): PatkaInferenceClientResponse => ({
+          type: 'PatkaInferenceClientResponse',
           id: randomUUID(),
-          content: patkaMessage.message,
+          content: inferenceClientResponse.content,
         }),
       ),
-      catchError(() => EMPTY),
     );
   }
 
-  private afterReply(patkaReply: PatkaReply): Observable<PatkaContextEntry> {
-    return match(this.patkaToolProtocol.parse(patkaReply.content))
+  private processInferenceClientResponse(
+    patkaInferenceClientResponse: PatkaInferenceClientResponse,
+  ): Observable<PatkaContextEntry> {
+    return match(this.patkaToolProtocol.parse(patkaInferenceClientResponse.content))
       .with(
         {type: 'success'},
         ({value}): Observable<PatkaContextEntry> =>
@@ -105,7 +108,6 @@ export class PatkaAgent {
           output,
         }),
       ),
-      catchError(() => EMPTY),
     );
   }
 }

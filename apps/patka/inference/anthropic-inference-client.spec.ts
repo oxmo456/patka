@@ -1,4 +1,3 @@
-import {randomUUID} from 'node:crypto';
 import type Anthropic from '@anthropic-ai/sdk';
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
@@ -14,11 +13,9 @@ describe('AnthropicInferenceClient', () => {
     }));
     const anthropicInferenceClient = new AnthropicInferenceClient('claude-opus-5', anthropic);
 
-    const response = await firstValueFrom(
-      anthropicInferenceClient.generate({message: 'hello', id: randomUUID()}),
-    );
+    const response = await firstValueFrom(anthropicInferenceClient.generate({prompt: 'hello'}));
 
-    expect(response.message).toBe('world');
+    expect(response.content).toBe('world');
   });
 
   it('joins every text block the model answered', async () => {
@@ -31,11 +28,9 @@ describe('AnthropicInferenceClient', () => {
     }));
     const anthropicInferenceClient = new AnthropicInferenceClient('claude-opus-5', anthropic);
 
-    const response = await firstValueFrom(
-      anthropicInferenceClient.generate({message: 'hello', id: randomUUID()}),
-    );
+    const response = await firstValueFrom(anthropicInferenceClient.generate({prompt: 'hello'}));
 
-    expect(response.message).toBe('hello world');
+    expect(response.content).toBe('hello world');
   });
 
   it('asks the configured model with the message as the prompt', async () => {
@@ -45,7 +40,7 @@ describe('AnthropicInferenceClient', () => {
       anAnthropic(create),
     );
 
-    await firstValueFrom(anthropicInferenceClient.generate({message: 'hello', id: randomUUID()}));
+    await firstValueFrom(anthropicInferenceClient.generate({prompt: 'hello'}));
 
     expect(create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -62,7 +57,7 @@ describe('AnthropicInferenceClient', () => {
       anAnthropic(create),
     );
 
-    anthropicInferenceClient.generate({message: 'hello', id: randomUUID()});
+    anthropicInferenceClient.generate({prompt: 'hello'});
 
     expect(create).not.toHaveBeenCalled();
   });

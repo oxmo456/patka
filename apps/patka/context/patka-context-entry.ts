@@ -8,8 +8,8 @@ export type PatkaUserUtterance = {
   readonly utterance: PatkaUtterance;
 };
 
-export type PatkaReply = {
-  readonly type: 'PatkaReply';
+export type PatkaInferenceClientResponse = {
+  readonly type: 'PatkaInferenceClientResponse';
   readonly id: UUID;
   readonly content: string;
 };
@@ -28,4 +28,8 @@ export type PatkaToolResult = {
   readonly output: JsonValue;
 };
 
-export type PatkaContextEntry = PatkaUserUtterance | PatkaReply | PatkaToolCall | PatkaToolResult;
+export type PatkaContextEntry =
+  | PatkaUserUtterance
+  | PatkaInferenceClientResponse
+  | PatkaToolCall
+  | PatkaToolResult;
