@@ -1,9 +1,8 @@
 import {match} from 'ts-pattern';
-import type {PatkaRole} from '../patka-role.ts';
+import type {PatkaContextEntry} from '../context/patka-context-entry.ts';
 import type {PatkaToolManual} from '../tools/patka-tool-manual.ts';
 import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
 import type {PatkaTools} from '../tools/patka-tools.ts';
-import type {PatkaConversation} from './patka-conversation.ts';
 import type {PatkaPromptFactory} from './patka-prompt-factory.ts';
 
 const INSTRUCTION =
@@ -11,18 +10,25 @@ const INSTRUCTION =
 
 const TOOLS_INTRODUCTION = 'You can use these tools:';
 
-const LABEL: Record<PatkaRole, string> = {
-  user: 'User',
-  agent: 'Assistant',
-};
+const USER = 'User';
 
-const present = (patkaToolManual: PatkaToolManual): string =>
+const ASSISTANT = 'Assistant';
+
+const presentManual = (patkaToolManual: PatkaToolManual): string =>
   [
     `- ${patkaToolManual.name}: ${patkaToolManual.summary}`,
     `  usage: ${patkaToolManual.usage}`,
     `  input: ${JSON.stringify(patkaToolManual.input)}`,
     `  output: ${JSON.stringify(patkaToolManual.output)}`,
   ].join('\n');
+
+const present = (patkaContextEntry: PatkaContextEntry): ReadonlyArray<string> =>
+  match(patkaContextEntry)
+    .with({type: 'PatkaUserUtterance'}, ({utterance}) => [`${USER}: ${utterance.content}`])
+    .with({type: 'PatkaReply'}, ({content}) => [`${ASSISTANT}: ${content}`])
+    .with({type: 'PatkaToolCall'}, () => [])
+    .with({type: 'PatkaToolResult'}, ({output}) => [`Tool output: ${JSON.stringify(output)}`])
+    .exhaustive();
 
 export class DefaultPatkaPromptFactory implements PatkaPromptFactory {
   private readonly patkaTools: PatkaTools;
@@ -41,22 +47,15 @@ export class DefaultPatkaPromptFactory implements PatkaPromptFactory {
           INSTRUCTION,
           '',
           TOOLS_INTRODUCTION,
-          ...patkaToolManuals.map(present),
+          ...patkaToolManuals.map(presentManual),
           '',
           this.patkaToolProtocol.manual,
         ].join('\n');
   }
 
-  create(patkaConversation: PatkaConversation): string {
-    const spoken = patkaConversation.flatMap((patkaConversationEntry) =>
-      match(patkaConversationEntry.utterance)
-        .with({type: 'some'}, (utterance) => [
-          `${LABEL[patkaConversationEntry.role]}: ${utterance.value.content}`,
-        ])
-        .with({type: 'none'}, () => [])
-        .exhaustive(),
-    );
+  create(patkaContextEntries: ReadonlyArray<PatkaContextEntry>): string {
+    const spoken = patkaContextEntries.flatMap(present);
 
-    return [this.header(), '', ...spoken, `${LABEL.agent}:`].join('\n');
+    return [this.header(), '', ...spoken, `${ASSISTANT}:`].join('\n');
   }
 }

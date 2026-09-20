@@ -1,173 +1,119 @@
 import {randomUUID} from 'node:crypto';
-import {of, Subject} from 'rxjs';
-import {describe, expect, it, vi} from 'vitest';
-import {PatkaAgent} from '../agent/patka-agent.ts';
-import {PatkaAgentLoop} from '../agent/patka-agent-loop.ts';
-import type {PatkaMessage} from '../inference/patka-message.ts';
-import {PatkaLogger} from '../patka-logger.ts';
-import type {PatkaUtterance} from '../patka-utterance.ts';
-import {PatkaTools} from '../tools/patka-tools.ts';
+import {describe, expect, it} from 'vitest';
+import {PatkaContext} from '../context/patka-context.ts';
 import type {PatkaChatEntry} from './patka-chat-entry.ts';
 import {PatkaEngine} from './patka-engine.ts';
-
-const anUtterance = (content: string): PatkaUtterance => ({
-  content,
-  timestamp: new Date(),
-  id: randomUUID(),
-});
 
 describe('PatkaEngine', () => {
   describe('patkaChatEntries', () => {
     it('starts empty', () => {
-      const patkaEngine = new PatkaEngine(
-        new PatkaAgent(
-          'patka',
-          new PatkaTools([]),
-          new PatkaAgentLoop(
-            'patka',
-            {generate: vi.fn(() => of({message: 'world', id: randomUUID()}))},
-            new PatkaTools([]),
-            new PatkaLogger(),
-          ),
-        ),
-      );
+      const patkaEngine = new PatkaEngine(new PatkaContext(), 'patka');
       const received: Array<ReadonlyArray<PatkaChatEntry>> = [];
 
-      patkaEngine.patkaChatEntries.subscribe((patkaChatEntries) => received.push(patkaChatEntries));
+      patkaEngine.patkaChatEntries.subscribe((entries) => received.push(entries));
 
       expect(received).toEqual([[]]);
     });
 
-    it('holds the utterance and the answer, in the order they happened', () => {
-      const patkaEngine = new PatkaEngine(
-        new PatkaAgent(
-          'patka',
-          new PatkaTools([]),
-          new PatkaAgentLoop(
-            'patka',
-            {generate: vi.fn(() => of({message: 'world', id: randomUUID()}))},
-            new PatkaTools([]),
-            new PatkaLogger(),
-          ),
-        ),
-      );
+    it('shows what the user said', () => {
+      const patkaContext = new PatkaContext();
+      const patkaEngine = new PatkaEngine(patkaContext, 'patka');
       let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
       patkaEngine.patkaChatEntries.subscribe((content) => {
         patkaChatEntries = content;
       });
 
-      patkaEngine.handle(anUtterance('hello'));
+      patkaContext.append({
+        type: 'PatkaUserUtterance',
+        id: randomUUID(),
+        utterance: {content: 'hello', timestamp: new Date(), id: randomUUID()},
+      });
 
-      expect(patkaChatEntries.map((patkaChatEntry) => patkaChatEntry.message)).toEqual([
-        'hello',
-        'world',
-      ]);
+      expect(patkaChatEntries.map((entry) => entry.message)).toEqual(['hello']);
     });
 
-    it('names the author and role of every entry', () => {
-      const patkaEngine = new PatkaEngine(
-        new PatkaAgent(
-          'patka',
-          new PatkaTools([]),
-          new PatkaAgentLoop(
-            'patka',
-            {generate: vi.fn(() => of({message: 'world', id: randomUUID()}))},
-            new PatkaTools([]),
-            new PatkaLogger(),
-          ),
-        ),
-      );
+    it('names the user as the author of what the user said', () => {
+      const patkaContext = new PatkaContext();
+      const patkaEngine = new PatkaEngine(patkaContext, 'patka');
       let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
       patkaEngine.patkaChatEntries.subscribe((content) => {
         patkaChatEntries = content;
       });
 
-      patkaEngine.handle(anUtterance('hello'));
+      patkaContext.append({
+        type: 'PatkaUserUtterance',
+        id: randomUUID(),
+        utterance: {content: 'hello', timestamp: new Date(), id: randomUUID()},
+      });
 
-      expect(patkaChatEntries.map((patkaChatEntry) => patkaChatEntry.author)).toEqual([
-        'you',
-        'patka',
-      ]);
-      expect(patkaChatEntries.map((patkaChatEntry) => patkaChatEntry.role)).toEqual([
-        'user',
-        'agent',
-      ]);
+      expect(patkaChatEntries.map((entry) => entry.author)).toEqual(['you']);
     });
 
-    it('keeps the answer pending until it arrives', () => {
-      const answers = new Subject<PatkaMessage>();
-      const patkaEngine = new PatkaEngine(
-        new PatkaAgent(
-          'patka',
-          new PatkaTools([]),
-          new PatkaAgentLoop(
-            'patka',
-            {generate: () => answers},
-            new PatkaTools([]),
-            new PatkaLogger(),
-          ),
-        ),
-      );
+    it('names the agent as the author of a reply', () => {
+      const patkaContext = new PatkaContext();
+      const patkaEngine = new PatkaEngine(patkaContext, 'patka');
       let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
       patkaEngine.patkaChatEntries.subscribe((content) => {
         patkaChatEntries = content;
       });
 
-      patkaEngine.handle(anUtterance('hello'));
+      patkaContext.append({type: 'PatkaReply', id: randomUUID(), content: 'world'});
 
-      expect(patkaChatEntries.map((patkaChatEntry) => patkaChatEntry.status)).toEqual([
-        'complete',
-        'pending',
-      ]);
-
-      answers.next({message: 'world', id: randomUUID()});
-
-      expect(patkaChatEntries.map((patkaChatEntry) => patkaChatEntry.status)).toEqual([
-        'complete',
-        'complete',
-      ]);
-      expect(patkaChatEntries.map((patkaChatEntry) => patkaChatEntry.message)).toEqual([
-        'hello',
-        'world',
-      ]);
+      expect(patkaChatEntries.map((entry) => entry.author)).toEqual(['patka']);
     });
 
-    it('gives every utterance its own answer, even when they overlap', () => {
-      const answers: Array<Subject<PatkaMessage>> = [];
-      const patkaEngine = new PatkaEngine(
-        new PatkaAgent(
-          'patka',
-          new PatkaTools([]),
-          new PatkaAgentLoop(
-            'patka',
-            {
-              generate: () => {
-                const answer = new Subject<PatkaMessage>();
-                answers.push(answer);
-                return answer;
-              },
-            },
-            new PatkaTools([]),
-            new PatkaLogger(),
-          ),
-        ),
-      );
+    it('says which tool runs', () => {
+      const patkaContext = new PatkaContext();
+      const patkaEngine = new PatkaEngine(patkaContext, 'patka');
       let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
       patkaEngine.patkaChatEntries.subscribe((content) => {
         patkaChatEntries = content;
       });
 
-      patkaEngine.handle(anUtterance('first'));
-      patkaEngine.handle(anUtterance('second'));
-      answers[0].next({message: 'answer one', id: randomUUID()});
-      answers[1].next({message: 'answer two', id: randomUUID()});
+      patkaContext.append({
+        type: 'PatkaToolCall',
+        id: randomUUID(),
+        name: 'read_file',
+        input: {path: 'note.txt'},
+      });
 
-      expect(patkaChatEntries.map((patkaChatEntry) => patkaChatEntry.message)).toEqual([
-        'first',
-        'answer one',
-        'second',
-        'answer two',
-      ]);
+      expect(patkaChatEntries[0].message).toContain('using read_file');
+    });
+
+    it('shows what a tool gave back', () => {
+      const patkaContext = new PatkaContext();
+      const patkaEngine = new PatkaEngine(patkaContext, 'patka');
+      let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
+      patkaEngine.patkaChatEntries.subscribe((content) => {
+        patkaChatEntries = content;
+      });
+
+      patkaContext.append({
+        type: 'PatkaToolResult',
+        id: randomUUID(),
+        name: 'read_file',
+        output: 'hello',
+      });
+
+      expect(patkaChatEntries[0].message).toContain('"hello"');
+    });
+
+    it('stacks the entries in the order they reach the context', () => {
+      const patkaContext = new PatkaContext();
+      const patkaEngine = new PatkaEngine(patkaContext, 'patka');
+      let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
+      patkaEngine.patkaChatEntries.subscribe((content) => {
+        patkaChatEntries = content;
+      });
+
+      patkaContext.append({
+        type: 'PatkaUserUtterance',
+        id: randomUUID(),
+        utterance: {content: 'hello', timestamp: new Date(), id: randomUUID()},
+      });
+      patkaContext.append({type: 'PatkaReply', id: randomUUID(), content: 'world'});
+
+      expect(patkaChatEntries.map((entry) => entry.role)).toEqual(['user', 'agent']);
     });
   });
 });

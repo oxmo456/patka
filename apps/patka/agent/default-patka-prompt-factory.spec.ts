@@ -1,23 +1,21 @@
 import {randomUUID} from 'node:crypto';
 import {describe, expect, it} from 'vitest';
-import {none, some} from '../option.ts';
-import type {PatkaRole} from '../patka-role.ts';
+import type {PatkaContextEntry} from '../context/patka-context-entry.ts';
 import {ListFiles} from '../tools/list-files.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
 import {ReadFile} from '../tools/read-file.ts';
 import {DefaultPatkaPromptFactory} from './default-patka-prompt-factory.ts';
-import type {PatkaConversationEntry} from './patka-conversation.ts';
 
-const spoken = (role: PatkaRole, content: string): PatkaConversationEntry => ({
+const said = (content: string): PatkaContextEntry => ({
+  type: 'PatkaUserUtterance',
   id: randomUUID(),
-  role,
-  utterance: some({content, timestamp: new Date(), id: randomUUID()}),
+  utterance: {content, timestamp: new Date(), id: randomUUID()},
 });
 
-const pending = (role: PatkaRole): PatkaConversationEntry => ({
+const answered = (content: string): PatkaContextEntry => ({
+  type: 'PatkaReply',
   id: randomUUID(),
-  role,
-  utterance: none,
+  content,
 });
 
 describe('DefaultPatkaPromptFactory', () => {
@@ -34,15 +32,15 @@ describe('DefaultPatkaPromptFactory', () => {
   });
 
   it('labels who said what', () => {
-    const patkaConversation = [spoken('user', 'hello'), spoken('agent', 'hi there')];
+    const patkaConversation = [said('hello'), answered('hi there')];
 
     expect(new DefaultPatkaPromptFactory(new PatkaTools([])).create(patkaConversation)).toContain(
       ['User: hello', 'Assistant: hi there', 'Assistant:'].join('\n'),
     );
   });
 
-  it('leaves out the nodes nobody has filled yet', () => {
-    const patkaConversation = [spoken('user', 'hello'), pending('agent')];
+  it('leaves the last cue for the model to answer', () => {
+    const patkaConversation = [said('hello')];
 
     expect(new DefaultPatkaPromptFactory(new PatkaTools([])).create(patkaConversation)).toContain(
       ['User: hello', 'Assistant:'].join('\n'),
@@ -51,10 +49,9 @@ describe('DefaultPatkaPromptFactory', () => {
 
   it('keeps the whole conversation, in order', () => {
     const patkaConversation = [
-      spoken('user', 'my name is Zaphod'),
-      spoken('agent', 'nice to meet you'),
-      spoken('user', 'what is my name?'),
-      pending('agent'),
+      said('my name is Zaphod'),
+      answered('nice to meet you'),
+      said('what is my name?'),
     ];
 
     expect(new DefaultPatkaPromptFactory(new PatkaTools([])).create(patkaConversation)).toContain(

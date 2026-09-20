@@ -1,49 +1,49 @@
 import type {Observable} from 'rxjs';
+import {Subscription} from 'rxjs';
 import {match} from 'ts-pattern';
 import {inject, injectable} from 'tsyringe';
-import {PatkaAgent} from '../agent/patka-agent.ts';
-import type {PatkaConversation, PatkaConversationEntry} from '../agent/patka-conversation.ts';
-import type {PatkaUtterance} from '../patka-utterance.ts';
+import {AGENT_NAME} from '../agent/agent-name.token.ts';
+import {PatkaContext} from '../context/patka-context.ts';
+import type {PatkaContextEntry} from '../context/patka-context-entry.ts';
+import type {Disposable} from '../disposable.ts';
 import {PatkaChat} from './patka-chat.ts';
-import type {PatkaChatEntry, PatkaChatEntryStatus} from './patka-chat-entry.ts';
+import type {PatkaChatEntry} from './patka-chat-entry.ts';
 
 const USER = 'you';
 
 const toPatkaChatEntry = (
-  patkaConversationEntry: PatkaConversationEntry,
+  patkaContextEntry: PatkaContextEntry,
   author: string,
 ): PatkaChatEntry => ({
-  id: patkaConversationEntry.id,
-  role: patkaConversationEntry.role,
-  author: patkaConversationEntry.role === 'user' ? USER : author,
-  message: match(patkaConversationEntry.utterance)
-    .with({type: 'some'}, (utterance) => utterance.value.content)
-    .with({type: 'none'}, () => '')
+  id: patkaContextEntry.id,
+  role: patkaContextEntry.type === 'PatkaUserUtterance' ? 'user' : 'agent',
+  author: patkaContextEntry.type === 'PatkaUserUtterance' ? USER : author,
+  message: match(patkaContextEntry)
+    .with({type: 'PatkaUserUtterance'}, ({utterance}) => utterance.content)
+    .with({type: 'PatkaReply'}, ({content}) => content)
+    .with({type: 'PatkaToolCall'}, ({name, input}) => `using ${name}(${JSON.stringify(input)})…`)
+    .with({type: 'PatkaToolResult'}, ({name, output}) => `${name} gave ${JSON.stringify(output)}`)
     .exhaustive(),
-  status: match(patkaConversationEntry.utterance)
-    .with({type: 'some'}, (): PatkaChatEntryStatus => 'complete')
-    .with({type: 'none'}, (): PatkaChatEntryStatus => 'pending')
-    .exhaustive(),
+  status: 'complete',
 });
 
 @injectable()
-export class PatkaEngine {
+export class PatkaEngine implements Disposable {
   private readonly patkaChat = new PatkaChat();
-  private readonly patkaAgent: PatkaAgent;
+  private readonly subscription = new Subscription();
 
   readonly patkaChatEntries: Observable<ReadonlyArray<PatkaChatEntry>> =
     this.patkaChat.patkaChatEntries;
 
-  constructor(@inject(PatkaAgent) patkaAgent: PatkaAgent) {
-    this.patkaAgent = patkaAgent;
-    patkaAgent.patkaConversation.subscribe((patkaConversation: PatkaConversation): void => {
-      for (const patkaConversationEntry of patkaConversation) {
-        this.patkaChat.push(toPatkaChatEntry(patkaConversationEntry, patkaAgent.name));
-      }
-    });
+  constructor(@inject(PatkaContext) patkaContext: PatkaContext, @inject(AGENT_NAME) name: string) {
+    this.subscription.add(
+      patkaContext.entries.subscribe((patkaContextEntry: PatkaContextEntry): void => {
+        this.patkaChat.push(toPatkaChatEntry(patkaContextEntry, name));
+      }),
+    );
   }
 
-  handle(patkaUtterance: PatkaUtterance): void {
-    this.patkaAgent.handle(patkaUtterance);
+  dispose(): void {
+    this.subscription.unsubscribe();
   }
 }
