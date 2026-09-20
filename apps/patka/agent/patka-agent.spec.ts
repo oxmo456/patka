@@ -1,204 +1,198 @@
 import {randomUUID} from 'node:crypto';
-import {of, Subject, throwError} from 'rxjs';
+import {type Observable, of, Subject, throwError} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
-import type {InferenceClient} from '../inference/inference-client.ts';
+import type {PatkaContextEntry} from '../context/patka-context-entry.ts';
 import type {PatkaMessage} from '../inference/patka-message.ts';
-import {isSome} from '../option.ts';
-import {PatkaLogger} from '../patka-logger.ts';
-import type {PatkaUtterance} from '../patka-utterance.ts';
+import type {PatkaTool} from '../tools/patka-tool.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
 import {PatkaAgent} from './patka-agent.ts';
-import {PatkaAgentLoop} from './patka-agent-loop.ts';
-import type {PatkaConversation} from './patka-conversation.ts';
 
-const anUtterance = (content: string): PatkaUtterance => ({
-  content,
-  timestamp: new Date(),
-  id: randomUUID(),
+const aTool = (name: string, output: string): PatkaTool<{path: string}, string> => ({
+  manual: {
+    name,
+    summary: `summary of ${name}`,
+    usage: `usage of ${name}`,
+    input: {type: 'object', properties: {}, required: []},
+    output: {type: 'string'},
+  },
+  invoke: (): Observable<string> => of(output),
 });
 
-const spoken = (patkaConversation: PatkaConversation): ReadonlyArray<string> =>
-  patkaConversation.map((node) =>
-    isSome(node.utterance) ? node.utterance.value.content : '<pending>',
-  );
+const said = (content: string): PatkaContextEntry => ({
+  type: 'PatkaUserUtterance',
+  id: randomUUID(),
+  utterance: {content, timestamp: new Date(), id: randomUUID()},
+});
 
 describe('PatkaAgent', () => {
   it('has a name', () => {
     const patkaAgent = new PatkaAgent(
       'patka',
       new PatkaTools([]),
-      new PatkaAgentLoop(
-        'patka',
-        {generate: vi.fn(() => of({message: 'world', id: randomUUID()}))},
-        new PatkaTools([]),
-        new PatkaLogger(),
-      ),
+      {generate: () => of({message: 'world', id: randomUUID()})},
+      new Subject<PatkaContextEntry>(),
     );
 
     expect(patkaAgent.name).toBe('patka');
   });
 
-  describe('patkaConversation', () => {
-    it('starts empty', () => {
+  describe('output', () => {
+    it('says nothing until an entry reaches the agent', () => {
+      const generate = vi.fn(() => of({message: 'world', id: randomUUID()}));
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        new PatkaAgentLoop(
-          'patka',
-          {generate: vi.fn(() => of({message: 'world', id: randomUUID()}))},
-          new PatkaTools([]),
-          new PatkaLogger(),
-        ),
-      );
-      const received: Array<PatkaConversation> = [];
-
-      patkaAgent.patkaConversation.subscribe((patkaConversation) =>
-        received.push(patkaConversation),
+        {generate},
+        new Subject<PatkaContextEntry>(),
       );
 
-      expect(received).toEqual([[]]);
+      patkaAgent.output.subscribe();
+
+      expect(generate).not.toHaveBeenCalled();
     });
 
-    it('opens an empty node for the answer before it arrives', () => {
-      const answers = new Subject<PatkaMessage>();
+    it('answers what the user said', () => {
+      const patkaContextEntries = new Subject<PatkaContextEntry>();
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        new PatkaAgentLoop(
-          'patka',
-          {generate: () => answers},
-          new PatkaTools([]),
-          new PatkaLogger(),
-        ),
+        {generate: () => of({message: 'world', id: randomUUID()})},
+        patkaContextEntries,
       );
-      let patkaConversation: PatkaConversation = [];
-      patkaAgent.patkaConversation.subscribe((content) => {
-        patkaConversation = content;
-      });
+      const received: Array<PatkaContextEntry> = [];
+      patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
 
-      patkaAgent.handle(anUtterance('hello'));
+      patkaContextEntries.next(said('hello'));
 
-      expect(spoken(patkaConversation)).toEqual(['hello', '<pending>']);
+      expect(received.map((patkaContextEntry) => patkaContextEntry.type)).toEqual(['PatkaReply']);
     });
 
-    it('names who said what', () => {
-      const answers = new Subject<PatkaMessage>();
+    it('prompts the engine with what the user said', () => {
+      const patkaContextEntries = new Subject<PatkaContextEntry>();
+      const generate = vi.fn(() => of({message: 'world', id: randomUUID()}));
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        new PatkaAgentLoop(
-          'patka',
-          {generate: () => answers},
-          new PatkaTools([]),
-          new PatkaLogger(),
-        ),
+        {generate},
+        patkaContextEntries,
       );
-      let patkaConversation: PatkaConversation = [];
-      patkaAgent.patkaConversation.subscribe((content) => {
-        patkaConversation = content;
-      });
+      patkaAgent.output.subscribe();
 
-      patkaAgent.handle(anUtterance('hello'));
+      patkaContextEntries.next(said('hello'));
 
-      expect(patkaConversation.map((node) => node.role)).toEqual(['user', 'agent']);
-    });
-
-    it('fills the node it opened, keeping its place', () => {
-      const answers = new Subject<PatkaMessage>();
-      const patkaAgent = new PatkaAgent(
-        'patka',
-        new PatkaTools([]),
-        new PatkaAgentLoop(
-          'patka',
-          {generate: () => answers},
-          new PatkaTools([]),
-          new PatkaLogger(),
-        ),
-      );
-      let patkaConversation: PatkaConversation = [];
-      patkaAgent.patkaConversation.subscribe((content) => {
-        patkaConversation = content;
-      });
-      patkaAgent.handle(anUtterance('hello'));
-
-      answers.next({message: 'world', id: randomUUID()});
-
-      expect(spoken(patkaConversation)).toEqual(['hello', 'world']);
-    });
-
-    it('keeps the whole conversation across several utterances', () => {
-      const patkaAgent = new PatkaAgent(
-        'patka',
-        new PatkaTools([]),
-        new PatkaAgentLoop(
-          'patka',
-          {generate: vi.fn(() => of({message: 'world', id: randomUUID()}))},
-          new PatkaTools([]),
-          new PatkaLogger(),
-        ),
-      );
-      let patkaConversation: PatkaConversation = [];
-      patkaAgent.patkaConversation.subscribe((content) => {
-        patkaConversation = content;
-      });
-
-      patkaAgent.handle(anUtterance('first'));
-      patkaAgent.handle(anUtterance('second'));
-
-      expect(spoken(patkaConversation)).toEqual(['first', 'world', 'second', 'world']);
-    });
-
-    it('leaves the node empty when the inference client fails', () => {
-      const patkaAgent = new PatkaAgent(
-        'patka',
-        new PatkaTools([]),
-        new PatkaAgentLoop(
-          'patka',
-          {generate: () => throwError(() => new Error('ollama is down'))},
-          new PatkaTools([]),
-          new PatkaLogger(),
-        ),
-      );
-      let patkaConversation: PatkaConversation = [];
-      patkaAgent.patkaConversation.subscribe((content) => {
-        patkaConversation = content;
-      });
-
-      patkaAgent.handle(anUtterance('hello'));
-
-      expect(spoken(patkaConversation)).toEqual(['hello', '<pending>']);
-    });
-
-    it('prompts the loop with the whole conversation so far', () => {
-      const inferenceClient: InferenceClient = {
-        generate: vi.fn(() => of({message: 'world', id: randomUUID()})),
-      };
-      const patkaAgent = new PatkaAgent(
-        'patka',
-        new PatkaTools([]),
-        new PatkaAgentLoop('patka', inferenceClient, new PatkaTools([]), new PatkaLogger()),
-      );
-
-      patkaAgent.handle(anUtterance('hello'));
-
-      expect(inferenceClient.generate).toHaveBeenCalledWith({
-        message: expect.stringContaining(['User: hello', 'Assistant:'].join('\n')),
+      expect(generate).toHaveBeenCalledWith({
+        message: expect.stringContaining('User: hello'),
         id: expect.any(String),
       });
     });
 
-    it('does not generate anything on its own', () => {
-      const inferenceClient: InferenceClient = {
-        generate: vi.fn(() => of({message: 'world', id: randomUUID()})),
-      };
-
-      new PatkaAgent(
+    it('says nothing when the engine fails', () => {
+      const patkaContextEntries = new Subject<PatkaContextEntry>();
+      const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        new PatkaAgentLoop('patka', inferenceClient, new PatkaTools([]), new PatkaLogger()),
+        {generate: () => throwError(() => new Error('ollama is down'))},
+        patkaContextEntries,
       );
+      const received: Array<PatkaContextEntry> = [];
+      patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
 
-      expect(inferenceClient.generate).not.toHaveBeenCalled();
+      patkaContextEntries.next(said('hello'));
+
+      expect(received).toEqual([]);
+    });
+
+    it('turns a tool invocation into a tool call', () => {
+      const patkaContextEntries = new Subject<PatkaContextEntry>();
+      const patkaAgent = new PatkaAgent(
+        'patka',
+        new PatkaTools([aTool('read_file', 'hello')]),
+        {generate: () => of({message: 'world', id: randomUUID()})},
+        patkaContextEntries,
+      );
+      const received: Array<PatkaContextEntry> = [];
+      patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
+
+      patkaContextEntries.next({
+        type: 'PatkaReply',
+        id: randomUUID(),
+        content: '$$$invoke(read_file, {"path": "a"})',
+      });
+
+      expect(received.map((patkaContextEntry) => patkaContextEntry.type)).toEqual([
+        'PatkaToolCall',
+      ]);
+    });
+
+    it('runs the tool a tool call names', () => {
+      const patkaContextEntries = new Subject<PatkaContextEntry>();
+      const patkaAgent = new PatkaAgent(
+        'patka',
+        new PatkaTools([aTool('read_file', 'hello')]),
+        {generate: () => of({message: 'world', id: randomUUID()})},
+        patkaContextEntries,
+      );
+      const received: Array<PatkaContextEntry> = [];
+      patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
+
+      patkaContextEntries.next({
+        type: 'PatkaToolCall',
+        id: randomUUID(),
+        name: 'read_file',
+        input: {path: 'a'},
+      });
+
+      expect(received.map((patkaContextEntry) => patkaContextEntry.type)).toEqual([
+        'PatkaToolResult',
+      ]);
+    });
+
+    it('says nothing when no tool carries that name', () => {
+      const patkaContextEntries = new Subject<PatkaContextEntry>();
+      const patkaAgent = new PatkaAgent(
+        'patka',
+        new PatkaTools([]),
+        {generate: () => of({message: 'world', id: randomUUID()})},
+        patkaContextEntries,
+      );
+      const received: Array<PatkaContextEntry> = [];
+      patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
+
+      patkaContextEntries.next({
+        type: 'PatkaToolCall',
+        id: randomUUID(),
+        name: 'read_file',
+        input: {path: 'a'},
+      });
+
+      expect(received).toEqual([]);
+    });
+
+    it('carries the tool output into the next prompt', () => {
+      const patkaContextEntries = new Subject<PatkaContextEntry>();
+      const prompts: Array<string> = [];
+      const patkaAgent = new PatkaAgent(
+        'patka',
+        new PatkaTools([]),
+        {
+          generate: (patkaMessage: PatkaMessage) => {
+            prompts.push(patkaMessage.message);
+
+            return of({message: 'the note says hello', id: randomUUID()});
+          },
+        },
+        patkaContextEntries,
+      );
+      patkaAgent.output.subscribe();
+
+      patkaContextEntries.next({
+        type: 'PatkaToolResult',
+        id: randomUUID(),
+        name: 'read_file',
+        output: 'hello',
+      });
+
+      expect(prompts[0]).toContain('Tool output: "hello"');
     });
   });
 });
