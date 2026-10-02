@@ -66,7 +66,7 @@ describe('PatkaEngine', () => {
       expect(patkaChatEntries.map((entry) => entry.author)).toEqual(['patka']);
     });
 
-    it('says which tool runs', () => {
+    it('keeps a tool call out of the chat', () => {
       const patkaContext = new PatkaContext();
       const patkaEngine = new PatkaEngine(patkaContext, 'patka');
       let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
@@ -81,10 +81,10 @@ describe('PatkaEngine', () => {
         input: {path: 'note.txt'},
       });
 
-      expect(patkaChatEntries[0].message).toBe('read_file');
+      expect(patkaChatEntries).toEqual([]);
     });
 
-    it('says which tool gave back its output', () => {
+    it('keeps a tool result out of the chat', () => {
       const patkaContext = new PatkaContext();
       const patkaEngine = new PatkaEngine(patkaContext, 'patka');
       let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
@@ -99,7 +99,24 @@ describe('PatkaEngine', () => {
         output: 'hello',
       });
 
-      expect(patkaChatEntries[0].message).toBe('read_file done');
+      expect(patkaChatEntries).toEqual([]);
+    });
+
+    it('keeps a reply that invokes a tool out of the chat', () => {
+      const patkaContext = new PatkaContext();
+      const patkaEngine = new PatkaEngine(patkaContext, 'patka');
+      let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
+      patkaEngine.patkaChatEntries.subscribe((content) => {
+        patkaChatEntries = content;
+      });
+
+      patkaContext.append({
+        type: 'PatkaInferenceClientResponse',
+        id: randomUUID(),
+        content: '$$$invoke(read_file, {"path": "note.txt"})',
+      });
+
+      expect(patkaChatEntries).toEqual([]);
     });
 
     it('stacks the entries in the order they reach the context', () => {

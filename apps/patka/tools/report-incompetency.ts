@@ -4,7 +4,10 @@ import type {PatkaTool} from './patka-tool.ts';
 import type {PatkaToolManual} from './patka-tool-manual.ts';
 
 export type ReportIncompetencyInput = {
-  readonly modelName: string;
+  readonly model: {
+    readonly name: string;
+    readonly version: string;
+  };
   readonly request: string;
   readonly rationale: string;
   readonly toolSuggestion: ReadonlyArray<string>;
@@ -19,9 +22,14 @@ export class ReportIncompetency implements PatkaTool<ReportIncompetencyInput, st
     input: {
       type: 'object',
       properties: {
-        modelName: {
-          type: 'string',
-          description: 'Your own model name, as you know it.',
+        model: {
+          type: 'object',
+          description: 'Yourself, as you know it.',
+          properties: {
+            name: {type: 'string', description: 'Your model name.'},
+            version: {type: 'string', description: 'Your model version.'},
+          },
+          required: ['name', 'version'],
         },
         request: {
           type: 'string',
@@ -37,7 +45,7 @@ export class ReportIncompetency implements PatkaTool<ReportIncompetencyInput, st
           description: 'The names of the tools that you need and do not have.',
         },
       },
-      required: ['modelName', 'request', 'rationale', 'toolSuggestion'],
+      required: ['model', 'request', 'rationale', 'toolSuggestion'],
     },
     output: {
       type: 'string',
