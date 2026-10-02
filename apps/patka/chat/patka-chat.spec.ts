@@ -6,7 +6,6 @@ import type {PatkaChatEntry} from './patka-chat-entry.ts';
 const anEntry = (message: string, id = randomUUID()): PatkaChatEntry => ({
   id,
   role: 'user',
-  kind: 'utterance',
   author: 'you',
   message,
   status: 'complete',
@@ -40,7 +39,6 @@ describe('PatkaChat', () => {
       patkaChat.push({
         id,
         role: 'agent',
-        kind: 'utterance',
         author: 'patka',
         message: '',
         status: 'pending',
@@ -50,7 +48,6 @@ describe('PatkaChat', () => {
       patkaChat.push({
         id,
         role: 'agent',
-        kind: 'utterance',
         author: 'patka',
         message: 'the answer',
         status: 'complete',
@@ -83,7 +80,6 @@ describe('PatkaChat', () => {
       patkaChat.push({
         id,
         role: 'agent',
-        kind: 'utterance',
         author: 'patka',
         message: '',
         status: 'pending',
@@ -96,7 +92,6 @@ describe('PatkaChat', () => {
       patkaChat.push({
         id,
         role: 'agent',
-        kind: 'utterance',
         author: 'patka',
         message: 'the answer',
         status: 'complete',

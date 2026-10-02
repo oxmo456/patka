@@ -20,8 +20,6 @@ const USER_STYLE = `{${SOLARIZED.blue}-bg}{${SOLARIZED.base3}-fg}`;
 
 const AGENT_STYLE = `{${SOLARIZED.base02}-bg}{${SOLARIZED.base0}-fg}`;
 
-const TOOL_STYLE = `{${SOLARIZED.base03}-bg}{${SOLARIZED.base01}-fg}`;
-
 const CHAT_WIDTH = '50%';
 
 const LEVEL_STYLE: Record<number, string> = {
@@ -70,13 +68,10 @@ const toBubble = (patkaChatEntry: PatkaChatEntry, width: number): ReadonlyArray<
     .exhaustive();
   const bubbleWidth = Math.max(8, width - 2);
   const lines = toMarkdownLines(text).flatMap((line) => wrap(line, bubbleWidth));
-  const style =
-    patkaChatEntry.kind === 'tool'
-      ? TOOL_STYLE
-      : match(patkaChatEntry.role)
-          .with('user', () => USER_STYLE)
-          .with('agent', () => AGENT_STYLE)
-          .exhaustive();
+  const style = match(patkaChatEntry.role)
+    .with('user', () => USER_STYLE)
+    .with('agent', () => AGENT_STYLE)
+    .exhaustive();
 
   return lines.map(
     (line) => `${style} ${line}${' '.repeat(bubbleWidth - visibleLength(line))} {/}`,
@@ -93,6 +88,11 @@ const toDetailLines = (record: Record<string, unknown>, width: number): Readonly
         .map((line) => `  ${escapeTags(line)}`),
     );
 
+const toInvokeLines = (record: Record<string, unknown>, width: number): ReadonlyArray<string> =>
+  [`invoke ${record.name}`, ...JSON.stringify(record.input, null, 2).split('\n')]
+    .flatMap((line) => line.match(new RegExp(`.{1,${width - 2}}`, 'g')) ?? [''])
+    .map((line) => `  ${escapeTags(line)}`);
+
 const toLogLines = (log: string, width: number): ReadonlyArray<string> =>
   match(
     attempt(
@@ -106,7 +106,9 @@ const toLogLines = (log: string, width: number): ReadonlyArray<string> =>
         (line) => `${style}${escapeTags(line)}{/}`,
       );
 
-      return [...head, ...toDetailLines(value, width)];
+      return value.msg === 'PatkaToolCall'
+        ? [...head, ...toInvokeLines(value, width)]
+        : [...head, ...toDetailLines(value, width)];
     })
     .with({type: 'failure'}, () => wrap(log, width).map(escapeTags))
     .exhaustive();
