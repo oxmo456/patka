@@ -81,10 +81,10 @@ describe('PatkaEngine', () => {
         input: {path: 'note.txt'},
       });
 
-      expect(patkaChatEntries[0].message).toContain('using read_file');
+      expect(patkaChatEntries[0].message).toBe('read_file');
     });
 
-    it('shows what a tool gave back', () => {
+    it('says which tool gave back its output', () => {
       const patkaContext = new PatkaContext();
       const patkaEngine = new PatkaEngine(patkaContext, 'patka');
       let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
@@ -99,7 +99,7 @@ describe('PatkaEngine', () => {
         output: 'hello',
       });
 
-      expect(patkaChatEntries[0].message).toContain('"hello"');
+      expect(patkaChatEntries[0].message).toBe('read_file done');
     });
 
     it('stacks the entries in the order they reach the context', () => {

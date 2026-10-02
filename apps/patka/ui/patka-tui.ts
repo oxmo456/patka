@@ -10,21 +10,24 @@ import {BLESSED} from './blessed.token.ts';
 import {toMarkdownLines, visibleLength} from './patka-markdown.ts';
 import type {PatkaUI} from './patka-ui.ts';
 import type {PatkaUserInput} from './patka-user-input.ts';
+import {SOLARIZED} from './solarized.ts';
 
 export type Blessed = Pick<typeof blessedModule, 'screen' | 'box' | 'textbox'>;
 
 const PENDING_RESPONSE = '...';
 
-const USER_STYLE = '{white-bg}{blue-fg}';
+const USER_STYLE = `{${SOLARIZED.blue}-bg}{${SOLARIZED.base3}-fg}`;
 
-const AGENT_STYLE = '{blue-bg}{white-fg}';
+const AGENT_STYLE = `{${SOLARIZED.base02}-bg}{${SOLARIZED.base0}-fg}`;
+
+const TOOL_STYLE = `{${SOLARIZED.base03}-bg}{${SOLARIZED.base01}-fg}`;
 
 const CHAT_WIDTH = '50%';
 
 const LEVEL_STYLE: Record<number, string> = {
-  30: '{green-fg}',
-  40: '{yellow-fg}',
-  50: '{red-fg}',
+  30: `{${SOLARIZED.green}-fg}`,
+  40: `{${SOLARIZED.yellow}-fg}`,
+  50: `{${SOLARIZED.red}-fg}`,
 };
 
 const PINO_OWN_FIELDS: ReadonlySet<string> = new Set(['level', 'time', 'pid', 'hostname', 'msg']);
@@ -67,10 +70,13 @@ const toBubble = (patkaChatEntry: PatkaChatEntry, width: number): ReadonlyArray<
     .exhaustive();
   const bubbleWidth = Math.max(8, width - 2);
   const lines = toMarkdownLines(text).flatMap((line) => wrap(line, bubbleWidth));
-  const style = match(patkaChatEntry.role)
-    .with('user', () => USER_STYLE)
-    .with('agent', () => AGENT_STYLE)
-    .exhaustive();
+  const style =
+    patkaChatEntry.kind === 'tool'
+      ? TOOL_STYLE
+      : match(patkaChatEntry.role)
+          .with('user', () => USER_STYLE)
+          .with('agent', () => AGENT_STYLE)
+          .exhaustive();
 
   return lines.map(
     (line) => `${style} ${line}${' '.repeat(bubbleWidth - visibleLength(line))} {/}`,
@@ -125,7 +131,7 @@ export class PatkaTUI implements PatkaUI {
       tags: true,
       scrollable: true,
       alwaysScroll: true,
-      style: {fg: 'white', bg: 'blue'},
+      style: {fg: SOLARIZED.base0, bg: SOLARIZED.base03},
     });
     this.logs = blessed.box({
       top: 0,
@@ -140,10 +146,10 @@ export class PatkaTUI implements PatkaUI {
       border: 'line',
       label: ' logs ',
       style: {
-        fg: 'white',
-        bg: 'blue',
-        border: {fg: 'white', bg: 'blue'},
-        label: {fg: 'white', bg: 'blue'},
+        fg: SOLARIZED.base0,
+        bg: SOLARIZED.base03,
+        border: {fg: SOLARIZED.base02, bg: SOLARIZED.base03},
+        label: {fg: SOLARIZED.base1, bg: SOLARIZED.base03},
       },
     });
     const promptInput = blessed.textbox({
@@ -153,7 +159,11 @@ export class PatkaTUI implements PatkaUI {
       height: 3,
       border: 'line',
       inputOnFocus: true,
-      style: {fg: 'white', bg: 'blue', border: {fg: 'white', bg: 'blue'}},
+      style: {
+        fg: SOLARIZED.base1,
+        bg: SOLARIZED.base03,
+        border: {fg: SOLARIZED.base02, bg: SOLARIZED.base03},
+      },
     });
 
     promptInput.on('submit', (prompt: string) => {
