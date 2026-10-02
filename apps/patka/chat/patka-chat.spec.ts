@@ -6,6 +6,7 @@ import type {PatkaChatEntry} from './patka-chat-entry.ts';
 const anEntry = (message: string, id = randomUUID()): PatkaChatEntry => ({
   id,
   role: 'user',
+  kind: 'utterance',
   author: 'you',
   message,
   status: 'complete',
@@ -36,12 +37,20 @@ describe('PatkaChat', () => {
       patkaChat.patkaChatEntries.subscribe((content) => {
         patkaChatEntries = content;
       });
-      patkaChat.push({id, role: 'agent', author: 'patka', message: '', status: 'pending'});
+      patkaChat.push({
+        id,
+        role: 'agent',
+        kind: 'utterance',
+        author: 'patka',
+        message: '',
+        status: 'pending',
+      });
       patkaChat.push(anEntry('later'));
 
       patkaChat.push({
         id,
         role: 'agent',
+        kind: 'utterance',
         author: 'patka',
         message: 'the answer',
         status: 'complete',
@@ -71,7 +80,14 @@ describe('PatkaChat', () => {
     it('emits again when an entry is replaced', () => {
       const patkaChat = new PatkaChat();
       const id = randomUUID();
-      patkaChat.push({id, role: 'agent', author: 'patka', message: '', status: 'pending'});
+      patkaChat.push({
+        id,
+        role: 'agent',
+        kind: 'utterance',
+        author: 'patka',
+        message: '',
+        status: 'pending',
+      });
       const received: Array<string> = [];
       patkaChat.patkaChatEntries.subscribe((patkaChatEntries) =>
         received.push(patkaChatEntries[0].status),
@@ -80,6 +96,7 @@ describe('PatkaChat', () => {
       patkaChat.push({
         id,
         role: 'agent',
+        kind: 'utterance',
         author: 'patka',
         message: 'the answer',
         status: 'complete',

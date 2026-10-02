@@ -1,3 +1,5 @@
+import {SOLARIZED} from './solarized.ts';
+
 const HEADING = /^\s{0,3}(#{1,6})\s+(.*)$/;
 
 const BULLET = /^(\s*)[-*+]\s+(.*)$/;
@@ -16,7 +18,9 @@ const BLESSED_TAG = /\{[^{}]*\}/g;
 
 const ESCAPED_BRACE = 'x';
 
-const CODE_STYLE = '{yellow-fg}';
+const CODE_STYLE = `{${SOLARIZED.cyan}-fg}`;
+
+const CODE_STYLE_END = `{/${SOLARIZED.cyan}-fg}`;
 
 type MarkdownState = {
   readonly fenced: boolean;
@@ -31,7 +35,7 @@ export const visibleLength = (text: string): number =>
 
 const inline = (text: string): string =>
   text
-    .replace(CODE_SPAN, `${CODE_STYLE}$1{/yellow-fg}`)
+    .replace(CODE_SPAN, `${CODE_STYLE}$1${CODE_STYLE_END}`)
     .replace(BOLD, '{bold}$1{/bold}')
     .replace(ITALIC, '{underline}$1{/underline}');
 
@@ -41,7 +45,7 @@ const nextState = (state: MarkdownState, line: string): MarkdownState => {
   }
 
   if (state.fenced) {
-    return {fenced: true, lines: [...state.lines, `${CODE_STYLE}${line}{/yellow-fg}`]};
+    return {fenced: true, lines: [...state.lines, `${CODE_STYLE}${line}${CODE_STYLE_END}`]};
   }
 
   const heading = HEADING.exec(line);

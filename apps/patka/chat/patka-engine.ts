@@ -6,9 +6,14 @@ import {PatkaContext} from '../context/patka-context.ts';
 import type {PatkaContextEntry} from '../context/patka-context-entry.ts';
 import type {Disposable} from '../disposable.ts';
 import {PatkaChat} from './patka-chat.ts';
-import type {PatkaChatEntry} from './patka-chat-entry.ts';
+import type {PatkaChatEntry, PatkaChatEntryKind} from './patka-chat-entry.ts';
 
 const USER = 'you';
+
+const toPatkaChatEntryKind = (patkaContextEntry: PatkaContextEntry): PatkaChatEntryKind =>
+  match(patkaContextEntry.type)
+    .with('PatkaToolCall', 'PatkaToolResult', (): PatkaChatEntryKind => 'tool')
+    .otherwise((): PatkaChatEntryKind => 'utterance');
 
 const toPatkaChatEntry = (
   patkaContextEntry: PatkaContextEntry,
@@ -16,12 +21,13 @@ const toPatkaChatEntry = (
 ): PatkaChatEntry => ({
   id: patkaContextEntry.id,
   role: patkaContextEntry.type === 'PatkaUserUtterance' ? 'user' : 'agent',
+  kind: toPatkaChatEntryKind(patkaContextEntry),
   author: patkaContextEntry.type === 'PatkaUserUtterance' ? USER : author,
   message: match(patkaContextEntry)
     .with({type: 'PatkaUserUtterance'}, ({utterance}) => utterance.content)
     .with({type: 'PatkaInferenceClientResponse'}, ({content}) => content)
-    .with({type: 'PatkaToolCall'}, ({name, input}) => `using ${name}(${JSON.stringify(input)})…`)
-    .with({type: 'PatkaToolResult'}, ({name, output}) => `${name} gave ${JSON.stringify(output)}`)
+    .with({type: 'PatkaToolCall'}, ({name}) => name)
+    .with({type: 'PatkaToolResult'}, ({name}) => `${name} done`)
     .exhaustive(),
   status: 'complete',
 });
