@@ -145,13 +145,9 @@ export class PatkaTUI implements PatkaUI {
       scrollable: true,
       alwaysScroll: true,
       mouse: true,
-      border: 'line',
-      label: ' logs ',
       style: {
         fg: SOLARIZED.base0,
         bg: SOLARIZED.base03,
-        border: {fg: SOLARIZED.base02, bg: SOLARIZED.base03},
-        label: {fg: SOLARIZED.base1, bg: SOLARIZED.base03},
       },
     });
     const promptInput = blessed.textbox({
@@ -197,7 +193,7 @@ export class PatkaTUI implements PatkaUI {
   }
 
   updateLogs(logs: ReadonlyArray<string>): void {
-    const width = Math.max(8, Number(this.logs.width) - 2);
+    const width = Math.max(8, Number(this.logs.width));
     const lines = logs.flatMap((log) => toLogLines(log, width));
     const blankLines = Math.max(0, Number(this.logs.height) - lines.length);
     const wasAtBottom = this.logs.getScrollPerc() === 100;

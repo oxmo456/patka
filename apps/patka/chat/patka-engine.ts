@@ -6,6 +6,7 @@ import {PatkaContext} from '../context/patka-context.ts';
 import type {
   PatkaContextEntry,
   PatkaInferenceClientResponse,
+  PatkaUserNotification,
   PatkaUserUtterance,
 } from '../context/patka-context-entry.ts';
 import type {Disposable} from '../disposable.ts';
@@ -40,6 +41,18 @@ const fromInferenceClientResponse = (
         status: 'complete',
       });
 
+const fromUserNotification = (
+  patkaUserNotification: PatkaUserNotification,
+  author: string,
+): Observable<PatkaChatEntry> =>
+  of({
+    id: patkaUserNotification.id,
+    role: 'agent',
+    author,
+    message: patkaUserNotification.content,
+    status: 'complete',
+  });
+
 const toPatkaChatEntry = (
   patkaContextEntry: PatkaContextEntry,
   author: string,
@@ -51,6 +64,9 @@ const toPatkaChatEntry = (
     )
     .with({type: 'PatkaToolCall'}, () => EMPTY)
     .with({type: 'PatkaToolResult'}, () => EMPTY)
+    .with({type: 'PatkaUserNotification'}, (patkaUserNotification) =>
+      fromUserNotification(patkaUserNotification, author),
+    )
     .exhaustive();
 
 @injectable()

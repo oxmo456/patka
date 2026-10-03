@@ -1,7 +1,8 @@
 import {readFile} from 'node:fs/promises';
 import {isAbsolute as isPathAbsolute} from 'node:path';
-import {defer, from, type Observable} from 'rxjs';
+import {defer, from, map, type Observable} from 'rxjs';
 import {injectable} from 'tsyringe';
+import {type Option, some} from '../option.ts';
 import type {PatkaTool} from './patka-tool.ts';
 import type {PatkaToolManual} from './patka-tool-manual.ts';
 
@@ -31,13 +32,13 @@ export class ReadFile implements PatkaTool<ReadFileInput, string> {
     },
   };
 
-  invoke(readFileInput: ReadFileInput): Observable<string> {
+  invoke(readFileInput: ReadFileInput): Observable<Option<string>> {
     return defer(() => {
       if (isPathAbsolute(readFileInput.path)) {
         throw new Error(`read_file only accepts a relative path, given "${readFileInput.path}"`);
       }
 
-      return from(readFile(readFileInput.path, 'utf8'));
+      return from(readFile(readFileInput.path, 'utf8')).pipe(map(some));
     });
   }
 }

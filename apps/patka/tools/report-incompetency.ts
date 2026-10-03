@@ -1,5 +1,6 @@
-import {EMPTY, type Observable} from 'rxjs';
+import {type Observable, of} from 'rxjs';
 import {injectable} from 'tsyringe';
+import {none, type Option} from '../option.ts';
 import type {PatkaTool} from './patka-tool.ts';
 import type {PatkaToolManual} from './patka-tool-manual.ts';
 
@@ -49,11 +50,11 @@ export class ReportIncompetency implements PatkaTool<ReportIncompetencyInput, st
     },
     output: {
       type: 'string',
-      description: 'Nothing. The report ends the turn.',
+      description: 'Nothing. The report has no output.',
     },
   };
 
-  invoke(): Observable<string> {
-    return EMPTY;
+  invoke(): Observable<Option<string>> {
+    return of(none);
   }
 }

@@ -1,5 +1,6 @@
 import {match} from 'ts-pattern';
 import type {PatkaContextEntry} from '../context/patka-context-entry.ts';
+import {isSome} from '../option.ts';
 import type {PatkaToolManual} from '../tools/patka-tool-manual.ts';
 import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
 import type {PatkaTools} from '../tools/patka-tools.ts';
@@ -27,7 +28,10 @@ const present = (patkaContextEntry: PatkaContextEntry): ReadonlyArray<string> =>
     .with({type: 'PatkaUserUtterance'}, ({utterance}) => [`${USER}: ${utterance.content}`])
     .with({type: 'PatkaInferenceClientResponse'}, ({content}) => [`${ASSISTANT}: ${content}`])
     .with({type: 'PatkaToolCall'}, () => [])
-    .with({type: 'PatkaToolResult'}, ({output}) => [`Tool output: ${JSON.stringify(output)}`])
+    .with({type: 'PatkaUserNotification'}, () => [])
+    .with({type: 'PatkaToolResult'}, ({output}) => [
+      `Tool output: ${isSome(output) ? JSON.stringify(output.value) : 'none'}`,
+    ])
     .exhaustive();
 
 export class DefaultPatkaPromptFactory implements PatkaPromptFactory {

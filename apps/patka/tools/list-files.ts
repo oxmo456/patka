@@ -2,6 +2,7 @@ import {readdir} from 'node:fs/promises';
 import {isAbsolute as isPathAbsolute} from 'node:path';
 import {defer, from, map, type Observable} from 'rxjs';
 import {injectable} from 'tsyringe';
+import {type Option, some} from '../option.ts';
 import type {PatkaTool} from './patka-tool.ts';
 import type {PatkaToolManual} from './patka-tool-manual.ts';
 
@@ -32,7 +33,7 @@ export class ListFiles implements PatkaTool<ListFilesInput, ReadonlyArray<string
     },
   };
 
-  invoke(listFilesInput: ListFilesInput): Observable<ReadonlyArray<string>> {
+  invoke(listFilesInput: ListFilesInput): Observable<Option<ReadonlyArray<string>>> {
     return defer(() => {
       if (isPathAbsolute(listFilesInput.path)) {
         throw new Error(`list_files only accepts a relative path, given "${listFilesInput.path}"`);
@@ -41,7 +42,7 @@ export class ListFiles implements PatkaTool<ListFilesInput, ReadonlyArray<string
       return from(readdir(listFilesInput.path, {withFileTypes: true}));
     }).pipe(
       map((entries) =>
-        entries.map((entry) => (entry.isDirectory() ? `${entry.name}/` : entry.name)).sort(),
+        some(entries.map((entry) => (entry.isDirectory() ? `${entry.name}/` : entry.name)).sort()),
       ),
     );
   }
