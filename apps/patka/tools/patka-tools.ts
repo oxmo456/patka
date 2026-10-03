@@ -1,6 +1,7 @@
 import {defer, type Observable} from 'rxjs';
 import {injectAll, injectable} from 'tsyringe';
 import type {JsonObject, JsonValue} from '../json.ts';
+import type {Option} from '../option.ts';
 import {PATKA_TOOL} from './patka-tool.token.ts';
 import type {PatkaTool} from './patka-tool.ts';
 import type {PatkaToolManual} from './patka-tool-manual.ts';
@@ -17,7 +18,7 @@ export class PatkaTools {
     return this.patkaTools.map((patkaTool) => patkaTool.manual);
   }
 
-  invoke(name: string, input: JsonObject): Observable<JsonValue> {
+  invoke(name: string, input: JsonObject): Observable<Option<JsonValue>> {
     return defer(() => {
       const patkaTool = this.patkaTools.find((candidate) => candidate.manual.name === name);
 

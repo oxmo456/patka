@@ -1,6 +1,7 @@
 import {firstValueFrom, of} from 'rxjs';
 import {describe, expect, it, type Mock, vi} from 'vitest';
 import type {JsonObject, JsonValue} from '../json.ts';
+import {some} from '../option.ts';
 import {ListFiles} from './list-files.ts';
 import type {PatkaTool} from './patka-tool.ts';
 import {PatkaTools} from './patka-tools.ts';
@@ -16,7 +17,7 @@ const aTool = (name: string, answer: string): FakeTool => ({
     input: {type: 'object' as const, properties: {}, required: []},
     output: {type: 'string' as const},
   },
-  invoke: vi.fn(() => of(answer)),
+  invoke: vi.fn(() => of(some(answer))),
 });
 
 describe('PatkaTools', () => {
@@ -37,7 +38,7 @@ describe('PatkaTools', () => {
 
     const output = await firstValueFrom(patkaTools.invoke('read_file', {path: 'note.txt'}));
 
-    expect(output).toBe('read');
+    expect(output).toEqual(some('read'));
     expect(readFile.invoke).toHaveBeenCalledWith({path: 'note.txt'});
     expect(listFiles.invoke).not.toHaveBeenCalled();
   });

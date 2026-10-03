@@ -1,6 +1,7 @@
 import {randomUUID} from 'node:crypto';
 import {describe, expect, it} from 'vitest';
 import type {PatkaContextEntry} from '../context/patka-context-entry.ts';
+import {none, some} from '../option.ts';
 import {ListFiles} from '../tools/list-files.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
 import {ReadFile} from '../tools/read-file.ts';
@@ -111,5 +112,31 @@ describe('DefaultPatkaPromptFactory', () => {
     expect(prompt).toContain('single line');
     expect(prompt).toContain('$$$invoke(tool_name, {"key": "value"})');
     expect(prompt).toContain('$$$invoke(read_file, {"path": "notes.txt"})');
+  });
+
+  it('shows the output a tool gave back', () => {
+    const patkaToolResult: PatkaContextEntry = {
+      type: 'PatkaToolResult',
+      id: randomUUID(),
+      name: 'read_file',
+      output: some('hello'),
+    };
+
+    const prompt = new DefaultPatkaPromptFactory(new PatkaTools([])).create([patkaToolResult]);
+
+    expect(prompt).toContain('Tool output: "hello"');
+  });
+
+  it('says none when a tool gave back nothing', () => {
+    const patkaToolResult: PatkaContextEntry = {
+      type: 'PatkaToolResult',
+      id: randomUUID(),
+      name: 'read_file',
+      output: none,
+    };
+
+    const prompt = new DefaultPatkaPromptFactory(new PatkaTools([])).create([patkaToolResult]);
+
+    expect(prompt).toContain('Tool output: none');
   });
 });

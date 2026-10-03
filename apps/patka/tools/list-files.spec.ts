@@ -3,6 +3,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it} from 'vitest';
+import {some} from '../option.ts';
 import {ListFiles} from './list-files.ts';
 
 const inADirectory = async <T>(run: () => Promise<T>): Promise<T> => {
@@ -36,7 +37,7 @@ describe('ListFiles', () => {
   it('lists what the directory holds, in order', async () => {
     const listing = await inADirectory(() => firstValueFrom(new ListFiles().invoke({path: '.'})));
 
-    expect(listing).toEqual(['first.ts', 'nested/', 'second.ts']);
+    expect(listing).toEqual(some(['first.ts', 'nested/', 'second.ts']));
   });
 
   it('refuses an absolute path', async () => {

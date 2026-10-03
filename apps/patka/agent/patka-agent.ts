@@ -8,6 +8,7 @@ import type {
   PatkaInferenceClientResponse,
   PatkaToolCall,
   PatkaToolResult,
+  PatkaUserNotification,
 } from '../context/patka-context-entry.ts';
 import {INFERENCE_CLIENT} from '../inference/inference-client.token.ts';
 import type {InferenceClient} from '../inference/inference-client.ts';
@@ -16,6 +17,9 @@ import type {PatkaPromptFactory} from '../prompt/patka-prompt-factory.ts';
 import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
 import {AGENT_NAME} from './agent-name.token.ts';
+
+const MISSING_TOOLS_NOTIFICATION =
+  'Patka agent is not providing the necessary tools for the LLM to complete the task.';
 
 @injectable()
 export class PatkaAgent {
@@ -56,12 +60,22 @@ export class PatkaAgent {
 
     return match(lastPatkaContextEntry)
       .with({type: 'PatkaUserUtterance'}, () => this.generate(patkaContextEntries))
+      .with({type: 'PatkaToolResult', output: {type: 'none'}}, () => this.notifyMissingTools())
       .with({type: 'PatkaToolResult'}, () => this.generate(patkaContextEntries))
       .with({type: 'PatkaInferenceClientResponse'}, (patkaInferenceClientResponse) =>
         this.processInferenceClientResponse(patkaInferenceClientResponse),
       )
       .with({type: 'PatkaToolCall'}, (patkaToolCall) => this.useTool(patkaToolCall))
+      .with({type: 'PatkaUserNotification'}, () => EMPTY)
       .exhaustive();
+  }
+
+  private notifyMissingTools(): Observable<PatkaContextEntry> {
+    return of({
+      type: 'PatkaUserNotification',
+      id: randomUUID(),
+      content: MISSING_TOOLS_NOTIFICATION,
+    } satisfies PatkaUserNotification);
   }
 
   private generate(

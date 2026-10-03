@@ -1,6 +1,7 @@
 import {randomUUID} from 'node:crypto';
 import {describe, expect, it} from 'vitest';
 import {PatkaContext} from '../context/patka-context.ts';
+import {some} from '../option.ts';
 import type {PatkaChatEntry} from './patka-chat-entry.ts';
 import {PatkaEngine} from './patka-engine.ts';
 
@@ -96,7 +97,7 @@ describe('PatkaEngine', () => {
         type: 'PatkaToolResult',
         id: randomUUID(),
         name: 'read_file',
-        output: 'hello',
+        output: some('hello'),
       });
 
       expect(patkaChatEntries).toEqual([]);
@@ -117,6 +118,26 @@ describe('PatkaEngine', () => {
       });
 
       expect(patkaChatEntries).toEqual([]);
+    });
+
+    it('shows a notification to the user as an agent message', () => {
+      const patkaContext = new PatkaContext();
+      const patkaEngine = new PatkaEngine(patkaContext, 'patka');
+      let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
+      patkaEngine.patkaChatEntries.subscribe((content) => {
+        patkaChatEntries = content;
+      });
+
+      patkaContext.append({
+        type: 'PatkaUserNotification',
+        id: randomUUID(),
+        content:
+          'Patka agent is not providing the necessary tools for the LLM to complete the task.',
+      });
+
+      expect(patkaChatEntries.map((patkaChatEntry) => patkaChatEntry.message)).toEqual([
+        'Patka agent is not providing the necessary tools for the LLM to complete the task.',
+      ]);
     });
 
     it('stacks the entries in the order they reach the context', () => {

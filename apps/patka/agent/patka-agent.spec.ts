@@ -3,6 +3,7 @@ import {type Observable, of, Subject, throwError} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
 import type {PatkaContextEntry} from '../context/patka-context-entry.ts';
 import type {InferenceClientInput} from '../inference/inference-client-input.ts';
+import {none, type Option, some} from '../option.ts';
 import type {PatkaTool} from '../tools/patka-tool.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
 import {PatkaAgent} from './patka-agent.ts';
@@ -15,7 +16,7 @@ const aTool = (name: string, output: string): PatkaTool<{path: string}, string> 
     input: {type: 'object', properties: {}, required: []},
     output: {type: 'string'},
   },
-  invoke: (): Observable<string> => of(output),
+  invoke: (): Observable<Option<string>> => of(some(output)),
 });
 
 const said = (content: string): PatkaContextEntry => ({
@@ -167,6 +168,71 @@ describe('PatkaAgent', () => {
       expect(errors.map((error) => error.message)).toEqual(['patka has no tool named "read_file"']);
     });
 
+    it('does not ask the model after a tool gave none', () => {
+      const patkaContextEntries = new Subject<PatkaContextEntry>();
+      const generate = vi.fn(() => of({content: 'world'}));
+      const patkaAgent = new PatkaAgent(
+        'patka',
+        new PatkaTools([]),
+        {generate},
+        patkaContextEntries,
+      );
+      patkaAgent.output.subscribe();
+
+      patkaContextEntries.next({
+        type: 'PatkaToolResult',
+        id: randomUUID(),
+        name: 'report_incompetency',
+        output: none,
+      });
+
+      expect(generate).not.toHaveBeenCalled();
+    });
+
+    it('tells the user the agent lacks the tools when a tool gave none', () => {
+      const patkaContextEntries = new Subject<PatkaContextEntry>();
+      const patkaAgent = new PatkaAgent(
+        'patka',
+        new PatkaTools([]),
+        {generate: () => of({content: 'world'})},
+        patkaContextEntries,
+      );
+      const received: Array<PatkaContextEntry> = [];
+      patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
+
+      patkaContextEntries.next({
+        type: 'PatkaToolResult',
+        id: randomUUID(),
+        name: 'report_incompetency',
+        output: none,
+      });
+
+      expect(received.map((patkaContextEntry) => patkaContextEntry.type)).toEqual([
+        'PatkaUserNotification',
+      ]);
+    });
+
+    it('says nothing after a notification to the user', () => {
+      const patkaContextEntries = new Subject<PatkaContextEntry>();
+      const patkaAgent = new PatkaAgent(
+        'patka',
+        new PatkaTools([]),
+        {generate: () => of({content: 'world'})},
+        patkaContextEntries,
+      );
+      const received: Array<PatkaContextEntry> = [];
+      patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
+
+      patkaContextEntries.next({
+        type: 'PatkaUserNotification',
+        id: randomUUID(),
+        content:
+          'Patka agent is not providing the necessary tools for the LLM to complete the task.',
+      });
+
+      expect(received).toEqual([]);
+    });
+
     it('carries the tool output into the next prompt', () => {
       const patkaContextEntries = new Subject<PatkaContextEntry>();
       const prompts: Array<string> = [];
@@ -188,7 +254,7 @@ describe('PatkaAgent', () => {
         type: 'PatkaToolResult',
         id: randomUUID(),
         name: 'read_file',
-        output: 'hello',
+        output: some('hello'),
       });
 
       expect(prompts[0]).toContain('Tool output: "hello"');
