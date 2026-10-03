@@ -13,6 +13,7 @@ const toDetails = (patkaContextEntry: PatkaContextEntry): JsonObject =>
     .with({type: 'PatkaInferenceClientResponse'}, ({content}) => ({content}))
     .with({type: 'PatkaToolCall'}, ({name, input}) => ({name, input}))
     .with({type: 'PatkaUserNotification'}, ({content}) => ({content}))
+    .with({type: 'PatkaError'}, ({error}) => ({error: String(error)}))
     .with({type: 'PatkaToolResult'}, ({name, output}) => ({name, output}))
     .exhaustive();
 

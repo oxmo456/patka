@@ -1,10 +1,11 @@
 import {randomUUID} from 'node:crypto';
-import {concatMap, EMPTY, map, type Observable, of, scan} from 'rxjs';
+import {catchError, concatMap, EMPTY, map, type Observable, of, scan} from 'rxjs';
 import {match} from 'ts-pattern';
 import {inject, injectable} from 'tsyringe';
 import {PATKA_CONTEXT_ENTRIES} from '../context/patka-context-entries.token.ts';
 import type {
   PatkaContextEntry,
+  PatkaError,
   PatkaInferenceClientResponse,
   PatkaToolCall,
   PatkaToolResult,
@@ -67,6 +68,7 @@ export class PatkaAgent {
       )
       .with({type: 'PatkaToolCall'}, (patkaToolCall) => this.useTool(patkaToolCall))
       .with({type: 'PatkaUserNotification'}, () => EMPTY)
+      .with({type: 'PatkaError'}, () => EMPTY)
       .exhaustive();
   }
 
@@ -90,6 +92,14 @@ export class PatkaAgent {
           id: randomUUID(),
           content: inferenceClientResponse.content,
         }),
+      ),
+      catchError(
+        (error: unknown): Observable<PatkaError> =>
+          of({
+            type: 'PatkaError',
+            id: randomUUID(),
+            error,
+          }),
       ),
     );
   }

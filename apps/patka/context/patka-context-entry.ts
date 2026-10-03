@@ -35,9 +35,16 @@ export type PatkaUserNotification = {
   readonly content: string;
 };
 
+export type PatkaError = {
+  readonly type: 'PatkaError';
+  readonly id: UUID;
+  readonly error: unknown;
+};
+
 export type PatkaContextEntry =
   | PatkaUserUtterance
   | PatkaInferenceClientResponse
   | PatkaToolCall
   | PatkaToolResult
-  | PatkaUserNotification;
+  | PatkaUserNotification
+  | PatkaError;
