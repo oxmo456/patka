@@ -5,6 +5,7 @@ import {AGENT_NAME} from '../agent/agent-name.token.ts';
 import {PatkaContext} from '../context/patka-context.ts';
 import type {
   PatkaContextEntry,
+  PatkaError,
   PatkaInferenceClientResponse,
   PatkaUserNotification,
   PatkaUserUtterance,
@@ -16,22 +17,27 @@ import type {PatkaChatEntry} from './patka-chat-entry.ts';
 
 const USER = 'you';
 
+const ERROR_MESSAGE = 'oops! something went wrong :/';
+
 const patkaToolProtocol = new PatkaToolProtocol();
 
-const fromUserUtterance = (patkaUserUtterance: PatkaUserUtterance): Observable<PatkaChatEntry> =>
-  of({
+function createChatEntryFromUserUtterance(
+  patkaUserUtterance: PatkaUserUtterance,
+): Observable<PatkaChatEntry> {
+  return of({
     id: patkaUserUtterance.id,
     role: 'user',
     author: USER,
     message: patkaUserUtterance.utterance.content,
     status: 'complete',
   });
+}
 
-const fromInferenceClientResponse = (
+function createChatEntryFromInferenceClientResponse(
   patkaInferenceClientResponse: PatkaInferenceClientResponse,
   author: string,
-): Observable<PatkaChatEntry> =>
-  patkaToolProtocol.isAPatkaToolInvocation(patkaInferenceClientResponse.content)
+): Observable<PatkaChatEntry> {
+  return patkaToolProtocol.isAPatkaToolInvocation(patkaInferenceClientResponse.content)
     ? EMPTY
     : of({
         id: patkaInferenceClientResponse.id,
@@ -40,34 +46,51 @@ const fromInferenceClientResponse = (
         message: patkaInferenceClientResponse.content,
         status: 'complete',
       });
+}
 
-const fromUserNotification = (
+function createChatEntryFromUserNotification(
   patkaUserNotification: PatkaUserNotification,
   author: string,
-): Observable<PatkaChatEntry> =>
-  of({
+): Observable<PatkaChatEntry> {
+  return of({
     id: patkaUserNotification.id,
     role: 'agent',
     author,
     message: patkaUserNotification.content,
     status: 'complete',
   });
+}
 
-const toPatkaChatEntry = (
+function createChatEntryFromError(
+  patkaError: PatkaError,
+  author: string,
+): Observable<PatkaChatEntry> {
+  return of({
+    id: patkaError.id,
+    role: 'agent',
+    author,
+    message: ERROR_MESSAGE,
+    status: 'failed',
+  });
+}
+
+function createChatEntryFromContextEntry(
   patkaContextEntry: PatkaContextEntry,
   author: string,
-): Observable<PatkaChatEntry> =>
-  match(patkaContextEntry)
-    .with({type: 'PatkaUserUtterance'}, fromUserUtterance)
+): Observable<PatkaChatEntry> {
+  return match(patkaContextEntry)
+    .with({type: 'PatkaUserUtterance'}, createChatEntryFromUserUtterance)
     .with({type: 'PatkaInferenceClientResponse'}, (patkaInferenceClientResponse) =>
-      fromInferenceClientResponse(patkaInferenceClientResponse, author),
+      createChatEntryFromInferenceClientResponse(patkaInferenceClientResponse, author),
     )
     .with({type: 'PatkaToolCall'}, () => EMPTY)
     .with({type: 'PatkaToolResult'}, () => EMPTY)
     .with({type: 'PatkaUserNotification'}, (patkaUserNotification) =>
-      fromUserNotification(patkaUserNotification, author),
+      createChatEntryFromUserNotification(patkaUserNotification, author),
     )
+    .with({type: 'PatkaError'}, (patkaError) => createChatEntryFromError(patkaError, author))
     .exhaustive();
+}
 
 @injectable()
 export class PatkaEngine implements Disposable {
@@ -79,7 +102,9 @@ export class PatkaEngine implements Disposable {
 
   constructor(@inject(PatkaContext) patkaContext: PatkaContext, @inject(AGENT_NAME) name: string) {
     this.pushToChat = patkaContext.entries
-      .pipe(concatMap((patkaContextEntry) => toPatkaChatEntry(patkaContextEntry, name)))
+      .pipe(
+        concatMap((patkaContextEntry) => createChatEntryFromContextEntry(patkaContextEntry, name)),
+      )
       .subscribe((patkaChatEntry) => this.patkaChat.push(patkaChatEntry));
   }
 

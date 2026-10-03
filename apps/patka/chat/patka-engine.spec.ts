@@ -140,6 +140,31 @@ describe('PatkaEngine', () => {
       ]);
     });
 
+    it('shows an error as a failed agent message', () => {
+      const patkaContext = new PatkaContext();
+      const patkaEngine = new PatkaEngine(patkaContext, 'patka');
+      let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
+      patkaEngine.patkaChatEntries.subscribe((content) => {
+        patkaChatEntries = content;
+      });
+
+      patkaContext.append({
+        type: 'PatkaError',
+        id: randomUUID(),
+        error: new Error('400 invalid_request_error'),
+      });
+
+      expect(patkaChatEntries).toEqual([
+        {
+          id: expect.any(String),
+          role: 'agent',
+          author: 'patka',
+          message: 'oops! something went wrong :/',
+          status: 'failed',
+        },
+      ]);
+    });
+
     it('stacks the entries in the order they reach the context', () => {
       const patkaContext = new PatkaContext();
       const patkaEngine = new PatkaEngine(patkaContext, 'patka');

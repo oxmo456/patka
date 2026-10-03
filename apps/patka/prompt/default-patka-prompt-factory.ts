@@ -29,6 +29,7 @@ const present = (patkaContextEntry: PatkaContextEntry): ReadonlyArray<string> =>
     .with({type: 'PatkaInferenceClientResponse'}, ({content}) => [`${ASSISTANT}: ${content}`])
     .with({type: 'PatkaToolCall'}, () => [])
     .with({type: 'PatkaUserNotification'}, () => [])
+    .with({type: 'PatkaError'}, () => [])
     .with({type: 'PatkaToolResult'}, ({output}) => [
       `Tool output: ${isSome(output) ? JSON.stringify(output.value) : 'none'}`,
     ])

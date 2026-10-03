@@ -86,20 +86,26 @@ describe('PatkaAgent', () => {
       expect(generate).toHaveBeenCalledWith({prompt: expect.stringContaining('User: hello')});
     });
 
-    it('fails when the inference client fails', () => {
+    it('tells the user when the inference client fails', () => {
       const patkaContextEntries = new Subject<PatkaContextEntry>();
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        {generate: () => throwError(() => new Error('ollama is down'))},
+        {generate: () => throwError(() => new Error('400 invalid_request_error'))},
         patkaContextEntries,
       );
-      const errors: Array<Error> = [];
-      patkaAgent.output.subscribe({error: (error: Error) => errors.push(error)});
+      const received: Array<PatkaContextEntry> = [];
+      patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
 
       patkaContextEntries.next(said('hello'));
 
-      expect(errors.map((error) => error.message)).toEqual(['ollama is down']);
+      expect(received).toEqual([
+        {
+          type: 'PatkaError',
+          id: expect.any(String),
+          error: new Error('400 invalid_request_error'),
+        },
+      ]);
     });
 
     it('turns a tool invocation into a tool call', () => {
@@ -228,6 +234,26 @@ describe('PatkaAgent', () => {
         id: randomUUID(),
         content:
           'Patka agent is not providing the necessary tools for the LLM to complete the task.',
+      });
+
+      expect(received).toEqual([]);
+    });
+
+    it('says nothing after an error', () => {
+      const patkaContextEntries = new Subject<PatkaContextEntry>();
+      const patkaAgent = new PatkaAgent(
+        'patka',
+        new PatkaTools([]),
+        {generate: () => of({content: 'world'})},
+        patkaContextEntries,
+      );
+      const received: Array<PatkaContextEntry> = [];
+      patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
+
+      patkaContextEntries.next({
+        type: 'PatkaError',
+        id: randomUUID(),
+        error: new Error('400 invalid_request_error'),
       });
 
       expect(received).toEqual([]);
