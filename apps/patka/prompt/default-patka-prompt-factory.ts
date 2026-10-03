@@ -1,3 +1,4 @@
+import {readFileSync} from 'node:fs';
 import {match} from 'ts-pattern';
 import type {PatkaContextEntry} from '../context/patka-context-entry.ts';
 import {isSome} from '../option.ts';
@@ -6,8 +7,7 @@ import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
 import type {PatkaTools} from '../tools/patka-tools.ts';
 import type {PatkaPromptFactory} from './patka-prompt-factory.ts';
 
-const INSTRUCTION =
-  'Answer with the fewest words possible. No preamble, no restatement of the question, no closing offer to help. Write the answer in markdown.';
+const INSTRUCTION = readFileSync(new URL('./instruction.md', import.meta.url), 'utf8').trim();
 
 const TOOLS_INTRODUCTION = 'You can use these tools:';
 

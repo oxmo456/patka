@@ -18,6 +18,7 @@ ts_project(
             "vitest.config.ts",
         ],
     ),
+    assets = ["prompt/instruction.md"],
     transpiler = "tsc",
     tsconfig = "tsconfig.json",
     deps = [
@@ -58,6 +59,7 @@ vitest_bin.vitest_test(
     args = ["run"],
     chdir = package_name(),
     data = glob(["**/*.ts"]) + [
+        "prompt/instruction.md",
         "tsconfig.json",
         "//:package_json",
         "//:node_modules/@anthropic-ai/sdk",
