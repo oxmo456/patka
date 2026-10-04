@@ -21,31 +21,39 @@ const answered = (content: string): PatkaContextEntry => ({
 
 describe('DefaultPatkaPromptFactory', () => {
   it('tells the model to keep its answer short', () => {
-    expect(new DefaultPatkaPromptFactory(new PatkaTools([])).create([])).toContain(
+    expect(new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create([])).toContain(
       'fewest words possible',
+    );
+  });
+
+  it('tells the model the directory where Patka runs', () => {
+    expect(new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create([])).toContain(
+      'As an agent, your working directory is: /home/user',
     );
   });
 
   it('asks for an answer when nothing has been said', () => {
     expect(
-      new DefaultPatkaPromptFactory(new PatkaTools([])).create([]).endsWith('\n\nAssistant:'),
+      new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user')
+        .create([])
+        .endsWith('\n\nAssistant:'),
     ).toBe(true);
   });
 
   it('labels who said what', () => {
     const patkaConversation = [said('hello'), answered('hi there')];
 
-    expect(new DefaultPatkaPromptFactory(new PatkaTools([])).create(patkaConversation)).toContain(
-      ['User: hello', 'Assistant: hi there', 'Assistant:'].join('\n'),
-    );
+    expect(
+      new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create(patkaConversation),
+    ).toContain(['User: hello', 'Assistant: hi there', 'Assistant:'].join('\n'));
   });
 
   it('leaves the last cue for the model to answer', () => {
     const patkaConversation = [said('hello')];
 
-    expect(new DefaultPatkaPromptFactory(new PatkaTools([])).create(patkaConversation)).toContain(
-      ['User: hello', 'Assistant:'].join('\n'),
-    );
+    expect(
+      new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create(patkaConversation),
+    ).toContain(['User: hello', 'Assistant:'].join('\n'));
   });
 
   it('keeps the whole conversation, in order', () => {
@@ -55,7 +63,9 @@ describe('DefaultPatkaPromptFactory', () => {
       said('what is my name?'),
     ];
 
-    expect(new DefaultPatkaPromptFactory(new PatkaTools([])).create(patkaConversation)).toContain(
+    expect(
+      new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create(patkaConversation),
+    ).toContain(
       [
         'User: my name is Zaphod',
         'Assistant: nice to meet you',
@@ -66,7 +76,7 @@ describe('DefaultPatkaPromptFactory', () => {
   });
 
   it('says nothing about tools when it has none', () => {
-    const prompt = new DefaultPatkaPromptFactory(new PatkaTools([])).create([]);
+    const prompt = new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create([]);
 
     expect(prompt).not.toContain('You can use these tools');
   });
@@ -74,6 +84,7 @@ describe('DefaultPatkaPromptFactory', () => {
   it('presents every tool it was given', () => {
     const defaultPatkaPromptFactory = new DefaultPatkaPromptFactory(
       new PatkaTools([new ListFiles(), new ReadFile()]),
+      '/home/user',
     );
 
     const prompt = defaultPatkaPromptFactory.create([]);
@@ -87,17 +98,19 @@ describe('DefaultPatkaPromptFactory', () => {
   it('gives the model each tool input and output schema', () => {
     const defaultPatkaPromptFactory = new DefaultPatkaPromptFactory(
       new PatkaTools([new ReadFile()]),
+      '/home/user',
     );
 
     const prompt = defaultPatkaPromptFactory.create([]);
 
-    expect(prompt).toContain('"required":["path"]');
+    expect(prompt).toContain('"required":["relativePath"]');
     expect(prompt).toContain('"type":"string"');
   });
 
   it('keeps the instruction before the tools, and the conversation after', () => {
     const defaultPatkaPromptFactory = new DefaultPatkaPromptFactory(
       new PatkaTools([new ListFiles()]),
+      '/home/user',
     );
 
     const prompt = defaultPatkaPromptFactory.create([]);
@@ -107,11 +120,14 @@ describe('DefaultPatkaPromptFactory', () => {
   });
 
   it('tells the model how to ask for a tool', () => {
-    const prompt = new DefaultPatkaPromptFactory(new PatkaTools([new ReadFile()])).create([]);
+    const prompt = new DefaultPatkaPromptFactory(
+      new PatkaTools([new ReadFile()]),
+      '/home/user',
+    ).create([]);
 
     expect(prompt).toContain('single line');
     expect(prompt).toContain('$$$invoke(tool_name, {"key": "value"})');
-    expect(prompt).toContain('$$$invoke(read_file, {"path": "notes.txt"})');
+    expect(prompt).toContain('$$$invoke(read_file, {"relativePath": "notes.txt"})');
   });
 
   it('shows the output a tool gave back', () => {
@@ -122,7 +138,9 @@ describe('DefaultPatkaPromptFactory', () => {
       output: some('hello'),
     };
 
-    const prompt = new DefaultPatkaPromptFactory(new PatkaTools([])).create([patkaToolResult]);
+    const prompt = new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create([
+      patkaToolResult,
+    ]);
 
     expect(prompt).toContain('Tool output: "hello"');
   });
@@ -135,7 +153,9 @@ describe('DefaultPatkaPromptFactory', () => {
       output: none,
     };
 
-    const prompt = new DefaultPatkaPromptFactory(new PatkaTools([])).create([patkaToolResult]);
+    const prompt = new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create([
+      patkaToolResult,
+    ]);
 
     expect(prompt).toContain('Tool output: none');
   });

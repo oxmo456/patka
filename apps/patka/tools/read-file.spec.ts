@@ -26,14 +26,14 @@ describe('ReadFile', () => {
     expect(readFile.manual.name).toBe('read_file');
     expect(readFile.manual.summary).toContain('Reads');
     expect(readFile.manual.usage).not.toBe('');
-    expect(readFile.manual.input.required).toEqual(['path']);
-    expect(readFile.manual.input.properties).toHaveProperty('path');
+    expect(readFile.manual.input.required).toEqual(['relativePath']);
+    expect(readFile.manual.input.properties).toHaveProperty('relativePath');
     expect(readFile.manual.output.type).toBe('string');
   });
 
   it('emits what the file holds', async () => {
     const content = await withAFile('hello patka', () =>
-      firstValueFrom(new ReadFile().invoke({path: 'note.txt'})),
+      firstValueFrom(new ReadFile().invoke({relativePath: 'note.txt'})),
     );
 
     expect(content).toEqual(some('hello patka'));
@@ -41,17 +41,17 @@ describe('ReadFile', () => {
 
   it('refuses an absolute path', async () => {
     await expect(
-      firstValueFrom(new ReadFile().invoke({path: join(tmpdir(), 'note.txt')})),
+      firstValueFrom(new ReadFile().invoke({relativePath: join(tmpdir(), 'note.txt')})),
     ).rejects.toThrow('only accepts a relative path');
   });
 
   it('fails when the file does not exist', async () => {
     await expect(
-      firstValueFrom(new ReadFile().invoke({path: 'patka-missing.txt'})),
+      firstValueFrom(new ReadFile().invoke({relativePath: 'patka-missing.txt'})),
     ).rejects.toThrow();
   });
 
   it('does not touch the disk until subscribed', () => {
-    expect(() => new ReadFile().invoke({path: 'patka-missing.txt'})).not.toThrow();
+    expect(() => new ReadFile().invoke({relativePath: 'patka-missing.txt'})).not.toThrow();
   });
 });

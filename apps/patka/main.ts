@@ -5,7 +5,11 @@ import {AGENT_NAME} from './agent/agent-name.token.ts';
 import {PatkaContext} from './context/patka-context.ts';
 import {PATKA_CONTEXT_ENTRIES} from './context/patka-context-entries.token.ts';
 import {INFERENCE_CLIENT} from './inference/inference-client.token.ts';
-import {buildInferenceClient, extractInferenceClientOption} from './inference/patka-inference.ts';
+import {
+  buildInferenceClient,
+  extractInferenceClientOption,
+  extractOllamaModel,
+} from './inference/patka-inference.ts';
 import {Patka} from './patka.ts';
 import {ListFiles} from './tools/list-files.ts';
 import {PATKA_TOOL} from './tools/patka-tool.token.ts';
@@ -15,6 +19,7 @@ import {WriteFile} from './tools/write-file.ts';
 import {BLESSED} from './ui/blessed.token.ts';
 import {PatkaTUI} from './ui/patka-tui.ts';
 import {PATKA_UI} from './ui/patka-ui.token.ts';
+import {WORKING_DIRECTORY} from './working-directory.token.ts';
 
 const workingDirectory = process.argv.slice(2).find((argument) => !argument.startsWith('--'));
 
@@ -22,10 +27,14 @@ if (workingDirectory !== undefined) {
   process.chdir(workingDirectory);
 }
 
+container.register(WORKING_DIRECTORY, {useValue: process.cwd()});
 container.register(AGENT_NAME, {useValue: 'ROOT'});
 container.register(BLESSED, {useValue: blessed});
 container.register(INFERENCE_CLIENT, {
-  useValue: buildInferenceClient(extractInferenceClientOption(process.argv)),
+  useValue: buildInferenceClient(
+    extractInferenceClientOption(process.argv),
+    extractOllamaModel(process.argv),
+  ),
 });
 container.register(PATKA_TOOL, {useClass: ListFiles});
 container.register(PATKA_TOOL, {useClass: ReadFile});

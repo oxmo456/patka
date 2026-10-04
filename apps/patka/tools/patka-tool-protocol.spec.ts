@@ -8,7 +8,7 @@ describe('PatkaToolProtocol', () => {
 
     expect(manual).toContain('single line');
     expect(manual).toContain('$$$invoke(tool_name, {"key": "value"})');
-    expect(manual).toContain('$$$invoke(read_file, {"path": "notes.txt"})');
+    expect(manual).toContain('$$$invoke(read_file, {"relativePath": "notes.txt"})');
   });
 
   it('reads back the tool and the input the model asked for', () => {
@@ -24,7 +24,7 @@ describe('PatkaToolProtocol', () => {
 
   it('reads an invocation the model wrapped in other words', () => {
     const patkaToolInvocation = new PatkaToolProtocol().parse(
-      'Let me look: $$$invoke(read_file, {"path": "notes.txt"}) please wait',
+      'Let me look: $$$invoke(read_file, {"relativePath": "notes.txt"}) please wait',
     );
 
     expect(isSuccess(patkaToolInvocation) && patkaToolInvocation.value.name).toBe('read_file');

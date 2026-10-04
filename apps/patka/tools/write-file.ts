@@ -7,7 +7,7 @@ import type {PatkaTool} from './patka-tool.ts';
 import type {PatkaToolManual} from './patka-tool-manual.ts';
 
 export type WriteFileInput = {
-  readonly path: string;
+  readonly relativePath: string;
   readonly content: string;
 };
 
@@ -20,16 +20,17 @@ export class WriteFile implements PatkaTool<WriteFileInput, string> {
     input: {
       type: 'object',
       properties: {
-        path: {
+        relativePath: {
           type: 'string',
-          description: 'Path of the file to write, relative to the working directory.',
+          description:
+            'Relative path of the file to write, from the working directory (e.g. "notes.txt" or "src/main.ts"). Never an absolute path: a path starting with "/" is refused.',
         },
         content: {
           type: 'string',
           description: 'The whole text the file must hold.',
         },
       },
-      required: ['path', 'content'],
+      required: ['relativePath', 'content'],
     },
     output: {
       type: 'string',
@@ -39,12 +40,14 @@ export class WriteFile implements PatkaTool<WriteFileInput, string> {
 
   invoke(writeFileInput: WriteFileInput): Observable<Option<string>> {
     return defer(() => {
-      if (isPathAbsolute(writeFileInput.path)) {
-        throw new Error(`write_file only accepts a relative path, given "${writeFileInput.path}"`);
+      if (isPathAbsolute(writeFileInput.relativePath)) {
+        throw new Error(
+          `write_file only accepts a relative path, given "${writeFileInput.relativePath}"`,
+        );
       }
 
-      return from(writeFile(writeFileInput.path, writeFileInput.content, 'utf8')).pipe(
-        map(() => some(writeFileInput.path)),
+      return from(writeFile(writeFileInput.relativePath, writeFileInput.content, 'utf8')).pipe(
+        map(() => some(writeFileInput.relativePath)),
       );
     });
   }

@@ -36,10 +36,10 @@ describe('PatkaTools', () => {
     const readFile = aTool('read_file', 'read');
     const patkaTools = new PatkaTools([listFiles, readFile]);
 
-    const output = await firstValueFrom(patkaTools.invoke('read_file', {path: 'note.txt'}));
+    const output = await firstValueFrom(patkaTools.invoke('read_file', {relativePath: 'note.txt'}));
 
     expect(output).toEqual(some('read'));
-    expect(readFile.invoke).toHaveBeenCalledWith({path: 'note.txt'});
+    expect(readFile.invoke).toHaveBeenCalledWith({relativePath: 'note.txt'});
     expect(listFiles.invoke).not.toHaveBeenCalled();
   });
 

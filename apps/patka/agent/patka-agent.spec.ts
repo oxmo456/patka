@@ -32,6 +32,7 @@ describe('PatkaAgent', () => {
       new PatkaTools([]),
       {generate: () => of({content: 'world'})},
       new Subject<PatkaContextEntry>(),
+      '/home/user',
     );
 
     expect(patkaAgent.name).toBe('patka');
@@ -45,6 +46,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate},
         new Subject<PatkaContextEntry>(),
+        '/home/user',
       );
 
       patkaAgent.output.subscribe();
@@ -59,6 +61,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate: () => of({content: 'world'})},
         patkaContextEntries,
+        '/home/user',
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -78,6 +81,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate},
         patkaContextEntries,
+        '/home/user',
       );
       patkaAgent.output.subscribe();
 
@@ -93,6 +97,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate: () => throwError(() => new Error('400 invalid_request_error'))},
         patkaContextEntries,
+        '/home/user',
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -115,6 +120,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([aTool('read_file', 'hello')]),
         {generate: () => of({content: 'world'})},
         patkaContextEntries,
+        '/home/user',
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -137,6 +143,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([aTool('read_file', 'hello')]),
         {generate: () => of({content: 'world'})},
         patkaContextEntries,
+        '/home/user',
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -160,6 +167,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate: () => of({content: 'world'})},
         patkaContextEntries,
+        '/home/user',
       );
       const errors: Array<Error> = [];
       patkaAgent.output.subscribe({error: (error: Error) => errors.push(error)});
@@ -182,6 +190,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate},
         patkaContextEntries,
+        '/home/user',
       );
       patkaAgent.output.subscribe();
 
@@ -202,6 +211,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate: () => of({content: 'world'})},
         patkaContextEntries,
+        '/home/user',
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -225,6 +235,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate: () => of({content: 'world'})},
         patkaContextEntries,
+        '/home/user',
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -246,6 +257,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate: () => of({content: 'world'})},
         patkaContextEntries,
+        '/home/user',
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -273,6 +285,7 @@ describe('PatkaAgent', () => {
           },
         },
         patkaContextEntries,
+        '/home/user',
       );
       patkaAgent.output.subscribe();
 

@@ -16,6 +16,7 @@ import type {Blessed} from './ui/patka-tui.ts';
 import {PATKA_UI} from './ui/patka-ui.token.ts';
 import type {PatkaUI} from './ui/patka-ui.ts';
 import type {PatkaUserInput} from './ui/patka-user-input.ts';
+import {WORKING_DIRECTORY} from './working-directory.token.ts';
 
 const aPatkaUI = (): PatkaUI => ({
   userInputs: of(),
@@ -26,6 +27,7 @@ const aPatkaUI = (): PatkaUI => ({
 describe('Patka', () => {
   it('resolves the whole graph from the container', () => {
     const child = container.createChildContainer();
+    child.register(WORKING_DIRECTORY, {useValue: '/home/user'});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {useValue: {generate: vi.fn()}});
@@ -43,6 +45,7 @@ describe('Patka', () => {
   it('answers what the user types', () => {
     const userInputs = new Subject<PatkaUserInput>();
     const child = container.createChildContainer();
+    child.register(WORKING_DIRECTORY, {useValue: '/home/user'});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {
@@ -74,6 +77,7 @@ describe('Patka', () => {
   it('stops answering once disposed', () => {
     const userInputs = new Subject<PatkaUserInput>();
     const child = container.createChildContainer();
+    child.register(WORKING_DIRECTORY, {useValue: '/home/user'});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {
