@@ -1,0 +1,34 @@
+load("@aspect_rules_js//js:defs.bzl", "js_library")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
+load("//tools:lint.bzl", "biome_lint")
+
+ts_project(
+    name = "report-incompetency",
+    srcs = ["report-incompetency.ts"],
+    declaration = True,
+    transpiler = "tsc",
+    tsconfig = "//apps/patka:tsconfig",
+    visibility = ["//apps/patka:__pkg__"],
+    deps = [
+        "//:package_json",
+        "//:node_modules/rxjs",
+        "//:node_modules/tsyringe",
+        "//apps/patka:tool",
+    ],
+)
+
+js_library(
+    name = "test_data",
+    srcs = [
+        "report-incompetency.spec.ts",
+        "report-incompetency.ts",
+    ],
+    visibility = ["//apps/patka:__pkg__"],
+)
+
+biome_lint(
+    srcs = [
+        "report-incompetency.spec.ts",
+        "report-incompetency.ts",
+    ],
+)

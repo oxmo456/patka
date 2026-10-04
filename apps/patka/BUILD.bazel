@@ -9,19 +9,48 @@ ts_config(
     visibility = ["//apps/patka:__subpackages__"],
 )
 
+# What every tool package needs to implement PatkaTool.
+ts_project(
+    name = "tool",
+    srcs = [
+        "json.ts",
+        "option.ts",
+        "tools/patka-tool.ts",
+        "tools/patka-tool-manual.ts",
+    ],
+    declaration = True,
+    transpiler = "tsc",
+    tsconfig = "tsconfig.json",
+    visibility = ["//apps/patka:__subpackages__"],
+    deps = [
+        "//:package_json",
+        "//:node_modules/rxjs",
+    ],
+)
+
 ts_project(
     name = "lib",
     srcs = glob(
         ["**/*.ts"],
         exclude = [
             "**/*.spec.ts",
+            "json.ts",
+            "option.ts",
+            "tools/patka-tool.ts",
+            "tools/patka-tool-manual.ts",
             "vitest.config.ts",
         ],
     ),
     assets = ["prompt/instruction.md"],
+    declaration = True,
     transpiler = "tsc",
     tsconfig = "tsconfig.json",
     deps = [
+        ":tool",
+        "//apps/patka/tools/list-files",
+        "//apps/patka/tools/read-file",
+        "//apps/patka/tools/report-incompetency",
+        "//apps/patka/tools/write-file",
         "//:package_json",
         "//:node_modules/@anthropic-ai/sdk",
         "//:node_modules/@types/blessed",
@@ -61,6 +90,10 @@ vitest_bin.vitest_test(
     data = glob(["**/*.ts"]) + [
         "prompt/instruction.md",
         "tsconfig.json",
+        "//apps/patka/tools/list-files:test_data",
+        "//apps/patka/tools/read-file:test_data",
+        "//apps/patka/tools/report-incompetency:test_data",
+        "//apps/patka/tools/write-file:test_data",
         "//:package_json",
         "//:node_modules/@anthropic-ai/sdk",
         "//:node_modules/blessed",
