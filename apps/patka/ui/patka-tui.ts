@@ -12,7 +12,7 @@ import type {PatkaUI} from './patka-ui.ts';
 import type {PatkaUserInput} from './patka-user-input.ts';
 import {SOLARIZED} from './solarized.ts';
 
-export type Blessed = Pick<typeof blessedModule, 'screen' | 'box' | 'textbox'>;
+export type Blessed = Pick<typeof blessedModule, 'screen' | 'box' | 'line' | 'textbox'>;
 
 const PENDING_RESPONSE = '...';
 
@@ -21,6 +21,8 @@ const USER_STYLE = `{${SOLARIZED.blue}-bg}{${SOLARIZED.base3}-fg}`;
 const AGENT_STYLE = `{${SOLARIZED.base02}-bg}{${SOLARIZED.base0}-fg}`;
 
 const CHAT_WIDTH = '50%';
+
+const MIN_WIDTH = 8;
 
 const LEVEL_STYLE: Record<number, string> = {
   30: `{${SOLARIZED.green}-fg}`,
@@ -66,16 +68,14 @@ const toBubble = (patkaChatEntry: PatkaChatEntry, width: number): ReadonlyArray<
     .with('pending', () => PENDING_RESPONSE)
     .with('complete', 'failed', () => patkaChatEntry.message)
     .exhaustive();
-  const bubbleWidth = Math.max(8, width - 2);
+  const bubbleWidth = Math.max(MIN_WIDTH, width - 1);
   const lines = toMarkdownLines(text).flatMap((line) => wrap(line, bubbleWidth));
   const style = match(patkaChatEntry.role)
     .with('user', () => USER_STYLE)
     .with('agent', () => AGENT_STYLE)
     .exhaustive();
 
-  return lines.map(
-    (line) => `${style} ${line}${' '.repeat(bubbleWidth - visibleLength(line))} {/}`,
-  );
+  return lines.map((line) => `${style}${line}${' '.repeat(bubbleWidth - visibleLength(line))} {/}`);
 };
 
 const toDetailLines = (record: Record<string, unknown>, width: number): ReadonlyArray<string> =>
@@ -119,6 +119,8 @@ export class PatkaTUI implements PatkaUI {
   private readonly screen: Widgets.Screen;
   private readonly conversation: Widgets.BoxElement;
   private readonly logs: Widgets.BoxElement;
+  private patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
+  private logLines: ReadonlyArray<string> = [];
 
   readonly userInputs: Observable<PatkaUserInput> = this._userInputs.asObservable();
 
@@ -133,11 +135,12 @@ export class PatkaTUI implements PatkaUI {
       tags: true,
       scrollable: true,
       alwaysScroll: true,
+      mouse: true,
       style: {fg: SOLARIZED.base0, bg: SOLARIZED.base03},
     });
     this.logs = blessed.box({
       top: 0,
-      left: CHAT_WIDTH,
+      left: `${CHAT_WIDTH}+1`,
       right: 0,
       height: '100%',
       content: '',
@@ -150,18 +153,37 @@ export class PatkaTUI implements PatkaUI {
         bg: SOLARIZED.base03,
       },
     });
+    const separator = blessed.line({
+      orientation: 'vertical',
+      top: 0,
+      left: CHAT_WIDTH,
+      height: '100%',
+      style: {fg: SOLARIZED.base02, bg: SOLARIZED.base03},
+    });
     const promptInput = blessed.textbox({
-      bottom: 0,
+      bottom: 1,
       left: 0,
       width: CHAT_WIDTH,
-      height: 3,
-      border: 'line',
+      height: 1,
       inputOnFocus: true,
       style: {
         fg: SOLARIZED.base1,
         bg: SOLARIZED.base03,
-        border: {fg: SOLARIZED.base02, bg: SOLARIZED.base03},
       },
+    });
+    const lineAboveInput = blessed.line({
+      orientation: 'horizontal',
+      bottom: 2,
+      left: 0,
+      width: CHAT_WIDTH,
+      style: {fg: SOLARIZED.base02, bg: SOLARIZED.base03},
+    });
+    const lineBelowInput = blessed.line({
+      orientation: 'horizontal',
+      bottom: 0,
+      left: 0,
+      width: CHAT_WIDTH,
+      style: {fg: SOLARIZED.base02, bg: SOLARIZED.base03},
     });
 
     promptInput.on('submit', (prompt: string) => {
@@ -172,16 +194,36 @@ export class PatkaTUI implements PatkaUI {
     });
 
     this.screen.append(this.conversation);
+    this.screen.append(separator);
     this.screen.append(this.logs);
     this.screen.append(promptInput);
+    this.screen.append(lineAboveInput);
+    this.screen.append(lineBelowInput);
     this.screen.key(['escape', 'C-c'], () => process.exit(0));
+    this.screen.on('resize', () => {
+      this.drawChat();
+      this.drawLogs();
+      this.screen.render();
+    });
     promptInput.focus();
     this.screen.render();
   }
 
   updateChat(patkaChatEntries: ReadonlyArray<PatkaChatEntry>): void {
-    const width = Number(this.conversation.width);
-    const lines = patkaChatEntries.flatMap((patkaChatEntry) => [
+    this.patkaChatEntries = patkaChatEntries;
+    this.drawChat();
+    this.screen.render();
+  }
+
+  updateLogs(logs: ReadonlyArray<string>): void {
+    this.logLines = logs;
+    this.drawLogs();
+    this.screen.render();
+  }
+
+  private drawChat(): void {
+    const width = Math.max(MIN_WIDTH, Number(this.conversation.width));
+    const lines = this.patkaChatEntries.flatMap((patkaChatEntry) => [
       ...toBubble(patkaChatEntry, width),
       '',
     ]);
@@ -189,21 +231,14 @@ export class PatkaTUI implements PatkaUI {
 
     this.conversation.setContent([...new Array(blankLines).fill(''), ...lines].join('\n'));
     this.conversation.setScrollPerc(100);
-    this.screen.render();
   }
 
-  updateLogs(logs: ReadonlyArray<string>): void {
-    const width = Math.max(8, Number(this.logs.width));
-    const lines = logs.flatMap((log) => toLogLines(log, width));
+  private drawLogs(): void {
+    const width = Math.max(MIN_WIDTH, Number(this.logs.width));
+    const lines = this.logLines.flatMap((log) => toLogLines(log, width));
     const blankLines = Math.max(0, Number(this.logs.height) - lines.length);
-    const wasAtBottom = this.logs.getScrollPerc() === 100;
 
     this.logs.setContent([...new Array(blankLines).fill(''), ...lines].join('\n'));
-
-    if (wasAtBottom) {
-      this.logs.setScrollPerc(100);
-    }
-
-    this.screen.render();
+    this.logs.setScrollPerc(100);
   }
 }
