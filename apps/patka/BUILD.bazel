@@ -47,6 +47,7 @@ ts_project(
     tsconfig = "tsconfig.json",
     deps = [
         ":tool",
+        "//apps/patka/tools/git-diff",
         "//apps/patka/tools/git-status",
         "//apps/patka/tools/list-files",
         "//apps/patka/tools/read-file",
@@ -93,6 +94,7 @@ vitest_bin.vitest_test(
     data = glob(["**/*.ts"]) + [
         "prompt/instruction.md",
         "tsconfig.json",
+        "//apps/patka/tools/git-diff:test_data",
         "//apps/patka/tools/git-status:test_data",
         "//apps/patka/tools/list-files:test_data",
         "//apps/patka/tools/read-file:test_data",
