@@ -47,6 +47,7 @@ ts_project(
     tsconfig = "tsconfig.json",
     deps = [
         ":tool",
+        "//apps/patka/tools/git-status",
         "//apps/patka/tools/list-files",
         "//apps/patka/tools/read-file",
         "//apps/patka/tools/report-incompetency",
@@ -62,6 +63,7 @@ ts_project(
         "//:node_modules/tsyringe",
         "//:node_modules/rxjs",
         "//:node_modules/ts-pattern",
+        "//:node_modules/zx",
     ],
 )
 
@@ -78,8 +80,9 @@ js_binary(
         "//:node_modules/tsyringe",
         "//:node_modules/rxjs",
         "//:node_modules/ts-pattern",
+        "//:node_modules/zx",
     ],
-    entry_point = "main.js",
+    entry_point = "bootstrap.js",
     visibility = ["//visibility:public"],
 )
 
@@ -90,6 +93,7 @@ vitest_bin.vitest_test(
     data = glob(["**/*.ts"]) + [
         "prompt/instruction.md",
         "tsconfig.json",
+        "//apps/patka/tools/git-status:test_data",
         "//apps/patka/tools/list-files:test_data",
         "//apps/patka/tools/read-file:test_data",
         "//apps/patka/tools/report-incompetency:test_data",
@@ -103,6 +107,7 @@ vitest_bin.vitest_test(
         "//:node_modules/tsyringe",
         "//:node_modules/rxjs",
         "//:node_modules/ts-pattern",
+        "//:node_modules/zx",
         "//:node_modules/vitest",
     ],
 )

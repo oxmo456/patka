@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import blessed from 'blessed';
 import {container, type DependencyContainer} from 'tsyringe';
+import {$} from 'zx';
 import {AGENT_NAME} from './agent/agent-name.token.ts';
 import {PatkaContext} from './context/patka-context.ts';
 import {PATKA_CONTEXT_ENTRIES} from './context/patka-context-entries.token.ts';
@@ -11,6 +12,7 @@ import {
   extractOllamaModel,
 } from './inference/patka-inference.ts';
 import {Patka} from './patka.ts';
+import {GitStatus} from './tools/git-status/git-status.ts';
 import {ListFiles} from './tools/list-files/list-files.ts';
 import {PATKA_TOOL} from './tools/patka-tool.token.ts';
 import {ReadFile} from './tools/read-file/read-file.ts';
@@ -21,11 +23,8 @@ import {PatkaTUI} from './ui/patka-tui.ts';
 import {PATKA_UI} from './ui/patka-ui.token.ts';
 import {WORKING_DIRECTORY} from './working-directory.token.ts';
 
-const workingDirectory = process.argv.slice(2).find((argument) => !argument.startsWith('--'));
-
-if (workingDirectory !== undefined) {
-  process.chdir(workingDirectory);
-}
+// zx must never write to the terminal: blessed owns the screen.
+$.quiet = true;
 
 container.register(WORKING_DIRECTORY, {useValue: process.cwd()});
 container.register(AGENT_NAME, {useValue: 'ROOT'});
@@ -37,6 +36,7 @@ container.register(INFERENCE_CLIENT, {
   ),
 });
 container.register(PATKA_TOOL, {useClass: ListFiles});
+container.register(PATKA_TOOL, {useClass: GitStatus});
 container.register(PATKA_TOOL, {useClass: ReadFile});
 container.register(PATKA_TOOL, {useClass: WriteFile});
 container.register(PATKA_TOOL, {useClass: ReportIncompetency});
