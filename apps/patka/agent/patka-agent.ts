@@ -17,6 +17,7 @@ import {DefaultPatkaPromptFactory} from '../prompt/default-patka-prompt-factory.
 import type {PatkaPromptFactory} from '../prompt/patka-prompt-factory.ts';
 import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
+import {WORKING_DIRECTORY} from '../working-directory.token.ts';
 import {AGENT_NAME} from './agent-name.token.ts';
 
 const MISSING_TOOLS_NOTIFICATION =
@@ -37,11 +38,12 @@ export class PatkaAgent {
     @inject(PatkaTools) patkaTools: PatkaTools,
     @inject(INFERENCE_CLIENT) inferenceClient: InferenceClient,
     @inject(PATKA_CONTEXT_ENTRIES) input: Observable<PatkaContextEntry>,
+    @inject(WORKING_DIRECTORY) workingDirectory: string,
   ) {
     this.name = name;
     this.patkaTools = patkaTools;
     this.inferenceClient = inferenceClient;
-    this.patkaPromptFactory = new DefaultPatkaPromptFactory(patkaTools);
+    this.patkaPromptFactory = new DefaultPatkaPromptFactory(patkaTools, workingDirectory);
     this.output = input.pipe(
       scan(
         (accumulator: ReadonlyArray<PatkaContextEntry>, patkaContextEntry: PatkaContextEntry) => [

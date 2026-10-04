@@ -7,7 +7,7 @@ import type {PatkaTool} from './patka-tool.ts';
 import type {PatkaToolManual} from './patka-tool-manual.ts';
 
 export type ListFilesInput = {
-  readonly path: string;
+  readonly relativePath: string;
 };
 
 @injectable()
@@ -19,12 +19,13 @@ export class ListFiles implements PatkaTool<ListFilesInput, ReadonlyArray<string
     input: {
       type: 'object',
       properties: {
-        path: {
+        relativePath: {
           type: 'string',
-          description: 'Path of the directory to list, relative to the working directory.',
+          description:
+            'Relative path of the directory to list, from the working directory (e.g. "." or "src/utils"). Never an absolute path: a path starting with "/" is refused.',
         },
       },
-      required: ['path'],
+      required: ['relativePath'],
     },
     output: {
       type: 'array',
@@ -35,11 +36,13 @@ export class ListFiles implements PatkaTool<ListFilesInput, ReadonlyArray<string
 
   invoke(listFilesInput: ListFilesInput): Observable<Option<ReadonlyArray<string>>> {
     return defer(() => {
-      if (isPathAbsolute(listFilesInput.path)) {
-        throw new Error(`list_files only accepts a relative path, given "${listFilesInput.path}"`);
+      if (isPathAbsolute(listFilesInput.relativePath)) {
+        throw new Error(
+          `list_files only accepts a relative path, given "${listFilesInput.relativePath}"`,
+        );
       }
 
-      return from(readdir(listFilesInput.path, {withFileTypes: true}));
+      return from(readdir(listFilesInput.relativePath, {withFileTypes: true}));
     }).pipe(
       map((entries) =>
         some(entries.map((entry) => (entry.isDirectory() ? `${entry.name}/` : entry.name)).sort()),

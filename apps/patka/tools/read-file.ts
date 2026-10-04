@@ -7,7 +7,7 @@ import type {PatkaTool} from './patka-tool.ts';
 import type {PatkaToolManual} from './patka-tool-manual.ts';
 
 export type ReadFileInput = {
-  readonly path: string;
+  readonly relativePath: string;
 };
 
 @injectable()
@@ -19,12 +19,13 @@ export class ReadFile implements PatkaTool<ReadFileInput, string> {
     input: {
       type: 'object',
       properties: {
-        path: {
+        relativePath: {
           type: 'string',
-          description: 'Path of the file to read, relative to the working directory.',
+          description:
+            'Relative path of the file to read, from the working directory (e.g. "notes.txt" or "src/main.ts"). Never an absolute path: a path starting with "/" is refused.',
         },
       },
-      required: ['path'],
+      required: ['relativePath'],
     },
     output: {
       type: 'string',
@@ -34,11 +35,13 @@ export class ReadFile implements PatkaTool<ReadFileInput, string> {
 
   invoke(readFileInput: ReadFileInput): Observable<Option<string>> {
     return defer(() => {
-      if (isPathAbsolute(readFileInput.path)) {
-        throw new Error(`read_file only accepts a relative path, given "${readFileInput.path}"`);
+      if (isPathAbsolute(readFileInput.relativePath)) {
+        throw new Error(
+          `read_file only accepts a relative path, given "${readFileInput.relativePath}"`,
+        );
       }
 
-      return from(readFile(readFileInput.path, 'utf8')).pipe(map(some));
+      return from(readFile(readFileInput.relativePath, 'utf8')).pipe(map(some));
     });
   }
 }

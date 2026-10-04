@@ -37,19 +37,25 @@ const present = (patkaContextEntry: PatkaContextEntry): ReadonlyArray<string> =>
 
 export class DefaultPatkaPromptFactory implements PatkaPromptFactory {
   private readonly patkaTools: PatkaTools;
+  private readonly workingDirectory: string;
   private readonly patkaToolProtocol = new PatkaToolProtocol();
 
-  constructor(patkaTools: PatkaTools) {
+  constructor(patkaTools: PatkaTools, workingDirectory: string) {
     this.patkaTools = patkaTools;
+    this.workingDirectory = workingDirectory;
   }
 
   private header(): string {
     const patkaToolManuals = this.patkaTools.manuals();
+    const introduction = [
+      INSTRUCTION,
+      `As an agent, your working directory is: ${this.workingDirectory}`,
+    ];
 
     return patkaToolManuals.length === 0
-      ? INSTRUCTION
+      ? introduction.join('\n')
       : [
-          INSTRUCTION,
+          ...introduction,
           '',
           TOOLS_INTRODUCTION,
           ...patkaToolManuals.map(presentManual),

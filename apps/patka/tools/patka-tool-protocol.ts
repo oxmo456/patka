@@ -14,7 +14,7 @@ export class PatkaToolProtocol {
   readonly manual: string = [
     'If you want to use a tool, reply with a single line and nothing else:',
     `${MARKER}(tool_name, {"key": "value"})`,
-    `For example: ${MARKER}(read_file, {"path": "notes.txt"})`,
+    `For example: ${MARKER}(read_file, {"relativePath": "notes.txt"})`,
     'The input must be a JSON object matching that tool input schema.',
     'Never invoke a tool as a guess. Every input you give it must come from the request.',
     'If the request is empty, ambiguous, or not actionable, ask the user a question instead.',
