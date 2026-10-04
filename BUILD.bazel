@@ -24,7 +24,13 @@ alias(
 
 test_suite(
     name = "lint",
-    tests = ["//apps/patka:lint"],
+    tests = [
+        "//apps/patka:lint",
+        "//apps/patka/tools/list-files:lint",
+        "//apps/patka/tools/read-file:lint",
+        "//apps/patka/tools/report-incompetency:lint",
+        "//apps/patka/tools/write-file:lint",
+    ],
 )
 
 bazel_env(

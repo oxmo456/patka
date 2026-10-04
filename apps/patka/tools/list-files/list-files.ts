@@ -2,9 +2,9 @@ import {readdir} from 'node:fs/promises';
 import {isAbsolute as isPathAbsolute} from 'node:path';
 import {defer, from, map, type Observable} from 'rxjs';
 import {injectable} from 'tsyringe';
-import {type Option, some} from '../option.ts';
-import type {PatkaTool} from './patka-tool.ts';
-import type {PatkaToolManual} from './patka-tool-manual.ts';
+import {type Option, some} from '../../option.ts';
+import type {PatkaTool} from '../patka-tool.ts';
+import type {PatkaToolManual} from '../patka-tool-manual.ts';
 
 export type ListFilesInput = {
   readonly relativePath: string;

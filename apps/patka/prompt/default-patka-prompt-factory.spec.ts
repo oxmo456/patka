@@ -2,9 +2,9 @@ import {randomUUID} from 'node:crypto';
 import {describe, expect, it} from 'vitest';
 import type {PatkaContextEntry} from '../context/patka-context-entry.ts';
 import {none, some} from '../option.ts';
-import {ListFiles} from '../tools/list-files.ts';
+import {ListFiles} from '../tools/list-files/list-files.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
-import {ReadFile} from '../tools/read-file.ts';
+import {ReadFile} from '../tools/read-file/read-file.ts';
 import {DefaultPatkaPromptFactory} from './default-patka-prompt-factory.ts';
 
 const said = (content: string): PatkaContextEntry => ({

@@ -1,8 +1,8 @@
 import {type Observable, of} from 'rxjs';
 import {injectable} from 'tsyringe';
-import {none, type Option} from '../option.ts';
-import type {PatkaTool} from './patka-tool.ts';
-import type {PatkaToolManual} from './patka-tool-manual.ts';
+import {none, type Option} from '../../option.ts';
+import type {PatkaTool} from '../patka-tool.ts';
+import type {PatkaToolManual} from '../patka-tool-manual.ts';
 
 export type ReportIncompetencyInput = {
   readonly model: {

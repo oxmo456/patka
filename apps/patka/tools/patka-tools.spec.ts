@@ -2,10 +2,10 @@ import {firstValueFrom, of} from 'rxjs';
 import {describe, expect, it, type Mock, vi} from 'vitest';
 import type {JsonObject, JsonValue} from '../json.ts';
 import {some} from '../option.ts';
-import {ListFiles} from './list-files.ts';
+import {ListFiles} from './list-files/list-files.ts';
 import type {PatkaTool} from './patka-tool.ts';
 import {PatkaTools} from './patka-tools.ts';
-import {ReadFile} from './read-file.ts';
+import {ReadFile} from './read-file/read-file.ts';
 
 type FakeTool = PatkaTool<JsonObject, JsonValue> & {invoke: Mock};
 
