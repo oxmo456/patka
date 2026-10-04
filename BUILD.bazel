@@ -26,6 +26,7 @@ test_suite(
     name = "lint",
     tests = [
         "//apps/patka:lint",
+        "//apps/patka/tools/git-status:lint",
         "//apps/patka/tools/list-files:lint",
         "//apps/patka/tools/read-file:lint",
         "//apps/patka/tools/report-incompetency:lint",
