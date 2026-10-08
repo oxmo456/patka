@@ -4,6 +4,7 @@ import {join} from 'node:path';
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it} from 'vitest';
 import {some} from '../../option.ts';
+import {success} from '../../try.ts';
 import {WriteFile} from './write-file.ts';
 
 const inADirectory = async <T>(run: () => Promise<T>): Promise<T> => {
@@ -28,7 +29,7 @@ describe('WriteFile', () => {
     expect(writeFile.manual.input.required).toEqual(['relativePath', 'content']);
     expect(writeFile.manual.input.properties).toHaveProperty('relativePath');
     expect(writeFile.manual.input.properties).toHaveProperty('content');
-    expect(writeFile.manual.output.type).toBe('string');
+    expect(writeFile.manual.output.oneOf).toHaveLength(2);
   });
 
   it('writes the content to the file', async () => {
@@ -48,23 +49,26 @@ describe('WriteFile', () => {
       firstValueFrom(new WriteFile().invoke({relativePath: 'note.txt', content: 'hello patka'})),
     );
 
-    expect(output).toEqual(some('note.txt'));
+    expect(output).toEqual(success(some('note.txt')));
   });
 
   it('refuses an absolute path', async () => {
-    await expect(
-      firstValueFrom(
+    expect(
+      await firstValueFrom(
         new WriteFile().invoke({relativePath: join(tmpdir(), 'note.txt'), content: ''}),
       ),
-    ).rejects.toThrow('only accepts a relative path');
+    ).toMatchObject({
+      type: 'failure',
+      error: {message: expect.stringContaining('only accepts a relative path')},
+    });
   });
 
   it('fails when the directory does not exist', async () => {
-    await expect(
-      inADirectory(() =>
+    expect(
+      await inADirectory(() =>
         firstValueFrom(new WriteFile().invoke({relativePath: 'missing/note.txt', content: ''})),
       ),
-    ).rejects.toThrow();
+    ).toMatchObject({type: 'failure'});
   });
 
   it('does not touch the disk until subscribed', () => {

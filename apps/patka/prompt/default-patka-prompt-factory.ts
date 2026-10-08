@@ -1,7 +1,7 @@
 import {readFileSync} from 'node:fs';
 import {match} from 'ts-pattern';
 import type {PatkaContextEntry} from '../context/patka-context-entry.ts';
-import {isSome} from '../option.ts';
+import {createJsonFromToolTry} from '../tools/patka-tool-json.ts';
 import type {PatkaToolManual} from '../tools/patka-tool-manual.ts';
 import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
 import type {PatkaTools} from '../tools/patka-tools.ts';
@@ -30,8 +30,8 @@ const present = (patkaContextEntry: PatkaContextEntry): ReadonlyArray<string> =>
     .with({type: 'PatkaToolCall'}, () => [])
     .with({type: 'PatkaUserNotification'}, () => [])
     .with({type: 'PatkaError'}, () => [])
-    .with({type: 'PatkaToolResult'}, ({output}) => [
-      `Tool output: ${isSome(output) ? JSON.stringify(output.value) : 'none'}`,
+    .with({type: 'PatkaToolOutput'}, ({output}) => [
+      `Tool output: ${JSON.stringify(createJsonFromToolTry(output))}`,
     ])
     .exhaustive();
 

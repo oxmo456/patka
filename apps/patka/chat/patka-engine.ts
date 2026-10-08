@@ -84,7 +84,7 @@ function createChatEntryFromContextEntry(
       createChatEntryFromInferenceClientResponse(patkaInferenceClientResponse, author),
     )
     .with({type: 'PatkaToolCall'}, () => EMPTY)
-    .with({type: 'PatkaToolResult'}, () => EMPTY)
+    .with({type: 'PatkaToolOutput'}, () => EMPTY)
     .with({type: 'PatkaUserNotification'}, (patkaUserNotification) =>
       createChatEntryFromUserNotification(patkaUserNotification, author),
     )

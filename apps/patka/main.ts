@@ -12,6 +12,7 @@ import {
   extractOllamaModel,
 } from './inference/patka-inference.ts';
 import {Patka} from './patka.ts';
+import {ApplyPatch} from './tools/apply-patch/apply-patch.ts';
 import {GitDiff} from './tools/git-diff/git-diff.ts';
 import {GitStatus} from './tools/git-status/git-status.ts';
 import {ListFiles} from './tools/list-files/list-files.ts';
@@ -39,6 +40,7 @@ container.register(INFERENCE_CLIENT, {
 container.register(PATKA_TOOL, {useClass: ListFiles});
 container.register(PATKA_TOOL, {useClass: GitStatus});
 container.register(PATKA_TOOL, {useClass: GitDiff});
+container.register(PATKA_TOOL, {useClass: ApplyPatch});
 container.register(PATKA_TOOL, {useClass: ReadFile});
 container.register(PATKA_TOOL, {useClass: WriteFile});
 container.register(PATKA_TOOL, {useClass: ReportIncompetency});

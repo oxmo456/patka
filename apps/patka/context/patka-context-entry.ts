@@ -2,6 +2,7 @@ import type {UUID} from 'node:crypto';
 import type {JsonObject, JsonValue} from '../json.ts';
 import type {Option} from '../option.ts';
 import type {PatkaUtterance} from '../patka-utterance.ts';
+import type {Try} from '../try.ts';
 
 export type PatkaUserUtterance = {
   readonly type: 'PatkaUserUtterance';
@@ -22,11 +23,11 @@ export type PatkaToolCall = {
   readonly input: JsonObject;
 };
 
-export type PatkaToolResult = {
-  readonly type: 'PatkaToolResult';
+export type PatkaToolOutput = {
+  readonly type: 'PatkaToolOutput';
   readonly id: UUID;
   readonly name: string;
-  readonly output: Option<JsonValue>;
+  readonly output: Try<Option<JsonValue>>;
 };
 
 export type PatkaUserNotification = {
@@ -45,6 +46,6 @@ export type PatkaContextEntry =
   | PatkaUserUtterance
   | PatkaInferenceClientResponse
   | PatkaToolCall
-  | PatkaToolResult
+  | PatkaToolOutput
   | PatkaUserNotification
   | PatkaError;

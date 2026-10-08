@@ -8,7 +8,7 @@ import type {
   PatkaError,
   PatkaInferenceClientResponse,
   PatkaToolCall,
-  PatkaToolResult,
+  PatkaToolOutput,
   PatkaUserNotification,
 } from '../context/patka-context-entry.ts';
 import {INFERENCE_CLIENT} from '../inference/inference-client.token.ts';
@@ -17,6 +17,7 @@ import {DefaultPatkaPromptFactory} from '../prompt/default-patka-prompt-factory.
 import type {PatkaPromptFactory} from '../prompt/patka-prompt-factory.ts';
 import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
+import {REPORT_INCOMPETENCY} from '../tools/report-incompetency/report-incompetency.ts';
 import {WORKING_DIRECTORY} from '../working-directory.token.ts';
 import {AGENT_NAME} from './agent-name.token.ts';
 
@@ -63,8 +64,8 @@ export class PatkaAgent {
 
     return match(lastPatkaContextEntry)
       .with({type: 'PatkaUserUtterance'}, () => this.generate(patkaContextEntries))
-      .with({type: 'PatkaToolResult', output: {type: 'none'}}, () => this.notifyMissingTools())
-      .with({type: 'PatkaToolResult'}, () => this.generate(patkaContextEntries))
+      .with({type: 'PatkaToolOutput', name: REPORT_INCOMPETENCY}, () => this.notifyMissingTools())
+      .with({type: 'PatkaToolOutput'}, () => this.generate(patkaContextEntries))
       .with({type: 'PatkaInferenceClientResponse'}, (patkaInferenceClientResponse) =>
         this.processInferenceClientResponse(patkaInferenceClientResponse),
       )
@@ -127,8 +128,8 @@ export class PatkaAgent {
   private useTool(patkaToolCall: PatkaToolCall): Observable<PatkaContextEntry> {
     return this.patkaTools.invoke(patkaToolCall.name, patkaToolCall.input).pipe(
       map(
-        (output): PatkaToolResult => ({
-          type: 'PatkaToolResult',
+        (output): PatkaToolOutput => ({
+          type: 'PatkaToolOutput',
           id: randomUUID(),
           name: patkaToolCall.name,
           output,

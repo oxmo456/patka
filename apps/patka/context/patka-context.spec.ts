@@ -1,6 +1,7 @@
 import {randomUUID} from 'node:crypto';
 import {describe, expect, it} from 'vitest';
 import {some} from '../option.ts';
+import {success} from '../try.ts';
 import {PatkaContext} from './patka-context.ts';
 import type {PatkaContextEntry} from './patka-context-entry.ts';
 
@@ -43,16 +44,16 @@ describe('PatkaContext', () => {
       input: {path: 'note.txt'},
     });
     patkaContext.append({
-      type: 'PatkaToolResult',
+      type: 'PatkaToolOutput',
       id: randomUUID(),
       name: 'read_file',
-      output: some('hello'),
+      output: success(some('hello')),
     });
 
     expect(received.map((patkaContextEntry) => patkaContextEntry.type)).toEqual([
       'PatkaUserUtterance',
       'PatkaToolCall',
-      'PatkaToolResult',
+      'PatkaToolOutput',
     ]);
   });
 

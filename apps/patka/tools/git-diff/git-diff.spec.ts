@@ -29,7 +29,10 @@ describe('GitDiff', () => {
     try {
       const output = await firstValueFrom(new GitDiff().invoke({relativePath: 'note.txt'}));
 
-      expect(output).toEqual({type: 'some', value: expect.stringContaining('+hello patka')});
+      expect(output).toEqual({
+        type: 'success',
+        value: {type: 'some', value: expect.stringContaining('+hello patka')},
+      });
     } finally {
       cd(before);
     }
@@ -51,16 +54,19 @@ describe('GitDiff', () => {
     try {
       const output = await firstValueFrom(new GitDiff().invoke({relativePath: 'note.txt'}));
 
-      expect(output).toEqual({type: 'some', value: ''});
+      expect(output).toEqual({type: 'success', value: {type: 'some', value: ''}});
     } finally {
       cd(before);
     }
   });
 
   it('refuses an absolute path', async () => {
-    await expect(
-      firstValueFrom(new GitDiff().invoke({relativePath: join(tmpdir(), 'note.txt')})),
-    ).rejects.toThrow('only accepts a relative path');
+    expect(
+      await firstValueFrom(new GitDiff().invoke({relativePath: join(tmpdir(), 'note.txt')})),
+    ).toMatchObject({
+      type: 'failure',
+      error: {message: expect.stringContaining('only accepts a relative path')},
+    });
   });
 
   it('does not run git until subscribed', () => {

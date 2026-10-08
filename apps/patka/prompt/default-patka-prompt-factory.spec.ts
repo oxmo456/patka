@@ -1,10 +1,11 @@
 import {randomUUID} from 'node:crypto';
 import {describe, expect, it} from 'vitest';
 import type {PatkaContextEntry} from '../context/patka-context-entry.ts';
-import {none, some} from '../option.ts';
+import {some} from '../option.ts';
 import {ListFiles} from '../tools/list-files/list-files.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
 import {ReadFile} from '../tools/read-file/read-file.ts';
+import {failure, success} from '../try.ts';
 import {DefaultPatkaPromptFactory} from './default-patka-prompt-factory.ts';
 
 const said = (content: string): PatkaContextEntry => ({
@@ -130,33 +131,44 @@ describe('DefaultPatkaPromptFactory', () => {
     expect(prompt).toContain('$$$invoke(read_file, {"relativePath": "notes.txt"})');
   });
 
-  it('shows the output a tool gave back', () => {
-    const patkaToolResult: PatkaContextEntry = {
-      type: 'PatkaToolResult',
-      id: randomUUID(),
-      name: 'read_file',
-      output: some('hello'),
-    };
+  it('gives the model the success and failure form of each tool output', () => {
+    const prompt = new DefaultPatkaPromptFactory(
+      new PatkaTools([new ReadFile()]),
+      '/home/user',
+    ).create([]);
 
-    const prompt = new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create([
-      patkaToolResult,
-    ]);
-
-    expect(prompt).toContain('Tool output: "hello"');
+    expect(prompt).toContain('"type":{"const":"failure"}');
   });
 
-  it('says none when a tool gave back nothing', () => {
+  it('shows the success output a tool gave back', () => {
     const patkaToolResult: PatkaContextEntry = {
-      type: 'PatkaToolResult',
+      type: 'PatkaToolOutput',
       id: randomUUID(),
       name: 'read_file',
-      output: none,
+      output: success(some('hello')),
     };
 
     const prompt = new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create([
       patkaToolResult,
     ]);
 
-    expect(prompt).toContain('Tool output: none');
+    expect(prompt).toContain(
+      'Tool output: {"type":"success","value":{"type":"some","value":"hello"}}',
+    );
+  });
+
+  it('shows the failure output a tool gave back', () => {
+    const patkaToolResult: PatkaContextEntry = {
+      type: 'PatkaToolOutput',
+      id: randomUUID(),
+      name: 'read_file',
+      output: failure(new Error('file not found')),
+    };
+
+    const prompt = new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create([
+      patkaToolResult,
+    ]);
+
+    expect(prompt).toContain('Tool output: {"type":"failure","error":"file not found"}');
   });
 });

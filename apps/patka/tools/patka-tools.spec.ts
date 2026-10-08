@@ -1,7 +1,8 @@
-import {firstValueFrom, of} from 'rxjs';
+import {firstValueFrom, of, throwError} from 'rxjs';
 import {describe, expect, it, type Mock, vi} from 'vitest';
 import type {JsonObject, JsonValue} from '../json.ts';
 import {some} from '../option.ts';
+import {success} from '../try.ts';
 import {ListFiles} from './list-files/list-files.ts';
 import type {PatkaTool} from './patka-tool.ts';
 import {PatkaTools} from './patka-tools.ts';
@@ -17,7 +18,7 @@ const aTool = (name: string, answer: string): FakeTool => ({
     input: {type: 'object' as const, properties: {}, required: []},
     output: {type: 'string' as const},
   },
-  invoke: vi.fn(() => of(some(answer))),
+  invoke: vi.fn(() => of(success(some(answer)))),
 });
 
 describe('PatkaTools', () => {
@@ -38,17 +39,32 @@ describe('PatkaTools', () => {
 
     const output = await firstValueFrom(patkaTools.invoke('read_file', {relativePath: 'note.txt'}));
 
-    expect(output).toEqual(some('read'));
+    expect(output).toEqual(success(some('read')));
     expect(readFile.invoke).toHaveBeenCalledWith({relativePath: 'note.txt'});
     expect(listFiles.invoke).not.toHaveBeenCalled();
   });
 
-  it('fails when no tool carries that name', async () => {
+  it('gives failure when no tool carries that name', async () => {
     const patkaTools = new PatkaTools([aTool('list_files', 'listed')]);
 
-    await expect(firstValueFrom(patkaTools.invoke('write_file', {}))).rejects.toThrow(
-      'patka has no tool named "write_file"',
-    );
+    const output = await firstValueFrom(patkaTools.invoke('write_file', {}));
+
+    expect(output).toEqual({
+      type: 'failure',
+      error: new Error('patka has no tool named "write_file"'),
+    });
+  });
+
+  it('gives failure with the error message when the tool fails', async () => {
+    const readFile: FakeTool = {
+      ...aTool('read_file', 'read'),
+      invoke: vi.fn(() => throwError(() => new Error('file not found'))),
+    };
+    const patkaTools = new PatkaTools([readFile]);
+
+    const output = await firstValueFrom(patkaTools.invoke('read_file', {relativePath: 'note.txt'}));
+
+    expect(output).toEqual({type: 'failure', error: new Error('file not found')});
   });
 
   it('does not invoke anything until subscribed', () => {

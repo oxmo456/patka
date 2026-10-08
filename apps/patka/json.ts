@@ -11,8 +11,10 @@ export type JsonObjectSchema = {
 };
 
 export type JsonSchema = {
-  readonly type: 'object' | 'array' | 'string' | 'number' | 'boolean';
+  readonly type?: 'object' | 'array' | 'string' | 'number' | 'boolean';
   readonly description?: string;
+  readonly const?: JsonValue;
+  readonly oneOf?: ReadonlyArray<JsonSchema>;
   readonly properties?: JsonObject;
   readonly items?: JsonObject;
   readonly required?: ReadonlyArray<string>;

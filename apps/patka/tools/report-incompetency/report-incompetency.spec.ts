@@ -1,6 +1,7 @@
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it} from 'vitest';
 import {none} from '../../option.ts';
+import {success} from '../../try.ts';
 import {ReportIncompetency} from './report-incompetency.ts';
 
 describe('ReportIncompetency', () => {
@@ -10,11 +11,11 @@ describe('ReportIncompetency', () => {
     expect(reportIncompetency.manual.name).toBe('report_incompetency');
   });
 
-  it('gives none as output', async () => {
+  it('gives an empty success as output', async () => {
     const reportIncompetency = new ReportIncompetency();
 
     const output = await firstValueFrom(reportIncompetency.invoke());
 
-    expect(output).toEqual(none);
+    expect(output).toEqual(success(none));
   });
 });

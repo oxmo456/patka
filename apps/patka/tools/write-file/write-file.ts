@@ -1,8 +1,9 @@
 import {writeFile} from 'node:fs/promises';
 import {isAbsolute as isPathAbsolute} from 'node:path';
-import {defer, from, map, type Observable} from 'rxjs';
+import {catchError, defer, from, map, type Observable, of} from 'rxjs';
 import {injectable} from 'tsyringe';
 import {type Option, some} from '../../option.ts';
+import {failure, success, type Try} from '../../try.ts';
 import type {PatkaTool} from '../patka-tool.ts';
 import type {PatkaToolManual} from '../patka-tool-manual.ts';
 
@@ -33,12 +34,40 @@ export class WriteFile implements PatkaTool<WriteFileInput, string> {
       required: ['relativePath', 'content'],
     },
     output: {
-      type: 'string',
-      description: 'The path of the file that was written.',
+      oneOf: [
+        {
+          type: 'object',
+          description: 'The tool worked.',
+          properties: {
+            type: {const: 'success'},
+            value: {
+              type: 'object',
+              properties: {
+                type: {const: 'some'},
+                value: {
+                  type: 'string',
+                  description: 'The path of the file that was written.',
+                },
+              },
+              required: ['type', 'value'],
+            },
+          },
+          required: ['type', 'value'],
+        },
+        {
+          type: 'object',
+          description: 'The tool failed.',
+          properties: {
+            type: {const: 'failure'},
+            error: {type: 'string', description: 'Why the tool failed.'},
+          },
+          required: ['type', 'error'],
+        },
+      ],
     },
   };
 
-  invoke(writeFileInput: WriteFileInput): Observable<Option<string>> {
+  invoke(writeFileInput: WriteFileInput): Observable<Try<Option<string>>> {
     return defer(() => {
       if (isPathAbsolute(writeFileInput.relativePath)) {
         throw new Error(
@@ -47,8 +76,8 @@ export class WriteFile implements PatkaTool<WriteFileInput, string> {
       }
 
       return from(writeFile(writeFileInput.relativePath, writeFileInput.content, 'utf8')).pipe(
-        map(() => some(writeFileInput.relativePath)),
+        map(() => success(some(writeFileInput.relativePath))),
       );
-    });
+    }).pipe(catchError((error: Error) => of(failure(error))));
   }
 }

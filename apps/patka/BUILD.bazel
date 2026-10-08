@@ -17,6 +17,7 @@ ts_project(
         "option.ts",
         "tools/patka-tool.ts",
         "tools/patka-tool-manual.ts",
+        "try.ts",
     ],
     declaration = True,
     transpiler = "tsc",
@@ -38,6 +39,7 @@ ts_project(
             "option.ts",
             "tools/patka-tool.ts",
             "tools/patka-tool-manual.ts",
+            "try.ts",
             "vitest.config.ts",
         ],
     ),
@@ -47,6 +49,7 @@ ts_project(
     tsconfig = "tsconfig.json",
     deps = [
         ":tool",
+        "//apps/patka/tools/apply-patch",
         "//apps/patka/tools/git-diff",
         "//apps/patka/tools/git-status",
         "//apps/patka/tools/list-files",
@@ -94,6 +97,7 @@ vitest_bin.vitest_test(
     data = glob(["**/*.ts"]) + [
         "prompt/instruction.md",
         "tsconfig.json",
+        "//apps/patka/tools/apply-patch:test_data",
         "//apps/patka/tools/git-diff:test_data",
         "//apps/patka/tools/git-status:test_data",
         "//apps/patka/tools/list-files:test_data",

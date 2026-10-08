@@ -1,6 +1,7 @@
 import {type Observable, of} from 'rxjs';
 import {injectable} from 'tsyringe';
 import {none, type Option} from '../../option.ts';
+import {success, type Try} from '../../try.ts';
 import type {PatkaTool} from '../patka-tool.ts';
 import type {PatkaToolManual} from '../patka-tool-manual.ts';
 
@@ -14,10 +15,12 @@ export type ReportIncompetencyInput = {
   readonly toolSuggestion: ReadonlyArray<string>;
 };
 
+export const REPORT_INCOMPETENCY = 'report_incompetency';
+
 @injectable()
 export class ReportIncompetency implements PatkaTool<ReportIncompetencyInput, string> {
   readonly manual: PatkaToolManual = {
-    name: 'report_incompetency',
+    name: REPORT_INCOMPETENCY,
     summary: 'Tells whoever asked that you have no tool for the job.',
     usage: 'Use it only when the request needs a tool that is not in this list.',
     input: {
@@ -49,12 +52,36 @@ export class ReportIncompetency implements PatkaTool<ReportIncompetencyInput, st
       required: ['model', 'request', 'rationale', 'toolSuggestion'],
     },
     output: {
-      type: 'string',
-      description: 'Nothing. The report has no output.',
+      oneOf: [
+        {
+          type: 'object',
+          description: 'The report was sent. It has no output.',
+          properties: {
+            type: {const: 'success'},
+            value: {
+              type: 'object',
+              properties: {
+                type: {const: 'none'},
+              },
+              required: ['type'],
+            },
+          },
+          required: ['type', 'value'],
+        },
+        {
+          type: 'object',
+          description: 'The tool failed.',
+          properties: {
+            type: {const: 'failure'},
+            error: {type: 'string', description: 'Why the tool failed.'},
+          },
+          required: ['type', 'error'],
+        },
+      ],
     },
   };
 
-  invoke(): Observable<Option<string>> {
-    return of(none);
+  invoke(): Observable<Try<Option<string>>> {
+    return of(success(none));
   }
 }
