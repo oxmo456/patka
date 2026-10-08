@@ -4,6 +4,7 @@ import {inject, injectable} from 'tsyringe';
 import type {Disposable} from '../disposable.ts';
 import type {JsonObject} from '../json.ts';
 import {PatkaLogger} from '../patka-logger.ts';
+import {createJsonFromToolTry} from '../tools/patka-tool-json.ts';
 import {PatkaContext} from './patka-context.ts';
 import type {PatkaContextEntry} from './patka-context-entry.ts';
 
@@ -14,7 +15,10 @@ const toDetails = (patkaContextEntry: PatkaContextEntry): JsonObject =>
     .with({type: 'PatkaToolCall'}, ({name, input}) => ({name, input}))
     .with({type: 'PatkaUserNotification'}, ({content}) => ({content}))
     .with({type: 'PatkaError'}, ({error}) => ({error: String(error)}))
-    .with({type: 'PatkaToolResult'}, ({name, output}) => ({name, output}))
+    .with({type: 'PatkaToolOutput'}, ({name, output}) => ({
+      name,
+      output: createJsonFromToolTry(output),
+    }))
     .exhaustive();
 
 @injectable()

@@ -1,32 +1,32 @@
-import {readFile} from 'node:fs/promises';
-import {isAbsolute as isPathAbsolute} from 'node:path';
-import {catchError, defer, from, map, type Observable, of} from 'rxjs';
+import {catchError, defer, type Observable, of} from 'rxjs';
 import {injectable} from 'tsyringe';
+import {$} from 'zx';
 import {type Option, some} from '../../option.ts';
 import {failure, success, type Try} from '../../try.ts';
 import type {PatkaTool} from '../patka-tool.ts';
 import type {PatkaToolManual} from '../patka-tool-manual.ts';
 
-export type ReadFileInput = {
-  readonly relativePath: string;
+export type ApplyPatchInput = {
+  readonly patch: string;
 };
 
 @injectable()
-export class ReadFile implements PatkaTool<ReadFileInput, string> {
+export class ApplyPatch implements PatkaTool<ApplyPatchInput, string> {
   readonly manual: PatkaToolManual = {
-    name: 'read_file',
-    summary: 'Reads the whole contents of a file.',
-    usage: 'Use it once you know the path of the file you need to read.',
+    name: 'apply_patch',
+    summary: 'Applies a unified diff to the files: creates, changes or deletes them.',
+    usage:
+      'Use it to change part of a file without writing the whole file again. Read the file first, so the context lines of the patch are exact.',
     input: {
       type: 'object',
       properties: {
-        relativePath: {
+        patch: {
           type: 'string',
           description:
-            'Relative path of the file to read, from the working directory (e.g. "notes.txt" or "src/main.ts"). Never an absolute path: a path starting with "/" is refused.',
+            'A unified diff, as "git diff" prints it. Paths are relative to the working directory, with the "a/" and "b/" prefixes (e.g. "--- a/src/main.ts" and "+++ b/src/main.ts"). Use "--- /dev/null" to create a file and "+++ /dev/null" to delete one.',
         },
       },
-      required: ['relativePath'],
+      required: ['patch'],
     },
     output: {
       oneOf: [
@@ -41,7 +41,8 @@ export class ReadFile implements PatkaTool<ReadFileInput, string> {
                 type: {const: 'some'},
                 value: {
                   type: 'string',
-                  description: 'The whole contents of the file, as text.',
+                  description:
+                    'What git prints: one line per file it checked and applied, and any warning.',
                 },
               },
               required: ['type', 'value'],
@@ -62,17 +63,16 @@ export class ReadFile implements PatkaTool<ReadFileInput, string> {
     },
   };
 
-  invoke(readFileInput: ReadFileInput): Observable<Try<Option<string>>> {
-    return defer(() => {
-      if (isPathAbsolute(readFileInput.relativePath)) {
-        throw new Error(
-          `read_file only accepts a relative path, given "${readFileInput.relativePath}"`,
-        );
-      }
+  invoke(applyPatchInput: ApplyPatchInput): Observable<Try<Option<string>>> {
+    return defer(async () => {
+      const processOutput = await $({
+        input: applyPatchInput.patch,
+        nothrow: true,
+      })`git apply --recount --verbose`;
 
-      return from(readFile(readFileInput.relativePath, 'utf8')).pipe(
-        map((value) => success(some(value))),
-      );
+      return processOutput.exitCode === 0
+        ? success(some(processOutput.stdall))
+        : failure(new Error(processOutput.stdall));
     }).pipe(catchError((error: Error) => of(failure(error))));
   }
 }

@@ -2,6 +2,7 @@ import {randomUUID} from 'node:crypto';
 import {describe, expect, it} from 'vitest';
 import {PatkaContext} from '../context/patka-context.ts';
 import {some} from '../option.ts';
+import {success} from '../try.ts';
 import type {PatkaChatEntry} from './patka-chat-entry.ts';
 import {PatkaEngine} from './patka-engine.ts';
 
@@ -94,10 +95,10 @@ describe('PatkaEngine', () => {
       });
 
       patkaContext.append({
-        type: 'PatkaToolResult',
+        type: 'PatkaToolOutput',
         id: randomUUID(),
         name: 'read_file',
-        output: some('hello'),
+        output: success(some('hello')),
       });
 
       expect(patkaChatEntries).toEqual([]);
