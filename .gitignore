@@ -4,3 +4,4 @@ bazel-*
 .claude/
 /target
 node_modules/
+package-lock.json
