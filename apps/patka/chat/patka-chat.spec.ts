@@ -1,6 +1,5 @@
 import {randomUUID} from 'node:crypto';
 import {describe, expect, it} from 'vitest';
-import {none} from '../option.ts';
 import {PatkaChat} from './patka-chat.ts';
 import type {PatkaChatEntry} from './patka-chat-entry.ts';
 
@@ -10,7 +9,7 @@ const anEntry = (message: string, id = randomUUID()): PatkaChatEntry => ({
   author: 'you',
   message,
   status: 'complete',
-  duration: none,
+  metadata: {},
 });
 
 describe('PatkaChat', () => {
@@ -44,7 +43,7 @@ describe('PatkaChat', () => {
         author: 'patka',
         message: '',
         status: 'pending',
-        duration: none,
+        metadata: {},
       });
       patkaChat.push(anEntry('later'));
 
@@ -54,7 +53,7 @@ describe('PatkaChat', () => {
         author: 'patka',
         message: 'the answer',
         status: 'complete',
-        duration: none,
+        metadata: {},
       });
 
       expect(patkaChatEntries.map((patkaChatEntry) => patkaChatEntry.message)).toEqual([
@@ -87,7 +86,7 @@ describe('PatkaChat', () => {
         author: 'patka',
         message: '',
         status: 'pending',
-        duration: none,
+        metadata: {},
       });
       const received: Array<string> = [];
       patkaChat.patkaChatEntries.subscribe((patkaChatEntries) =>
@@ -100,7 +99,7 @@ describe('PatkaChat', () => {
         author: 'patka',
         message: 'the answer',
         status: 'complete',
-        duration: none,
+        metadata: {},
       });
 
       expect(received).toEqual(['pending', 'complete']);

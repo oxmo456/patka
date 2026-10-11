@@ -11,10 +11,12 @@ import type {
 } from '../context/patka-context-entry.ts';
 import type {Disposable} from '../disposable.ts';
 import type {Duration} from '../duration.ts';
+import type {InferenceUsage} from '../inference/inference-usage.ts';
 import {none, type Option, some} from '../option.ts';
 import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
 import {PatkaChat} from './patka-chat.ts';
 import type {PatkaChatEntry} from './patka-chat-entry.ts';
+import type {PatkaChatEntryMetadata} from './patka-chat-entry-metadata.ts';
 
 const USER = 'you';
 
@@ -36,6 +38,63 @@ function extractDurationFromRoot(
     .exhaustive();
 }
 
+function extractTokenUsageFromRoot(
+  patkaContextEntry: PatkaContextEntry,
+  patkaContextEntries: ReadonlyArray<PatkaContextEntry>,
+): Option<InferenceUsage> {
+  return match(patkaContextEntry.root)
+    .with(
+      {type: 'some'},
+      ({value}): Option<InferenceUsage> =>
+        some(
+          patkaContextEntries
+            .flatMap((candidate) =>
+              candidate.type === 'PatkaInferenceClientResponse' &&
+              candidate.root.type === 'some' &&
+              candidate.root.value === value
+                ? [candidate.usage]
+                : [],
+            )
+            .reduce(
+              (total: InferenceUsage, usage: InferenceUsage): InferenceUsage => ({
+                inputTokens: total.inputTokens + usage.inputTokens,
+                outputTokens: total.outputTokens + usage.outputTokens,
+              }),
+              {inputTokens: 0, outputTokens: 0},
+            ),
+        ),
+    )
+    .with({type: 'none'}, (): Option<InferenceUsage> => none)
+    .exhaustive();
+}
+
+function createMetadataFromRoot(
+  patkaContextEntry: PatkaContextEntry,
+  patkaContextEntries: ReadonlyArray<PatkaContextEntry>,
+): PatkaChatEntryMetadata {
+  return {
+    ...match(extractDurationFromRoot(patkaContextEntry, patkaContextEntries))
+      .with(
+        {type: 'some'},
+        ({value}): PatkaChatEntryMetadata => ({
+          duration: `${Math.round(value)} ms`,
+        }),
+      )
+      .with({type: 'none'}, (): PatkaChatEntryMetadata => ({}))
+      .exhaustive(),
+    ...match(extractTokenUsageFromRoot(patkaContextEntry, patkaContextEntries))
+      .with(
+        {type: 'some'},
+        ({value}): PatkaChatEntryMetadata => ({
+          'input tokens': `${value.inputTokens}`,
+          'output tokens': `${value.outputTokens}`,
+        }),
+      )
+      .with({type: 'none'}, (): PatkaChatEntryMetadata => ({}))
+      .exhaustive(),
+  };
+}
+
 function createChatEntryFromUserUtterance(
   patkaUserUtterance: PatkaUserUtterance,
 ): Observable<PatkaChatEntry> {
@@ -45,7 +104,7 @@ function createChatEntryFromUserUtterance(
     author: USER,
     message: patkaUserUtterance.utterance.content,
     status: 'complete',
-    duration: none,
+    metadata: {},
   });
 }
 
@@ -62,7 +121,7 @@ function createChatEntryFromInferenceClientResponse(
         author,
         message: patkaInferenceClientResponse.content,
         status: 'complete',
-        duration: extractDurationFromRoot(patkaInferenceClientResponse, patkaContextEntries),
+        metadata: createMetadataFromRoot(patkaInferenceClientResponse, patkaContextEntries),
       });
 }
 
@@ -77,7 +136,7 @@ function createChatEntryFromUserNotification(
     author,
     message: patkaUserNotification.content,
     status: 'complete',
-    duration: extractDurationFromRoot(patkaUserNotification, patkaContextEntries),
+    metadata: createMetadataFromRoot(patkaUserNotification, patkaContextEntries),
   });
 }
 

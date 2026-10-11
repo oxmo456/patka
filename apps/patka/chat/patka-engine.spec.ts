@@ -88,10 +88,66 @@ describe('PatkaEngine', () => {
         content: 'world',
       });
 
-      expect(patkaChatEntries.map((entry) => entry.duration)).toEqual([none, some(1200)]);
+      expect(patkaChatEntries.at(-1)?.metadata.duration).toBe('1200 ms');
     });
 
-    it('gives no duration to what the user said', () => {
+    it('gives a reply the tokens of every inference since the request of the user', () => {
+      const patkaContext = new PatkaContext();
+      const patkaEngine = new PatkaEngine(patkaContext, 'patka');
+      let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
+      patkaEngine.patkaChatEntries.subscribe((content) => {
+        patkaChatEntries = content;
+      });
+      const otherPatkaUserUtteranceId = randomUUID();
+      const patkaUserUtteranceId = randomUUID();
+
+      patkaContext.append({
+        type: 'PatkaInferenceClientResponse',
+        timestamp: 0,
+        performanceTimestamp: 0,
+        root: some(otherPatkaUserUtteranceId),
+        parent: some(otherPatkaUserUtteranceId),
+        id: randomUUID(),
+        usage: {inputTokens: 100, outputTokens: 100},
+        content: 'other',
+      });
+      patkaContext.append({
+        type: 'PatkaUserUtterance',
+        timestamp: 0,
+        performanceTimestamp: 0,
+        root: none,
+        parent: none,
+        id: patkaUserUtteranceId,
+        utterance: {content: 'hello', timestamp: new Date(), id: randomUUID()},
+      });
+      patkaContext.append({
+        type: 'PatkaInferenceClientResponse',
+        timestamp: 0,
+        performanceTimestamp: 0,
+        root: some(patkaUserUtteranceId),
+        parent: some(patkaUserUtteranceId),
+        id: randomUUID(),
+        usage: {inputTokens: 10, outputTokens: 2},
+        content: '$$$invoke(read_file, {"path": "note.txt"})',
+      });
+      patkaContext.append({
+        type: 'PatkaInferenceClientResponse',
+        timestamp: 0,
+        performanceTimestamp: 0,
+        root: some(patkaUserUtteranceId),
+        parent: some(patkaUserUtteranceId),
+        id: randomUUID(),
+        usage: {inputTokens: 20, outputTokens: 3},
+        content: 'world',
+      });
+
+      expect(patkaChatEntries.at(-1)?.metadata).toMatchObject({
+        'input tokens': '30',
+        'output tokens': '5',
+      });
+    });
+
+    it('gives no metadata to what the user said', () => {
       const patkaContext = new PatkaContext();
       const patkaEngine = new PatkaEngine(patkaContext, 'patka');
       let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
@@ -109,7 +165,7 @@ describe('PatkaEngine', () => {
         utterance: {content: 'hello', timestamp: new Date(), id: randomUUID()},
       });
 
-      expect(patkaChatEntries.map((entry) => entry.duration)).toEqual([none]);
+      expect(patkaChatEntries.map((entry) => entry.metadata)).toEqual([{}]);
     });
 
     it('names the agent as the author of a reply', () => {

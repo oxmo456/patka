@@ -20,6 +20,8 @@ const USER_STYLE = `{${SOLARIZED.blue}-bg}{${SOLARIZED.base3}-fg}`;
 
 const AGENT_STYLE = `{${SOLARIZED.base02}-bg}{${SOLARIZED.base0}-fg}`;
 
+const METADATA_STYLE = `{${SOLARIZED.base01}-fg}`;
+
 const CHAT_WIDTH = '50%';
 
 const MIN_WIDTH = 8;
@@ -69,19 +71,24 @@ const toBubble = (patkaChatEntry: PatkaChatEntry, width: number): ReadonlyArray<
     .with('complete', 'failed', () => patkaChatEntry.message)
     .exhaustive();
   const bubbleWidth = Math.max(MIN_WIDTH, width - 1);
-  const durationLines: ReadonlyArray<string> = match(patkaChatEntry.duration)
-    .with({type: 'some'}, ({value}) => ['', `${Math.round(value)} ms`])
-    .with({type: 'none'}, () => [])
-    .exhaustive();
-  const lines = [...toMarkdownLines(text), ...durationLines].flatMap((line) =>
-    wrap(line, bubbleWidth),
-  );
   const style = match(patkaChatEntry.role)
     .with('user', () => USER_STYLE)
     .with('agent', () => AGENT_STYLE)
     .exhaustive();
 
-  return lines.map((line) => `${style}${line}${' '.repeat(bubbleWidth - visibleLength(line))} {/}`);
+  const textLines = toMarkdownLines(text).flatMap((line) => wrap(line, bubbleWidth));
+  const metadataLines = Object.entries(patkaChatEntry.metadata)
+    .flatMap(([key, value]) => wrap(`${key}: ${value}`, bubbleWidth))
+    .map(escapeTags);
+  const toBubbleLine = (line: string, lineStyle: string): string =>
+    `${lineStyle}${line}${' '.repeat(bubbleWidth - visibleLength(line))} {/}`;
+
+  return [
+    ...textLines.map((line) => toBubbleLine(line, style)),
+    ...(metadataLines.length === 0 ? [] : ['', ...metadataLines]).map((line) =>
+      toBubbleLine(line, `${style}${METADATA_STYLE}`),
+    ),
+  ];
 };
 
 const toDetailLines = (record: Record<string, unknown>, width: number): ReadonlyArray<string> =>
