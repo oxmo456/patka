@@ -21,6 +21,14 @@ export class OllamaInferenceClient implements InferenceClient {
           prompt: inferenceClientInput.prompt,
         }),
       ),
-    ).pipe(map((response) => ({content: response.response})));
+    ).pipe(
+      map((response) => ({
+        content: response.response,
+        usage: {
+          inputTokens: response.prompt_eval_count ?? 0,
+          outputTokens: response.eval_count ?? 0,
+        },
+      })),
+    );
   }
 }

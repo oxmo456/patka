@@ -130,6 +130,7 @@ export class PatkaAgent {
             durationSinceParent: createPerformanceTimestamp() - parent.performanceTimestamp,
           }),
           content: inferenceClientResponse.content,
+          usage: inferenceClientResponse.usage,
         }),
       ),
       catchError(

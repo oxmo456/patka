@@ -26,6 +26,7 @@ describe('PatkaContext', () => {
       performanceTimestamp: 0,
       origin: none,
       id: randomUUID(),
+      usage: {inputTokens: 0, outputTokens: 0},
       content: 'Paris',
     });
 
@@ -81,6 +82,7 @@ describe('PatkaContext', () => {
       performanceTimestamp: 0,
       origin: none,
       id: randomUUID(),
+      usage: {inputTokens: 0, outputTokens: 0},
       content: 'Paris',
     });
     patkaContext.append({
@@ -89,6 +91,7 @@ describe('PatkaContext', () => {
       performanceTimestamp: 0,
       origin: none,
       id: randomUUID(),
+      usage: {inputTokens: 0, outputTokens: 0},
       content: 'Berlin',
     });
     const received: Array<PatkaContextEntry> = [];

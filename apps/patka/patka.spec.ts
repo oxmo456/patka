@@ -49,7 +49,7 @@ describe('Patka', () => {
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {
-      useValue: {generate: () => of({content: 'Paris'})},
+      useValue: {generate: () => of({content: 'Paris', usage: {inputTokens: 0, outputTokens: 0}})},
     });
     child.register(PATKA_TOOL, {useClass: ListFiles});
     child.register(PATKA_TOOL, {useClass: ReadFile});
@@ -81,7 +81,7 @@ describe('Patka', () => {
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {
-      useValue: {generate: () => of({content: 'Paris'})},
+      useValue: {generate: () => of({content: 'Paris', usage: {inputTokens: 0, outputTokens: 0}})},
     });
     child.register(PATKA_TOOL, {useClass: ListFiles});
     child.register(PATKA_TOOL, {useClass: ReadFile});

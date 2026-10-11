@@ -15,6 +15,28 @@ describe('OllamaInferenceClient', () => {
     expect(response.content).toBe('world');
   });
 
+  it('gives the tokens sent and received', async () => {
+    const ollama = {
+      generate: vi.fn(async () => ({response: 'world', prompt_eval_count: 3, eval_count: 5})),
+    } as unknown as Ollama;
+    const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
+
+    const response = await firstValueFrom(ollamaInferenceClient.generate({prompt: 'hello'}));
+
+    expect(response.usage).toEqual({inputTokens: 3, outputTokens: 5});
+  });
+
+  it('gives zero tokens sent when Ollama does not count them', async () => {
+    const ollama = {
+      generate: vi.fn(async () => ({response: 'world', eval_count: 5})),
+    } as unknown as Ollama;
+    const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
+
+    const response = await firstValueFrom(ollamaInferenceClient.generate({prompt: 'hello'}));
+
+    expect(response.usage.inputTokens).toBe(0);
+  });
+
   it('asks the configured model with the message as the prompt', async () => {
     const ollama = {
       generate: vi.fn(async () => ({response: 'world'})),

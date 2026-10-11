@@ -1,5 +1,5 @@
 import {spawn} from 'node:child_process';
-import {Observable, type Subscriber} from 'rxjs';
+import {map, Observable, type Subscriber} from 'rxjs';
 import type {InferenceClient} from './inference-client.ts';
 import type {InferenceClientInput} from './inference-client-input.ts';
 import type {InferenceClientResponse} from './inference-client-response.ts';
@@ -9,6 +9,8 @@ const SYSTEM_PROMPT =
 
 const ARGUMENTS: ReadonlyArray<string> = [
   '--print',
+  '--output-format',
+  'json',
   '--system-prompt',
   SYSTEM_PROMPT,
   '--restricted',
@@ -16,6 +18,26 @@ const ARGUMENTS: ReadonlyArray<string> = [
   '--strict-mcp-config',
   '--no-session-persistence',
 ];
+
+type ClaudeOutput = {
+  readonly result: string;
+  readonly usage: {
+    readonly input_tokens: number;
+    readonly output_tokens: number;
+  };
+};
+
+function createInferenceClientResponseFromClaudeOutput(
+  claudeOutput: ClaudeOutput,
+): InferenceClientResponse {
+  return {
+    content: claudeOutput.result.trim(),
+    usage: {
+      inputTokens: claudeOutput.usage.input_tokens,
+      outputTokens: claudeOutput.usage.output_tokens,
+    },
+  };
+}
 
 export class ClaudeInferenceClient implements InferenceClient {
   private readonly command: string;
@@ -25,7 +47,7 @@ export class ClaudeInferenceClient implements InferenceClient {
   }
 
   generate(inferenceClientInput: InferenceClientInput): Observable<InferenceClientResponse> {
-    return new Observable((subscriber: Subscriber<InferenceClientResponse>) => {
+    return new Observable((subscriber: Subscriber<string>) => {
       const claude = spawn(this.command, [...ARGUMENTS, inferenceClientInput.prompt]);
       let answer = '';
 
@@ -39,7 +61,7 @@ export class ClaudeInferenceClient implements InferenceClient {
 
       claude.on('close', (code: number | null): void => {
         if (code === 0) {
-          subscriber.next({content: answer.trim()});
+          subscriber.next(answer);
           subscriber.complete();
         } else {
           subscriber.error(new Error(`${this.command} exited with code ${code}`));
@@ -49,6 +71,6 @@ export class ClaudeInferenceClient implements InferenceClient {
       return (): void => {
         claude.kill();
       };
-    });
+    }).pipe(map((answer) => createInferenceClientResponseFromClaudeOutput(JSON.parse(answer))));
   }
 }

@@ -1,4 +1,5 @@
 import type {UUID} from 'node:crypto';
+import type {InferenceUsage} from '../inference/inference-usage.ts';
 import type {JsonObject, JsonValue} from '../json.ts';
 import type {Option} from '../option.ts';
 import type {PatkaUtterance} from '../patka-utterance.ts';
@@ -23,6 +24,7 @@ export type PatkaInferenceClientResponse = {
   readonly performanceTimestamp: PerformanceTimestamp;
   readonly origin: Option<PatkaContextEntryOrigin>;
   readonly content: string;
+  readonly usage: InferenceUsage;
 };
 
 export type PatkaToolCall = {

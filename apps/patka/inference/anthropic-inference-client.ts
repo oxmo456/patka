@@ -30,6 +30,14 @@ export class AnthropicInferenceClient implements InferenceClient {
           messages: [{role: 'user', content: inferenceClientInput.prompt}],
         }),
       ),
-    ).pipe(map((response) => ({content: toContent(response)})));
+    ).pipe(
+      map((response) => ({
+        content: toContent(response),
+        usage: {
+          inputTokens: response.usage.input_tokens,
+          outputTokens: response.usage.output_tokens,
+        },
+      })),
+    );
   }
 }

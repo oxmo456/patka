@@ -71,6 +71,7 @@ describe('PatkaEngine', () => {
         performanceTimestamp: 0,
         origin: none,
         id: randomUUID(),
+        usage: {inputTokens: 0, outputTokens: 0},
         content: 'world',
       });
 
@@ -133,6 +134,7 @@ describe('PatkaEngine', () => {
         performanceTimestamp: 0,
         origin: none,
         id: randomUUID(),
+        usage: {inputTokens: 0, outputTokens: 0},
         content: '$$$invoke(read_file, {"path": "note.txt"})',
       });
 
@@ -204,6 +206,7 @@ describe('PatkaEngine', () => {
         performanceTimestamp: 0,
         origin: none,
         id: randomUUID(),
+        usage: {inputTokens: 0, outputTokens: 0},
         content: 'world',
       });
 

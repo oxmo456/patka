@@ -34,7 +34,7 @@ describe('PatkaAgent', () => {
     const patkaAgent = new PatkaAgent(
       'patka',
       new PatkaTools([]),
-      {generate: () => of({content: 'world'})},
+      {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
       new Subject<PatkaContextEntry>(),
       '/home/user',
     );
@@ -44,7 +44,9 @@ describe('PatkaAgent', () => {
 
   describe('output', () => {
     it('says nothing until an entry reaches the agent', () => {
-      const generate = vi.fn(() => of({content: 'world'}));
+      const generate = vi.fn(() =>
+        of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}}),
+      );
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
@@ -63,7 +65,7 @@ describe('PatkaAgent', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        {generate: () => of({content: 'world'})},
+        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
         '/home/user',
       );
@@ -79,7 +81,9 @@ describe('PatkaAgent', () => {
 
     it('prompts the engine with what the user said', () => {
       const patkaContextEntries = new Subject<PatkaContextEntry>();
-      const generate = vi.fn(() => of({content: 'world'}));
+      const generate = vi.fn(() =>
+        of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}}),
+      );
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
@@ -125,7 +129,7 @@ describe('PatkaAgent', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([aTool('read_file', 'hello')]),
-        {generate: () => of({content: 'world'})},
+        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
         '/home/user',
       );
@@ -138,6 +142,7 @@ describe('PatkaAgent', () => {
         performanceTimestamp: 0,
         origin: none,
         id: randomUUID(),
+        usage: {inputTokens: 0, outputTokens: 0},
         content: '$$$invoke(read_file, {"path": "a"})',
       });
 
@@ -151,7 +156,7 @@ describe('PatkaAgent', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([aTool('read_file', 'hello')]),
-        {generate: () => of({content: 'world'})},
+        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
         '/home/user',
       );
@@ -179,7 +184,7 @@ describe('PatkaAgent', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([aTool('read_file', 'hello')]),
-        {generate: () => of({content: 'world'})},
+        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
         '/home/user',
       );
@@ -206,7 +211,7 @@ describe('PatkaAgent', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        {generate: () => of({content: 'world'})},
+        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
         '/home/user',
       );
@@ -233,7 +238,9 @@ describe('PatkaAgent', () => {
 
     it('does not ask the model after an incompetency report', () => {
       const patkaContextEntries = new Subject<PatkaContextEntry>();
-      const generate = vi.fn(() => of({content: 'world'}));
+      const generate = vi.fn(() =>
+        of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}}),
+      );
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
@@ -261,7 +268,7 @@ describe('PatkaAgent', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        {generate: () => of({content: 'world'})},
+        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
         '/home/user',
       );
@@ -288,7 +295,7 @@ describe('PatkaAgent', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        {generate: () => of({content: 'world'})},
+        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
         '/home/user',
       );
@@ -313,7 +320,7 @@ describe('PatkaAgent', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        {generate: () => of({content: 'world'})},
+        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
         '/home/user',
       );
@@ -347,7 +354,7 @@ describe('PatkaAgent', () => {
           generate: (inferenceClientInput: InferenceClientInput) => {
             prompts.push(inferenceClientInput.prompt);
 
-            return of({content: 'the note says hello'});
+            return of({content: 'the note says hello', usage: {inputTokens: 0, outputTokens: 0}});
           },
         },
         patkaContextEntries,

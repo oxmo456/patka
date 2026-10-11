@@ -23,6 +23,7 @@ const answered = (content: string): PatkaContextEntry => ({
   performanceTimestamp: 0,
   origin: none,
   id: randomUUID(),
+  usage: {inputTokens: 0, outputTokens: 0},
   content,
 });
 

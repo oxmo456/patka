@@ -10,12 +10,25 @@ describe('AnthropicInferenceClient', () => {
   it('emits the text the model answered', async () => {
     const anthropic = anAnthropic(async () => ({
       content: [{type: 'text', text: 'world'}],
+      usage: {input_tokens: 3, output_tokens: 5},
     }));
     const anthropicInferenceClient = new AnthropicInferenceClient('claude-opus-5', anthropic);
 
     const response = await firstValueFrom(anthropicInferenceClient.generate({prompt: 'hello'}));
 
     expect(response.content).toBe('world');
+  });
+
+  it('gives the tokens sent and received', async () => {
+    const anthropic = anAnthropic(async () => ({
+      content: [{type: 'text', text: 'world'}],
+      usage: {input_tokens: 3, output_tokens: 5},
+    }));
+    const anthropicInferenceClient = new AnthropicInferenceClient('claude-opus-5', anthropic);
+
+    const response = await firstValueFrom(anthropicInferenceClient.generate({prompt: 'hello'}));
+
+    expect(response.usage).toEqual({inputTokens: 3, outputTokens: 5});
   });
 
   it('joins every text block the model answered', async () => {
@@ -25,6 +38,7 @@ describe('AnthropicInferenceClient', () => {
         {type: 'text', text: 'hello '},
         {type: 'text', text: 'world'},
       ],
+      usage: {input_tokens: 3, output_tokens: 5},
     }));
     const anthropicInferenceClient = new AnthropicInferenceClient('claude-opus-5', anthropic);
 
@@ -34,7 +48,10 @@ describe('AnthropicInferenceClient', () => {
   });
 
   it('asks the configured model with the message as the prompt', async () => {
-    const create = vi.fn(async () => ({content: [{type: 'text', text: 'world'}]}));
+    const create = vi.fn(async () => ({
+      content: [{type: 'text', text: 'world'}],
+      usage: {input_tokens: 3, output_tokens: 5},
+    }));
     const anthropicInferenceClient = new AnthropicInferenceClient(
       'claude-opus-5',
       anAnthropic(create),
@@ -51,7 +68,10 @@ describe('AnthropicInferenceClient', () => {
   });
 
   it('does not call the api until subscribed', () => {
-    const create = vi.fn(async () => ({content: [{type: 'text', text: 'world'}]}));
+    const create = vi.fn(async () => ({
+      content: [{type: 'text', text: 'world'}],
+      usage: {input_tokens: 3, output_tokens: 5},
+    }));
     const anthropicInferenceClient = new AnthropicInferenceClient(
       'claude-opus-5',
       anAnthropic(create),
