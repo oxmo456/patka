@@ -272,7 +272,7 @@ describe('PatkaAgent', () => {
       expect(received).toEqual([]);
     });
 
-    it('says nothing after an error', () => {
+    it('tells the user the error message after an error', () => {
       const patkaContextEntries = new Subject<PatkaContextEntry>();
       const patkaAgent = new PatkaAgent(
         'patka',
@@ -292,7 +292,12 @@ describe('PatkaAgent', () => {
         error: new Error('400 invalid_request_error'),
       });
 
-      expect(received).toEqual([]);
+      expect(received).toEqual([
+        expect.objectContaining({
+          type: 'PatkaUserNotification',
+          content: 'Oops something went wrong... 400 invalid_request_error',
+        }),
+      ]);
     });
 
     it('carries the tool output into the next prompt', () => {

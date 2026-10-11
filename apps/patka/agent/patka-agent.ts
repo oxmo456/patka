@@ -72,7 +72,7 @@ export class PatkaAgent {
       )
       .with({type: 'PatkaToolCall'}, (patkaToolCall) => this.useTool(patkaToolCall))
       .with({type: 'PatkaUserNotification'}, () => EMPTY)
-      .with({type: 'PatkaError'}, () => EMPTY)
+      .with({type: 'PatkaError'}, (patkaError) => this.notifyError(patkaError))
       .exhaustive();
   }
 
@@ -83,6 +83,16 @@ export class PatkaAgent {
       timestamp: createTimestamp(),
       performanceTimestamp: createPerformanceTimestamp(),
       content: MISSING_TOOLS_NOTIFICATION,
+    } satisfies PatkaUserNotification);
+  }
+
+  private notifyError(patkaError: PatkaError): Observable<PatkaContextEntry> {
+    return of({
+      type: 'PatkaUserNotification',
+      id: randomUUID(),
+      timestamp: createTimestamp(),
+      performanceTimestamp: createPerformanceTimestamp(),
+      content: `Oops something went wrong... ${patkaError.error instanceof Error ? patkaError.error.message : String(patkaError.error)}`,
     } satisfies PatkaUserNotification);
   }
 

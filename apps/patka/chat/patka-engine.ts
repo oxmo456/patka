@@ -5,7 +5,6 @@ import {AGENT_NAME} from '../agent/agent-name.token.ts';
 import {PatkaContext} from '../context/patka-context.ts';
 import type {
   PatkaContextEntry,
-  PatkaError,
   PatkaInferenceClientResponse,
   PatkaUserNotification,
   PatkaUserUtterance,
@@ -16,8 +15,6 @@ import {PatkaChat} from './patka-chat.ts';
 import type {PatkaChatEntry} from './patka-chat-entry.ts';
 
 const USER = 'you';
-
-const ERROR_MESSAGE = 'oops! something went wrong :/';
 
 const patkaToolProtocol = new PatkaToolProtocol();
 
@@ -61,19 +58,6 @@ function createChatEntryFromUserNotification(
   });
 }
 
-function createChatEntryFromError(
-  patkaError: PatkaError,
-  author: string,
-): Observable<PatkaChatEntry> {
-  return of({
-    id: patkaError.id,
-    role: 'agent',
-    author,
-    message: ERROR_MESSAGE,
-    status: 'failed',
-  });
-}
-
 function createChatEntryFromContextEntry(
   patkaContextEntry: PatkaContextEntry,
   author: string,
@@ -88,7 +72,7 @@ function createChatEntryFromContextEntry(
     .with({type: 'PatkaUserNotification'}, (patkaUserNotification) =>
       createChatEntryFromUserNotification(patkaUserNotification, author),
     )
-    .with({type: 'PatkaError'}, (patkaError) => createChatEntryFromError(patkaError, author))
+    .with({type: 'PatkaError'}, () => EMPTY)
     .exhaustive();
 }
 
