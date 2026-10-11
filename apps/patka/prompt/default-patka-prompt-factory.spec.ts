@@ -1,7 +1,7 @@
 import {randomUUID} from 'node:crypto';
 import {describe, expect, it} from 'vitest';
 import type {PatkaContextEntry} from '../context/patka-context-entry.ts';
-import {some} from '../option.ts';
+import {none, some} from '../option.ts';
 import {ListFiles} from '../tools/list-files/list-files.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
 import {ReadFile} from '../tools/read-file/read-file.ts';
@@ -12,6 +12,7 @@ const said = (content: string): PatkaContextEntry => ({
   type: 'PatkaUserUtterance',
   timestamp: 0,
   performanceTimestamp: 0,
+  origin: none,
   id: randomUUID(),
   utterance: {content, timestamp: new Date(), id: randomUUID()},
 });
@@ -20,6 +21,7 @@ const answered = (content: string): PatkaContextEntry => ({
   type: 'PatkaInferenceClientResponse',
   timestamp: 0,
   performanceTimestamp: 0,
+  origin: none,
   id: randomUUID(),
   content,
 });
@@ -149,6 +151,7 @@ describe('DefaultPatkaPromptFactory', () => {
       type: 'PatkaToolOutput',
       timestamp: 0,
       performanceTimestamp: 0,
+      origin: none,
       id: randomUUID(),
       name: 'read_file',
       output: success(some('hello')),
@@ -168,6 +171,7 @@ describe('DefaultPatkaPromptFactory', () => {
       type: 'PatkaToolOutput',
       timestamp: 0,
       performanceTimestamp: 0,
+      origin: none,
       id: randomUUID(),
       name: 'read_file',
       output: failure(new Error('file not found')),

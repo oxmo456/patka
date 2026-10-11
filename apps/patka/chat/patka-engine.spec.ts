@@ -1,7 +1,7 @@
 import {randomUUID} from 'node:crypto';
 import {describe, expect, it} from 'vitest';
 import {PatkaContext} from '../context/patka-context.ts';
-import {some} from '../option.ts';
+import {none, some} from '../option.ts';
 import {success} from '../try.ts';
 import type {PatkaChatEntry} from './patka-chat-entry.ts';
 import {PatkaEngine} from './patka-engine.ts';
@@ -29,6 +29,7 @@ describe('PatkaEngine', () => {
         type: 'PatkaUserUtterance',
         timestamp: 0,
         performanceTimestamp: 0,
+        origin: none,
         id: randomUUID(),
         utterance: {content: 'hello', timestamp: new Date(), id: randomUUID()},
       });
@@ -48,6 +49,7 @@ describe('PatkaEngine', () => {
         type: 'PatkaUserUtterance',
         timestamp: 0,
         performanceTimestamp: 0,
+        origin: none,
         id: randomUUID(),
         utterance: {content: 'hello', timestamp: new Date(), id: randomUUID()},
       });
@@ -67,6 +69,7 @@ describe('PatkaEngine', () => {
         type: 'PatkaInferenceClientResponse',
         timestamp: 0,
         performanceTimestamp: 0,
+        origin: none,
         id: randomUUID(),
         content: 'world',
       });
@@ -86,6 +89,7 @@ describe('PatkaEngine', () => {
         type: 'PatkaToolCall',
         timestamp: 0,
         performanceTimestamp: 0,
+        origin: none,
         id: randomUUID(),
         name: 'read_file',
         input: {path: 'note.txt'},
@@ -106,6 +110,7 @@ describe('PatkaEngine', () => {
         type: 'PatkaToolOutput',
         timestamp: 0,
         performanceTimestamp: 0,
+        origin: none,
         id: randomUUID(),
         name: 'read_file',
         output: success(some('hello')),
@@ -126,6 +131,7 @@ describe('PatkaEngine', () => {
         type: 'PatkaInferenceClientResponse',
         timestamp: 0,
         performanceTimestamp: 0,
+        origin: none,
         id: randomUUID(),
         content: '$$$invoke(read_file, {"path": "note.txt"})',
       });
@@ -145,6 +151,7 @@ describe('PatkaEngine', () => {
         type: 'PatkaUserNotification',
         timestamp: 0,
         performanceTimestamp: 0,
+        origin: none,
         id: randomUUID(),
         content:
           'Patka agent is not providing the necessary tools for the LLM to complete the task.',
@@ -167,6 +174,7 @@ describe('PatkaEngine', () => {
         type: 'PatkaError',
         timestamp: 0,
         performanceTimestamp: 0,
+        origin: none,
         id: randomUUID(),
         error: new Error('400 invalid_request_error'),
       });
@@ -186,6 +194,7 @@ describe('PatkaEngine', () => {
         type: 'PatkaUserUtterance',
         timestamp: 0,
         performanceTimestamp: 0,
+        origin: none,
         id: randomUUID(),
         utterance: {content: 'hello', timestamp: new Date(), id: randomUUID()},
       });
@@ -193,6 +202,7 @@ describe('PatkaEngine', () => {
         type: 'PatkaInferenceClientResponse',
         timestamp: 0,
         performanceTimestamp: 0,
+        origin: none,
         id: randomUUID(),
         content: 'world',
       });

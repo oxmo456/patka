@@ -13,9 +13,11 @@ import type {
 } from '../context/patka-context-entry.ts';
 import {INFERENCE_CLIENT} from '../inference/inference-client.token.ts';
 import type {InferenceClient} from '../inference/inference-client.ts';
+import {some} from '../option.ts';
+import {createPerformanceTimestamp} from '../performance-timestamp.ts';
 import {DefaultPatkaPromptFactory} from '../prompt/default-patka-prompt-factory.ts';
 import type {PatkaPromptFactory} from '../prompt/patka-prompt-factory.ts';
-import {createPerformanceTimestamp, createTimestamp} from '../timestamp.ts';
+import {createTimestamp} from '../timestamp.ts';
 import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
 import {REPORT_INCOMPETENCY} from '../tools/report-incompetency/report-incompetency.ts';
@@ -64,9 +66,15 @@ export class PatkaAgent {
     const lastPatkaContextEntry = patkaContextEntries[patkaContextEntries.length - 1];
 
     return match(lastPatkaContextEntry)
-      .with({type: 'PatkaUserUtterance'}, () => this.generate(patkaContextEntries))
-      .with({type: 'PatkaToolOutput', name: REPORT_INCOMPETENCY}, () => this.notifyMissingTools())
-      .with({type: 'PatkaToolOutput'}, () => this.generate(patkaContextEntries))
+      .with({type: 'PatkaUserUtterance'}, () =>
+        this.generate(patkaContextEntries, lastPatkaContextEntry),
+      )
+      .with({type: 'PatkaToolOutput', name: REPORT_INCOMPETENCY}, () =>
+        this.notifyMissingTools(lastPatkaContextEntry),
+      )
+      .with({type: 'PatkaToolOutput'}, () =>
+        this.generate(patkaContextEntries, lastPatkaContextEntry),
+      )
       .with({type: 'PatkaInferenceClientResponse'}, (patkaInferenceClientResponse) =>
         this.processInferenceClientResponse(patkaInferenceClientResponse),
       )
@@ -76,12 +84,16 @@ export class PatkaAgent {
       .exhaustive();
   }
 
-  private notifyMissingTools(): Observable<PatkaContextEntry> {
+  private notifyMissingTools(parent: PatkaContextEntry): Observable<PatkaContextEntry> {
     return of({
       type: 'PatkaUserNotification',
       id: randomUUID(),
       timestamp: createTimestamp(),
       performanceTimestamp: createPerformanceTimestamp(),
+      origin: some({
+        parentId: parent.id,
+        durationSinceParent: createPerformanceTimestamp() - parent.performanceTimestamp,
+      }),
       content: MISSING_TOOLS_NOTIFICATION,
     } satisfies PatkaUserNotification);
   }
@@ -92,12 +104,17 @@ export class PatkaAgent {
       id: randomUUID(),
       timestamp: createTimestamp(),
       performanceTimestamp: createPerformanceTimestamp(),
+      origin: some({
+        parentId: patkaError.id,
+        durationSinceParent: createPerformanceTimestamp() - patkaError.performanceTimestamp,
+      }),
       content: `Oops something went wrong... ${patkaError.error instanceof Error ? patkaError.error.message : String(patkaError.error)}`,
     } satisfies PatkaUserNotification);
   }
 
   private generate(
     patkaContextEntries: ReadonlyArray<PatkaContextEntry>,
+    parent: PatkaContextEntry,
   ): Observable<PatkaContextEntry> {
     const prompt = this.patkaPromptFactory.create(patkaContextEntries);
 
@@ -108,6 +125,10 @@ export class PatkaAgent {
           id: randomUUID(),
           timestamp: createTimestamp(),
           performanceTimestamp: createPerformanceTimestamp(),
+          origin: some({
+            parentId: parent.id,
+            durationSinceParent: createPerformanceTimestamp() - parent.performanceTimestamp,
+          }),
           content: inferenceClientResponse.content,
         }),
       ),
@@ -118,6 +139,10 @@ export class PatkaAgent {
             id: randomUUID(),
             timestamp: createTimestamp(),
             performanceTimestamp: createPerformanceTimestamp(),
+            origin: some({
+              parentId: parent.id,
+              durationSinceParent: createPerformanceTimestamp() - parent.performanceTimestamp,
+            }),
             error,
           }),
       ),
@@ -136,6 +161,11 @@ export class PatkaAgent {
             id: randomUUID(),
             timestamp: createTimestamp(),
             performanceTimestamp: createPerformanceTimestamp(),
+            origin: some({
+              parentId: patkaInferenceClientResponse.id,
+              durationSinceParent:
+                createPerformanceTimestamp() - patkaInferenceClientResponse.performanceTimestamp,
+            }),
             name: value.name,
             input: value.input,
           } satisfies PatkaToolCall),
@@ -152,6 +182,10 @@ export class PatkaAgent {
           id: randomUUID(),
           timestamp: createTimestamp(),
           performanceTimestamp: createPerformanceTimestamp(),
+          origin: some({
+            parentId: patkaToolCall.id,
+            durationSinceParent: createPerformanceTimestamp() - patkaToolCall.performanceTimestamp,
+          }),
           name: patkaToolCall.name,
           output,
         }),
