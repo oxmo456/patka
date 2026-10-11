@@ -1,3 +1,4 @@
+import {Ajv} from 'ajv';
 import {catchError, defer, type Observable, of} from 'rxjs';
 import {injectAll, injectable} from 'tsyringe';
 import type {JsonObject, JsonValue} from '../json.ts';
@@ -10,6 +11,7 @@ import type {PatkaToolManual} from './patka-tool-manual.ts';
 @injectable()
 export class PatkaTools {
   private readonly patkaTools: ReadonlyArray<PatkaTool<JsonObject, JsonValue>>;
+  private readonly ajv = new Ajv();
 
   constructor(@injectAll(PATKA_TOOL) patkaTools: ReadonlyArray<PatkaTool<JsonObject, JsonValue>>) {
     this.patkaTools = patkaTools;
@@ -25,7 +27,24 @@ export class PatkaTools {
 
       return patkaTool === undefined
         ? of(failure(new Error(`patka has no tool named "${name}"`)))
-        : patkaTool.invoke(input);
+        : this.invokeWithValidInput(patkaTool, input);
     }).pipe(catchError((error: Error) => of(failure(error))));
+  }
+
+  private invokeWithValidInput(
+    patkaTool: PatkaTool<JsonObject, JsonValue>,
+    input: JsonObject,
+  ): Observable<Try<Option<JsonValue>>> {
+    const validateFunction = this.ajv.compile(patkaTool.manual.input);
+
+    return validateFunction(input)
+      ? patkaTool.invoke(input)
+      : of(
+          failure(
+            new Error(
+              `the input of "${patkaTool.manual.name}" is not valid: ${this.ajv.errorsText(validateFunction.errors)}`,
+            ),
+          ),
+        );
   }
 }

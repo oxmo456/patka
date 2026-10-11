@@ -15,6 +15,8 @@ const USER = 'User';
 
 const ASSISTANT = 'Assistant';
 
+const PATKA = 'Patka';
+
 const presentManual = (patkaToolManual: PatkaToolManual): string =>
   [
     `- ${patkaToolManual.name}: ${patkaToolManual.summary}`,
@@ -28,6 +30,7 @@ const present = (patkaContextEntry: PatkaContextEntry): ReadonlyArray<string> =>
     .with({type: 'PatkaUserUtterance'}, ({utterance}) => [`${USER}: ${utterance.content}`])
     .with({type: 'PatkaInferenceClientResponse'}, ({content}) => [`${ASSISTANT}: ${content}`])
     .with({type: 'PatkaToolCall'}, () => [])
+    .with({type: 'PatkaAgentUtterance'}, ({content}) => [`${PATKA}: ${content}`])
     .with({type: 'PatkaUserNotification'}, () => [])
     .with({type: 'PatkaError'}, () => [])
     .with({type: 'PatkaToolOutput'}, ({output}) => [

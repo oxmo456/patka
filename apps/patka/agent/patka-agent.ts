@@ -4,6 +4,7 @@ import {match} from 'ts-pattern';
 import {inject, injectable} from 'tsyringe';
 import {PATKA_CONTEXT_ENTRIES} from '../context/patka-context-entries.token.ts';
 import type {
+  PatkaAgentUtterance,
   PatkaContextEntry,
   PatkaError,
   PatkaInferenceClientResponse,
@@ -78,6 +79,9 @@ export class PatkaAgent {
         this.notifyMissingTools(lastPatkaContextEntry),
       )
       .with({type: 'PatkaToolOutput'}, () =>
+        this.generate(patkaContextEntries, lastPatkaContextEntry),
+      )
+      .with({type: 'PatkaAgentUtterance'}, () =>
         this.generate(patkaContextEntries, lastPatkaContextEntry),
       )
       .with({type: 'PatkaInferenceClientResponse'}, (patkaInferenceClientResponse) =>
@@ -165,7 +169,21 @@ export class PatkaAgent {
             input: value.input,
           } satisfies PatkaToolCall),
       )
-      .with({type: 'failure'}, () => EMPTY)
+      .with(
+        {type: 'failure'},
+        ({error}): Observable<PatkaContextEntry> =>
+          this.patkaToolProtocol.isAPatkaToolInvocation(patkaInferenceClientResponse.content)
+            ? of({
+                type: 'PatkaAgentUtterance',
+                id: randomUUID(),
+                timestamp: createTimestamp(),
+                performanceTimestamp: createPerformanceTimestamp(),
+                root: createRootFromParent(patkaInferenceClientResponse),
+                parent: some(patkaInferenceClientResponse.id),
+                content: `Patka could not read your tool invocation: ${error.message}`,
+              } satisfies PatkaAgentUtterance)
+            : EMPTY,
+      )
       .exhaustive();
   }
 

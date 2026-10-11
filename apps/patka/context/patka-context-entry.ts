@@ -50,6 +50,16 @@ export type PatkaToolOutput = {
   readonly output: Try<Option<JsonValue>>;
 };
 
+export type PatkaAgentUtterance = {
+  readonly type: 'PatkaAgentUtterance';
+  readonly id: PatkaContextEntryID;
+  readonly timestamp: Timestamp;
+  readonly performanceTimestamp: PerformanceTimestamp;
+  readonly root: Option<PatkaContextEntryID>;
+  readonly parent: Option<PatkaContextEntryID>;
+  readonly content: string;
+};
+
 export type PatkaUserNotification = {
   readonly type: 'PatkaUserNotification';
   readonly id: PatkaContextEntryID;
@@ -75,5 +85,6 @@ export type PatkaContextEntry =
   | PatkaInferenceClientResponse
   | PatkaToolCall
   | PatkaToolOutput
+  | PatkaAgentUtterance
   | PatkaUserNotification
   | PatkaError;

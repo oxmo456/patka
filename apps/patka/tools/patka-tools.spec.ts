@@ -55,6 +55,80 @@ describe('PatkaTools', () => {
     });
   });
 
+  it('gives failure when the input misses a required key', async () => {
+    const readFile: FakeTool = {
+      manual: {
+        name: 'read_file',
+        summary: 'summary of read_file',
+        usage: 'usage of read_file',
+        input: {
+          type: 'object' as const,
+          properties: {relativePath: {type: 'string'}},
+          required: ['relativePath'],
+        },
+        output: {type: 'string' as const},
+      },
+      invoke: vi.fn(() => of(success(some('read')))),
+    };
+    const patkaTools = new PatkaTools([readFile]);
+
+    const output = await firstValueFrom(patkaTools.invoke('read_file', {}));
+
+    expect(output).toEqual({
+      type: 'failure',
+      error: new Error(
+        'the input of "read_file" is not valid: data must have required property \'relativePath\'',
+      ),
+    });
+  });
+
+  it('gives failure when a value of the input has the wrong type', async () => {
+    const readFile: FakeTool = {
+      manual: {
+        name: 'read_file',
+        summary: 'summary of read_file',
+        usage: 'usage of read_file',
+        input: {
+          type: 'object' as const,
+          properties: {relativePath: {type: 'string'}},
+          required: ['relativePath'],
+        },
+        output: {type: 'string' as const},
+      },
+      invoke: vi.fn(() => of(success(some('read')))),
+    };
+    const patkaTools = new PatkaTools([readFile]);
+
+    const output = await firstValueFrom(patkaTools.invoke('read_file', {relativePath: 12}));
+
+    expect(output).toEqual({
+      type: 'failure',
+      error: new Error('the input of "read_file" is not valid: data/relativePath must be string'),
+    });
+  });
+
+  it('does not invoke the tool when its input is not valid', async () => {
+    const readFile: FakeTool = {
+      manual: {
+        name: 'read_file',
+        summary: 'summary of read_file',
+        usage: 'usage of read_file',
+        input: {
+          type: 'object' as const,
+          properties: {relativePath: {type: 'string'}},
+          required: ['relativePath'],
+        },
+        output: {type: 'string' as const},
+      },
+      invoke: vi.fn(() => of(success(some('read')))),
+    };
+    const patkaTools = new PatkaTools([readFile]);
+
+    await firstValueFrom(patkaTools.invoke('read_file', {}));
+
+    expect(readFile.invoke).not.toHaveBeenCalled();
+  });
+
   it('gives failure with the error message when the tool fails', async () => {
     const readFile: FakeTool = {
       ...aTool('read_file', 'read'),

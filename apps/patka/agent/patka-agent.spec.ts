@@ -242,6 +242,63 @@ describe('PatkaAgent', () => {
       expect(received[0]).toMatchObject({root: some(patkaUserUtterance.id)});
     });
 
+    it('tells the model when its tool invocation cannot be read', () => {
+      const patkaContextEntries = new Subject<PatkaContextEntry>();
+      const patkaAgent = new PatkaAgent(
+        'patka',
+        new PatkaTools([aTool('read_file', 'hello')]),
+        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        patkaContextEntries,
+        '/home/user',
+      );
+      const received: Array<PatkaContextEntry> = [];
+      patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
+
+      patkaContextEntries.next({
+        type: 'PatkaInferenceClientResponse',
+        timestamp: 0,
+        performanceTimestamp: 0,
+        root: none,
+        parent: none,
+        id: randomUUID(),
+        usage: {inputTokens: 0, outputTokens: 0},
+        content: '$$$invoke(read_file, {"a": 1}) $$$invoke(read_file, {"b": 2})',
+      });
+
+      expect(received.map((patkaContextEntry) => patkaContextEntry.type)).toEqual([
+        'PatkaAgentUtterance',
+      ]);
+    });
+
+    it('prompts the engine with what the agent said', () => {
+      const patkaContextEntries = new Subject<PatkaContextEntry>();
+      const generate = vi.fn(() =>
+        of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}}),
+      );
+      const patkaAgent = new PatkaAgent(
+        'patka',
+        new PatkaTools([]),
+        {generate},
+        patkaContextEntries,
+        '/home/user',
+      );
+      patkaAgent.output.subscribe();
+
+      patkaContextEntries.next({
+        type: 'PatkaAgentUtterance',
+        timestamp: 0,
+        performanceTimestamp: 0,
+        root: none,
+        parent: none,
+        id: randomUUID(),
+        content: 'Patka could not read your tool invocation',
+      });
+
+      expect(generate).toHaveBeenCalledWith({
+        prompt: expect.stringContaining('Patka: Patka could not read your tool invocation'),
+      });
+    });
+
     it('runs the tool a tool call names', () => {
       const patkaContextEntries = new Subject<PatkaContextEntry>();
       const patkaAgent = new PatkaAgent(

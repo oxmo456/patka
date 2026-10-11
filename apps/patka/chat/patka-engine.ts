@@ -155,6 +155,7 @@ function createChatEntryFromContextEntries(
     )
     .with({type: 'PatkaToolCall'}, () => EMPTY)
     .with({type: 'PatkaToolOutput'}, () => EMPTY)
+    .with({type: 'PatkaAgentUtterance'}, () => EMPTY)
     .with({type: 'PatkaUserNotification'}, (patkaUserNotification) =>
       createChatEntryFromUserNotification(patkaUserNotification, patkaContextEntries, author),
     )
