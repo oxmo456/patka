@@ -27,6 +27,8 @@ describe('PatkaEngine', () => {
 
       patkaContext.append({
         type: 'PatkaUserUtterance',
+        timestamp: 0,
+        performanceTimestamp: 0,
         id: randomUUID(),
         utterance: {content: 'hello', timestamp: new Date(), id: randomUUID()},
       });
@@ -44,6 +46,8 @@ describe('PatkaEngine', () => {
 
       patkaContext.append({
         type: 'PatkaUserUtterance',
+        timestamp: 0,
+        performanceTimestamp: 0,
         id: randomUUID(),
         utterance: {content: 'hello', timestamp: new Date(), id: randomUUID()},
       });
@@ -61,6 +65,8 @@ describe('PatkaEngine', () => {
 
       patkaContext.append({
         type: 'PatkaInferenceClientResponse',
+        timestamp: 0,
+        performanceTimestamp: 0,
         id: randomUUID(),
         content: 'world',
       });
@@ -78,6 +84,8 @@ describe('PatkaEngine', () => {
 
       patkaContext.append({
         type: 'PatkaToolCall',
+        timestamp: 0,
+        performanceTimestamp: 0,
         id: randomUUID(),
         name: 'read_file',
         input: {path: 'note.txt'},
@@ -96,6 +104,8 @@ describe('PatkaEngine', () => {
 
       patkaContext.append({
         type: 'PatkaToolOutput',
+        timestamp: 0,
+        performanceTimestamp: 0,
         id: randomUUID(),
         name: 'read_file',
         output: success(some('hello')),
@@ -114,6 +124,8 @@ describe('PatkaEngine', () => {
 
       patkaContext.append({
         type: 'PatkaInferenceClientResponse',
+        timestamp: 0,
+        performanceTimestamp: 0,
         id: randomUUID(),
         content: '$$$invoke(read_file, {"path": "note.txt"})',
       });
@@ -131,6 +143,8 @@ describe('PatkaEngine', () => {
 
       patkaContext.append({
         type: 'PatkaUserNotification',
+        timestamp: 0,
+        performanceTimestamp: 0,
         id: randomUUID(),
         content:
           'Patka agent is not providing the necessary tools for the LLM to complete the task.',
@@ -151,6 +165,8 @@ describe('PatkaEngine', () => {
 
       patkaContext.append({
         type: 'PatkaError',
+        timestamp: 0,
+        performanceTimestamp: 0,
         id: randomUUID(),
         error: new Error('400 invalid_request_error'),
       });
@@ -176,11 +192,15 @@ describe('PatkaEngine', () => {
 
       patkaContext.append({
         type: 'PatkaUserUtterance',
+        timestamp: 0,
+        performanceTimestamp: 0,
         id: randomUUID(),
         utterance: {content: 'hello', timestamp: new Date(), id: randomUUID()},
       });
       patkaContext.append({
         type: 'PatkaInferenceClientResponse',
+        timestamp: 0,
+        performanceTimestamp: 0,
         id: randomUUID(),
         content: 'world',
       });

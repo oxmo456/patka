@@ -22,6 +22,8 @@ const aTool = (name: string, output: string): PatkaTool<{path: string}, string> 
 
 const said = (content: string): PatkaContextEntry => ({
   type: 'PatkaUserUtterance',
+  timestamp: 0,
+  performanceTimestamp: 0,
   id: randomUUID(),
   utterance: {content, timestamp: new Date(), id: randomUUID()},
 });
@@ -108,6 +110,8 @@ describe('PatkaAgent', () => {
       expect(received).toEqual([
         {
           type: 'PatkaError',
+          timestamp: expect.any(Number),
+          performanceTimestamp: expect.any(Number),
           id: expect.any(String),
           error: new Error('400 invalid_request_error'),
         },
@@ -128,6 +132,8 @@ describe('PatkaAgent', () => {
 
       patkaContextEntries.next({
         type: 'PatkaInferenceClientResponse',
+        timestamp: 0,
+        performanceTimestamp: 0,
         id: randomUUID(),
         content: '$$$invoke(read_file, {"path": "a"})',
       });
@@ -151,6 +157,8 @@ describe('PatkaAgent', () => {
 
       patkaContextEntries.next({
         type: 'PatkaToolCall',
+        timestamp: 0,
+        performanceTimestamp: 0,
         id: randomUUID(),
         name: 'read_file',
         input: {path: 'a'},
@@ -175,6 +183,8 @@ describe('PatkaAgent', () => {
 
       patkaContextEntries.next({
         type: 'PatkaToolCall',
+        timestamp: 0,
+        performanceTimestamp: 0,
         id: randomUUID(),
         name: 'read_file',
         input: {path: 'a'},
@@ -202,6 +212,8 @@ describe('PatkaAgent', () => {
 
       patkaContextEntries.next({
         type: 'PatkaToolOutput',
+        timestamp: 0,
+        performanceTimestamp: 0,
         id: randomUUID(),
         name: 'report_incompetency',
         output: success(none),
@@ -224,6 +236,8 @@ describe('PatkaAgent', () => {
 
       patkaContextEntries.next({
         type: 'PatkaToolOutput',
+        timestamp: 0,
+        performanceTimestamp: 0,
         id: randomUUID(),
         name: 'report_incompetency',
         output: success(none),
@@ -248,6 +262,8 @@ describe('PatkaAgent', () => {
 
       patkaContextEntries.next({
         type: 'PatkaUserNotification',
+        timestamp: 0,
+        performanceTimestamp: 0,
         id: randomUUID(),
         content:
           'Patka agent is not providing the necessary tools for the LLM to complete the task.',
@@ -270,6 +286,8 @@ describe('PatkaAgent', () => {
 
       patkaContextEntries.next({
         type: 'PatkaError',
+        timestamp: 0,
+        performanceTimestamp: 0,
         id: randomUUID(),
         error: new Error('400 invalid_request_error'),
       });
@@ -297,6 +315,8 @@ describe('PatkaAgent', () => {
 
       patkaContextEntries.next({
         type: 'PatkaToolOutput',
+        timestamp: 0,
+        performanceTimestamp: 0,
         id: randomUUID(),
         name: 'read_file',
         output: success(some('hello')),

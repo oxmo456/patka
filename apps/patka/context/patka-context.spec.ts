@@ -20,7 +20,13 @@ describe('PatkaContext', () => {
     const received: Array<PatkaContextEntry> = [];
     patkaContext.entries.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
 
-    patkaContext.append({type: 'PatkaInferenceClientResponse', id: randomUUID(), content: 'Paris'});
+    patkaContext.append({
+      type: 'PatkaInferenceClientResponse',
+      timestamp: 0,
+      performanceTimestamp: 0,
+      id: randomUUID(),
+      content: 'Paris',
+    });
 
     expect(received.map((patkaContextEntry) => patkaContextEntry.type)).toEqual([
       'PatkaInferenceClientResponse',
@@ -34,17 +40,23 @@ describe('PatkaContext', () => {
 
     patkaContext.append({
       type: 'PatkaUserUtterance',
+      timestamp: 0,
+      performanceTimestamp: 0,
       id: randomUUID(),
       utterance: {content: 'read note.txt', timestamp: new Date(), id: randomUUID()},
     });
     patkaContext.append({
       type: 'PatkaToolCall',
+      timestamp: 0,
+      performanceTimestamp: 0,
       id: randomUUID(),
       name: 'read_file',
       input: {path: 'note.txt'},
     });
     patkaContext.append({
       type: 'PatkaToolOutput',
+      timestamp: 0,
+      performanceTimestamp: 0,
       id: randomUUID(),
       name: 'read_file',
       output: success(some('hello')),
@@ -59,9 +71,17 @@ describe('PatkaContext', () => {
 
   it('gives a late subscriber everything it appended before', () => {
     const patkaContext = new PatkaContext();
-    patkaContext.append({type: 'PatkaInferenceClientResponse', id: randomUUID(), content: 'Paris'});
     patkaContext.append({
       type: 'PatkaInferenceClientResponse',
+      timestamp: 0,
+      performanceTimestamp: 0,
+      id: randomUUID(),
+      content: 'Paris',
+    });
+    patkaContext.append({
+      type: 'PatkaInferenceClientResponse',
+      timestamp: 0,
+      performanceTimestamp: 0,
       id: randomUUID(),
       content: 'Berlin',
     });

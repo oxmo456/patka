@@ -8,6 +8,7 @@ import type {PatkaContextEntry} from './context/patka-context-entry.ts';
 import {PatkaContextLogger} from './context/patka-context-logger.ts';
 import type {Disposable} from './disposable.ts';
 import {PatkaLogger} from './patka-logger.ts';
+import {createPerformanceTimestamp, createTimestamp} from './timestamp.ts';
 import {PATKA_UI} from './ui/patka-ui.token.ts';
 import type {PatkaUI} from './ui/patka-ui.ts';
 import {toPatkaUtterance} from './ui/patka-user-input.ts';
@@ -70,6 +71,8 @@ export class Patka implements Disposable {
         (patkaUserInput): PatkaContextEntry => ({
           type: 'PatkaUserUtterance',
           id: randomUUID(),
+          timestamp: createTimestamp(),
+          performanceTimestamp: createPerformanceTimestamp(),
           utterance: toPatkaUtterance(patkaUserInput),
         }),
       ),

@@ -10,12 +10,16 @@ import {DefaultPatkaPromptFactory} from './default-patka-prompt-factory.ts';
 
 const said = (content: string): PatkaContextEntry => ({
   type: 'PatkaUserUtterance',
+  timestamp: 0,
+  performanceTimestamp: 0,
   id: randomUUID(),
   utterance: {content, timestamp: new Date(), id: randomUUID()},
 });
 
 const answered = (content: string): PatkaContextEntry => ({
   type: 'PatkaInferenceClientResponse',
+  timestamp: 0,
+  performanceTimestamp: 0,
   id: randomUUID(),
   content,
 });
@@ -143,6 +147,8 @@ describe('DefaultPatkaPromptFactory', () => {
   it('shows the success output a tool gave back', () => {
     const patkaToolResult: PatkaContextEntry = {
       type: 'PatkaToolOutput',
+      timestamp: 0,
+      performanceTimestamp: 0,
       id: randomUUID(),
       name: 'read_file',
       output: success(some('hello')),
@@ -160,6 +166,8 @@ describe('DefaultPatkaPromptFactory', () => {
   it('shows the failure output a tool gave back', () => {
     const patkaToolResult: PatkaContextEntry = {
       type: 'PatkaToolOutput',
+      timestamp: 0,
+      performanceTimestamp: 0,
       id: randomUUID(),
       name: 'read_file',
       output: failure(new Error('file not found')),

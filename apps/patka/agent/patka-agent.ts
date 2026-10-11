@@ -15,6 +15,7 @@ import {INFERENCE_CLIENT} from '../inference/inference-client.token.ts';
 import type {InferenceClient} from '../inference/inference-client.ts';
 import {DefaultPatkaPromptFactory} from '../prompt/default-patka-prompt-factory.ts';
 import type {PatkaPromptFactory} from '../prompt/patka-prompt-factory.ts';
+import {createPerformanceTimestamp, createTimestamp} from '../timestamp.ts';
 import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
 import {REPORT_INCOMPETENCY} from '../tools/report-incompetency/report-incompetency.ts';
@@ -79,6 +80,8 @@ export class PatkaAgent {
     return of({
       type: 'PatkaUserNotification',
       id: randomUUID(),
+      timestamp: createTimestamp(),
+      performanceTimestamp: createPerformanceTimestamp(),
       content: MISSING_TOOLS_NOTIFICATION,
     } satisfies PatkaUserNotification);
   }
@@ -93,6 +96,8 @@ export class PatkaAgent {
         (inferenceClientResponse): PatkaInferenceClientResponse => ({
           type: 'PatkaInferenceClientResponse',
           id: randomUUID(),
+          timestamp: createTimestamp(),
+          performanceTimestamp: createPerformanceTimestamp(),
           content: inferenceClientResponse.content,
         }),
       ),
@@ -101,6 +106,8 @@ export class PatkaAgent {
           of({
             type: 'PatkaError',
             id: randomUUID(),
+            timestamp: createTimestamp(),
+            performanceTimestamp: createPerformanceTimestamp(),
             error,
           }),
       ),
@@ -117,6 +124,8 @@ export class PatkaAgent {
           of({
             type: 'PatkaToolCall',
             id: randomUUID(),
+            timestamp: createTimestamp(),
+            performanceTimestamp: createPerformanceTimestamp(),
             name: value.name,
             input: value.input,
           } satisfies PatkaToolCall),
@@ -131,6 +140,8 @@ export class PatkaAgent {
         (output): PatkaToolOutput => ({
           type: 'PatkaToolOutput',
           id: randomUUID(),
+          timestamp: createTimestamp(),
+          performanceTimestamp: createPerformanceTimestamp(),
           name: patkaToolCall.name,
           output,
         }),
