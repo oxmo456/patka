@@ -69,7 +69,13 @@ const toBubble = (patkaChatEntry: PatkaChatEntry, width: number): ReadonlyArray<
     .with('complete', 'failed', () => patkaChatEntry.message)
     .exhaustive();
   const bubbleWidth = Math.max(MIN_WIDTH, width - 1);
-  const lines = toMarkdownLines(text).flatMap((line) => wrap(line, bubbleWidth));
+  const durationLines: ReadonlyArray<string> = match(patkaChatEntry.duration)
+    .with({type: 'some'}, ({value}) => ['', `${Math.round(value)} ms`])
+    .with({type: 'none'}, () => [])
+    .exhaustive();
+  const lines = [...toMarkdownLines(text), ...durationLines].flatMap((line) =>
+    wrap(line, bubbleWidth),
+  );
   const style = match(patkaChatEntry.role)
     .with('user', () => USER_STYLE)
     .with('agent', () => AGENT_STYLE)

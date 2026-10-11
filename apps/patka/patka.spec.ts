@@ -7,6 +7,7 @@ import {PatkaContext} from './context/patka-context.ts';
 import {PATKA_CONTEXT_ENTRIES} from './context/patka-context-entries.token.ts';
 import type {PatkaContextEntry} from './context/patka-context-entry.ts';
 import {INFERENCE_CLIENT} from './inference/inference-client.token.ts';
+import {some} from './option.ts';
 import {Patka} from './patka.ts';
 import {ListFiles} from './tools/list-files/list-files.ts';
 import {PATKA_TOOL} from './tools/patka-tool.token.ts';
@@ -72,6 +73,35 @@ describe('Patka', () => {
       'PatkaUserUtterance',
       'PatkaInferenceClientResponse',
     ]);
+  });
+
+  it('gives the answer what the user said as root', () => {
+    const userInputs = new Subject<PatkaUserInput>();
+    const child = container.createChildContainer();
+    child.register(WORKING_DIRECTORY, {useValue: '/home/user'});
+    child.register(AGENT_NAME, {useValue: 'ROOT'});
+    child.register(BLESSED, {useValue: {} as unknown as Blessed});
+    child.register(INFERENCE_CLIENT, {
+      useValue: {generate: () => of({content: 'Paris', usage: {inputTokens: 0, outputTokens: 0}})},
+    });
+    child.register(PATKA_TOOL, {useClass: ListFiles});
+    child.register(PATKA_TOOL, {useClass: ReadFile});
+    child.register(PATKA_UI, {
+      useValue: {userInputs, updateChat: vi.fn(), updateLogs: vi.fn()},
+    });
+    child.register(PATKA_CONTEXT_ENTRIES, {
+      useFactory: (dependencyContainer: DependencyContainer) =>
+        dependencyContainer.resolve(PatkaContext).entries,
+    });
+    child.resolve(Patka);
+    const received: Array<PatkaContextEntry> = [];
+    child
+      .resolve(PatkaContext)
+      .entries.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
+
+    userInputs.next({content: 'capital of France?', timestamp: new Date(), id: randomUUID()});
+
+    expect(received[1]).toMatchObject({root: some(received[0]?.id)});
   });
 
   it('stops answering once disposed', () => {

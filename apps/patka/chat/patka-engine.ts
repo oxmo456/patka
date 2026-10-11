@@ -1,4 +1,4 @@
-import {concatMap, EMPTY, type Observable, of, type Subscription} from 'rxjs';
+import {concatMap, EMPTY, type Observable, of, type Subscription, scan} from 'rxjs';
 import {match} from 'ts-pattern';
 import {inject, injectable} from 'tsyringe';
 import {AGENT_NAME} from '../agent/agent-name.token.ts';
@@ -10,6 +10,8 @@ import type {
   PatkaUserUtterance,
 } from '../context/patka-context-entry.ts';
 import type {Disposable} from '../disposable.ts';
+import type {Duration} from '../duration.ts';
+import {none, type Option, some} from '../option.ts';
 import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
 import {PatkaChat} from './patka-chat.ts';
 import type {PatkaChatEntry} from './patka-chat-entry.ts';
@@ -17,6 +19,22 @@ import type {PatkaChatEntry} from './patka-chat-entry.ts';
 const USER = 'you';
 
 const patkaToolProtocol = new PatkaToolProtocol();
+
+function extractDurationFromRoot(
+  patkaContextEntry: PatkaContextEntry,
+  patkaContextEntries: ReadonlyArray<PatkaContextEntry>,
+): Option<Duration> {
+  return match(patkaContextEntry.root)
+    .with({type: 'some'}, ({value}): Option<Duration> => {
+      const root = patkaContextEntries.find((candidate) => candidate.id === value);
+
+      return root === undefined
+        ? none
+        : some(patkaContextEntry.performanceTimestamp - root.performanceTimestamp);
+    })
+    .with({type: 'none'}, (): Option<Duration> => none)
+    .exhaustive();
+}
 
 function createChatEntryFromUserUtterance(
   patkaUserUtterance: PatkaUserUtterance,
@@ -27,11 +45,13 @@ function createChatEntryFromUserUtterance(
     author: USER,
     message: patkaUserUtterance.utterance.content,
     status: 'complete',
+    duration: none,
   });
 }
 
 function createChatEntryFromInferenceClientResponse(
   patkaInferenceClientResponse: PatkaInferenceClientResponse,
+  patkaContextEntries: ReadonlyArray<PatkaContextEntry>,
   author: string,
 ): Observable<PatkaChatEntry> {
   return patkaToolProtocol.isAPatkaToolInvocation(patkaInferenceClientResponse.content)
@@ -42,11 +62,13 @@ function createChatEntryFromInferenceClientResponse(
         author,
         message: patkaInferenceClientResponse.content,
         status: 'complete',
+        duration: extractDurationFromRoot(patkaInferenceClientResponse, patkaContextEntries),
       });
 }
 
 function createChatEntryFromUserNotification(
   patkaUserNotification: PatkaUserNotification,
+  patkaContextEntries: ReadonlyArray<PatkaContextEntry>,
   author: string,
 ): Observable<PatkaChatEntry> {
   return of({
@@ -55,22 +77,27 @@ function createChatEntryFromUserNotification(
     author,
     message: patkaUserNotification.content,
     status: 'complete',
+    duration: extractDurationFromRoot(patkaUserNotification, patkaContextEntries),
   });
 }
 
-function createChatEntryFromContextEntry(
-  patkaContextEntry: PatkaContextEntry,
+function createChatEntryFromContextEntries(
+  patkaContextEntries: ReadonlyArray<PatkaContextEntry>,
   author: string,
 ): Observable<PatkaChatEntry> {
-  return match(patkaContextEntry)
+  return match(patkaContextEntries[patkaContextEntries.length - 1])
     .with({type: 'PatkaUserUtterance'}, createChatEntryFromUserUtterance)
     .with({type: 'PatkaInferenceClientResponse'}, (patkaInferenceClientResponse) =>
-      createChatEntryFromInferenceClientResponse(patkaInferenceClientResponse, author),
+      createChatEntryFromInferenceClientResponse(
+        patkaInferenceClientResponse,
+        patkaContextEntries,
+        author,
+      ),
     )
     .with({type: 'PatkaToolCall'}, () => EMPTY)
     .with({type: 'PatkaToolOutput'}, () => EMPTY)
     .with({type: 'PatkaUserNotification'}, (patkaUserNotification) =>
-      createChatEntryFromUserNotification(patkaUserNotification, author),
+      createChatEntryFromUserNotification(patkaUserNotification, patkaContextEntries, author),
     )
     .with({type: 'PatkaError'}, () => EMPTY)
     .exhaustive();
@@ -87,7 +114,16 @@ export class PatkaEngine implements Disposable {
   constructor(@inject(PatkaContext) patkaContext: PatkaContext, @inject(AGENT_NAME) name: string) {
     this.pushToChat = patkaContext.entries
       .pipe(
-        concatMap((patkaContextEntry) => createChatEntryFromContextEntry(patkaContextEntry, name)),
+        scan(
+          (accumulator: ReadonlyArray<PatkaContextEntry>, patkaContextEntry: PatkaContextEntry) => [
+            ...accumulator,
+            patkaContextEntry,
+          ],
+          [],
+        ),
+        concatMap((patkaContextEntries) =>
+          createChatEntryFromContextEntries(patkaContextEntries, name),
+        ),
       )
       .subscribe((patkaChatEntry) => this.patkaChat.push(patkaChatEntry));
   }

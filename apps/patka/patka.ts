@@ -89,14 +89,8 @@ export class Patka implements Disposable {
           id: randomUUID(),
           timestamp: createTimestamp(),
           performanceTimestamp: createPerformanceTimestamp(),
-          origin:
-            parent.type === 'some'
-              ? some({
-                  parentId: parent.value.id,
-                  durationSinceParent:
-                    createPerformanceTimestamp() - parent.value.performanceTimestamp,
-                })
-              : none,
+          root: none,
+          parent: parent.type === 'some' ? some(parent.value.id) : none,
           utterance: toPatkaUtterance(patkaUserInput),
         }),
       ),

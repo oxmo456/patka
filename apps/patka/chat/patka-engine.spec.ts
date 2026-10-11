@@ -29,7 +29,8 @@ describe('PatkaEngine', () => {
         type: 'PatkaUserUtterance',
         timestamp: 0,
         performanceTimestamp: 0,
-        origin: none,
+        root: none,
+        parent: none,
         id: randomUUID(),
         utterance: {content: 'hello', timestamp: new Date(), id: randomUUID()},
       });
@@ -49,12 +50,66 @@ describe('PatkaEngine', () => {
         type: 'PatkaUserUtterance',
         timestamp: 0,
         performanceTimestamp: 0,
-        origin: none,
+        root: none,
+        parent: none,
         id: randomUUID(),
         utterance: {content: 'hello', timestamp: new Date(), id: randomUUID()},
       });
 
       expect(patkaChatEntries.map((entry) => entry.author)).toEqual(['you']);
+    });
+
+    it('gives a reply the milliseconds since the request of the user', () => {
+      const patkaContext = new PatkaContext();
+      const patkaEngine = new PatkaEngine(patkaContext, 'patka');
+      let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
+      patkaEngine.patkaChatEntries.subscribe((content) => {
+        patkaChatEntries = content;
+      });
+      const patkaUserUtteranceId = randomUUID();
+
+      patkaContext.append({
+        type: 'PatkaUserUtterance',
+        timestamp: 0,
+        performanceTimestamp: 300,
+        root: none,
+        parent: none,
+        id: patkaUserUtteranceId,
+        utterance: {content: 'hello', timestamp: new Date(), id: randomUUID()},
+      });
+      patkaContext.append({
+        type: 'PatkaInferenceClientResponse',
+        timestamp: 0,
+        performanceTimestamp: 1500,
+        root: some(patkaUserUtteranceId),
+        parent: some(patkaUserUtteranceId),
+        id: randomUUID(),
+        usage: {inputTokens: 0, outputTokens: 0},
+        content: 'world',
+      });
+
+      expect(patkaChatEntries.map((entry) => entry.duration)).toEqual([none, some(1200)]);
+    });
+
+    it('gives no duration to what the user said', () => {
+      const patkaContext = new PatkaContext();
+      const patkaEngine = new PatkaEngine(patkaContext, 'patka');
+      let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
+      patkaEngine.patkaChatEntries.subscribe((content) => {
+        patkaChatEntries = content;
+      });
+
+      patkaContext.append({
+        type: 'PatkaUserUtterance',
+        timestamp: 0,
+        performanceTimestamp: 300,
+        root: none,
+        parent: none,
+        id: randomUUID(),
+        utterance: {content: 'hello', timestamp: new Date(), id: randomUUID()},
+      });
+
+      expect(patkaChatEntries.map((entry) => entry.duration)).toEqual([none]);
     });
 
     it('names the agent as the author of a reply', () => {
@@ -69,7 +124,8 @@ describe('PatkaEngine', () => {
         type: 'PatkaInferenceClientResponse',
         timestamp: 0,
         performanceTimestamp: 0,
-        origin: none,
+        root: some(randomUUID()),
+        parent: none,
         id: randomUUID(),
         usage: {inputTokens: 0, outputTokens: 0},
         content: 'world',
@@ -90,7 +146,8 @@ describe('PatkaEngine', () => {
         type: 'PatkaToolCall',
         timestamp: 0,
         performanceTimestamp: 0,
-        origin: none,
+        root: some(randomUUID()),
+        parent: none,
         id: randomUUID(),
         name: 'read_file',
         input: {path: 'note.txt'},
@@ -111,7 +168,8 @@ describe('PatkaEngine', () => {
         type: 'PatkaToolOutput',
         timestamp: 0,
         performanceTimestamp: 0,
-        origin: none,
+        root: some(randomUUID()),
+        parent: none,
         id: randomUUID(),
         name: 'read_file',
         output: success(some('hello')),
@@ -132,7 +190,8 @@ describe('PatkaEngine', () => {
         type: 'PatkaInferenceClientResponse',
         timestamp: 0,
         performanceTimestamp: 0,
-        origin: none,
+        root: some(randomUUID()),
+        parent: none,
         id: randomUUID(),
         usage: {inputTokens: 0, outputTokens: 0},
         content: '$$$invoke(read_file, {"path": "note.txt"})',
@@ -153,7 +212,8 @@ describe('PatkaEngine', () => {
         type: 'PatkaUserNotification',
         timestamp: 0,
         performanceTimestamp: 0,
-        origin: none,
+        root: some(randomUUID()),
+        parent: none,
         id: randomUUID(),
         content:
           'Patka agent is not providing the necessary tools for the LLM to complete the task.',
@@ -176,7 +236,8 @@ describe('PatkaEngine', () => {
         type: 'PatkaError',
         timestamp: 0,
         performanceTimestamp: 0,
-        origin: none,
+        root: some(randomUUID()),
+        parent: none,
         id: randomUUID(),
         error: new Error('400 invalid_request_error'),
       });
@@ -196,7 +257,8 @@ describe('PatkaEngine', () => {
         type: 'PatkaUserUtterance',
         timestamp: 0,
         performanceTimestamp: 0,
-        origin: none,
+        root: none,
+        parent: none,
         id: randomUUID(),
         utterance: {content: 'hello', timestamp: new Date(), id: randomUUID()},
       });
@@ -204,7 +266,8 @@ describe('PatkaEngine', () => {
         type: 'PatkaInferenceClientResponse',
         timestamp: 0,
         performanceTimestamp: 0,
-        origin: none,
+        root: some(randomUUID()),
+        parent: none,
         id: randomUUID(),
         usage: {inputTokens: 0, outputTokens: 0},
         content: 'world',

@@ -11,9 +11,10 @@ import type {
   PatkaToolOutput,
   PatkaUserNotification,
 } from '../context/patka-context-entry.ts';
+import type {PatkaContextEntryID} from '../context/patka-context-entry-id.ts';
 import {INFERENCE_CLIENT} from '../inference/inference-client.token.ts';
 import type {InferenceClient} from '../inference/inference-client.ts';
-import {some} from '../option.ts';
+import {type Option, some} from '../option.ts';
 import {createPerformanceTimestamp} from '../performance-timestamp.ts';
 import {DefaultPatkaPromptFactory} from '../prompt/default-patka-prompt-factory.ts';
 import type {PatkaPromptFactory} from '../prompt/patka-prompt-factory.ts';
@@ -26,6 +27,10 @@ import {AGENT_NAME} from './agent-name.token.ts';
 
 const MISSING_TOOLS_NOTIFICATION =
   'Patka agent is not providing the necessary tools for the LLM to complete the task.';
+
+function createRootFromParent(parent: PatkaContextEntry): Option<PatkaContextEntryID> {
+  return parent.root.type === 'some' ? parent.root : some(parent.id);
+}
 
 @injectable()
 export class PatkaAgent {
@@ -90,10 +95,8 @@ export class PatkaAgent {
       id: randomUUID(),
       timestamp: createTimestamp(),
       performanceTimestamp: createPerformanceTimestamp(),
-      origin: some({
-        parentId: parent.id,
-        durationSinceParent: createPerformanceTimestamp() - parent.performanceTimestamp,
-      }),
+      root: createRootFromParent(parent),
+      parent: some(parent.id),
       content: MISSING_TOOLS_NOTIFICATION,
     } satisfies PatkaUserNotification);
   }
@@ -104,10 +107,8 @@ export class PatkaAgent {
       id: randomUUID(),
       timestamp: createTimestamp(),
       performanceTimestamp: createPerformanceTimestamp(),
-      origin: some({
-        parentId: patkaError.id,
-        durationSinceParent: createPerformanceTimestamp() - patkaError.performanceTimestamp,
-      }),
+      root: createRootFromParent(patkaError),
+      parent: some(patkaError.id),
       content: `Oops something went wrong... ${patkaError.error instanceof Error ? patkaError.error.message : String(patkaError.error)}`,
     } satisfies PatkaUserNotification);
   }
@@ -125,10 +126,8 @@ export class PatkaAgent {
           id: randomUUID(),
           timestamp: createTimestamp(),
           performanceTimestamp: createPerformanceTimestamp(),
-          origin: some({
-            parentId: parent.id,
-            durationSinceParent: createPerformanceTimestamp() - parent.performanceTimestamp,
-          }),
+          root: createRootFromParent(parent),
+          parent: some(parent.id),
           content: inferenceClientResponse.content,
           usage: inferenceClientResponse.usage,
         }),
@@ -140,10 +139,8 @@ export class PatkaAgent {
             id: randomUUID(),
             timestamp: createTimestamp(),
             performanceTimestamp: createPerformanceTimestamp(),
-            origin: some({
-              parentId: parent.id,
-              durationSinceParent: createPerformanceTimestamp() - parent.performanceTimestamp,
-            }),
+            root: createRootFromParent(parent),
+            parent: some(parent.id),
             error,
           }),
       ),
@@ -162,11 +159,8 @@ export class PatkaAgent {
             id: randomUUID(),
             timestamp: createTimestamp(),
             performanceTimestamp: createPerformanceTimestamp(),
-            origin: some({
-              parentId: patkaInferenceClientResponse.id,
-              durationSinceParent:
-                createPerformanceTimestamp() - patkaInferenceClientResponse.performanceTimestamp,
-            }),
+            root: createRootFromParent(patkaInferenceClientResponse),
+            parent: some(patkaInferenceClientResponse.id),
             name: value.name,
             input: value.input,
           } satisfies PatkaToolCall),
@@ -183,10 +177,8 @@ export class PatkaAgent {
           id: randomUUID(),
           timestamp: createTimestamp(),
           performanceTimestamp: createPerformanceTimestamp(),
-          origin: some({
-            parentId: patkaToolCall.id,
-            durationSinceParent: createPerformanceTimestamp() - patkaToolCall.performanceTimestamp,
-          }),
+          root: createRootFromParent(patkaToolCall),
+          parent: some(patkaToolCall.id),
           name: patkaToolCall.name,
           output,
         }),

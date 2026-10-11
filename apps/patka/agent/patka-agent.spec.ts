@@ -1,7 +1,7 @@
 import {randomUUID} from 'node:crypto';
 import {type Observable, of, Subject, throwError} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
-import type {PatkaContextEntry} from '../context/patka-context-entry.ts';
+import type {PatkaContextEntry, PatkaUserUtterance} from '../context/patka-context-entry.ts';
 import type {InferenceClientInput} from '../inference/inference-client-input.ts';
 import {none, type Option, some} from '../option.ts';
 import type {PatkaTool} from '../tools/patka-tool.ts';
@@ -24,7 +24,8 @@ const said = (content: string): PatkaContextEntry => ({
   type: 'PatkaUserUtterance',
   timestamp: 0,
   performanceTimestamp: 0,
-  origin: none,
+  root: none,
+  parent: none,
   id: randomUUID(),
   utterance: {content, timestamp: new Date(), id: randomUUID()},
 });
@@ -117,7 +118,8 @@ describe('PatkaAgent', () => {
           type: 'PatkaError',
           timestamp: expect.any(Number),
           performanceTimestamp: expect.any(Number),
-          origin: expect.anything(),
+          root: expect.anything(),
+          parent: expect.anything(),
           id: expect.any(String),
           error: new Error('400 invalid_request_error'),
         },
@@ -140,7 +142,8 @@ describe('PatkaAgent', () => {
         type: 'PatkaInferenceClientResponse',
         timestamp: 0,
         performanceTimestamp: 0,
-        origin: none,
+        root: some(randomUUID()),
+        parent: none,
         id: randomUUID(),
         usage: {inputTokens: 0, outputTokens: 0},
         content: '$$$invoke(read_file, {"path": "a"})',
@@ -168,15 +171,75 @@ describe('PatkaAgent', () => {
         type: 'PatkaToolCall',
         timestamp: 0,
         performanceTimestamp: 0,
-        origin: none,
+        root: some(randomUUID()),
+        parent: none,
         id: patkaToolCallId,
         name: 'read_file',
         input: {path: 'a'},
       });
 
-      expect(received[0]?.origin).toEqual(
-        some({parentId: patkaToolCallId, durationSinceParent: expect.any(Number)}),
+      expect(received[0]?.parent).toEqual(some(patkaToolCallId));
+    });
+
+    it('gives an answer what the user said as root', () => {
+      const patkaContextEntries = new Subject<PatkaContextEntry>();
+      const patkaAgent = new PatkaAgent(
+        'patka',
+        new PatkaTools([]),
+        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        patkaContextEntries,
+        '/home/user',
       );
+      const received: Array<PatkaContextEntry> = [];
+      patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
+      const patkaUserUtterance: PatkaUserUtterance = {
+        type: 'PatkaUserUtterance',
+        id: randomUUID(),
+        timestamp: 0,
+        performanceTimestamp: 0,
+        root: none,
+        parent: none,
+        utterance: {content: 'hello', timestamp: new Date(), id: randomUUID()},
+      };
+
+      patkaContextEntries.next(patkaUserUtterance);
+
+      expect(received[0]).toMatchObject({root: some(patkaUserUtterance.id)});
+    });
+
+    it('gives a tool output the root of its tool call', () => {
+      const patkaContextEntries = new Subject<PatkaContextEntry>();
+      const patkaAgent = new PatkaAgent(
+        'patka',
+        new PatkaTools([aTool('read_file', 'hello')]),
+        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        patkaContextEntries,
+        '/home/user',
+      );
+      const received: Array<PatkaContextEntry> = [];
+      patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
+      const patkaUserUtterance: PatkaUserUtterance = {
+        type: 'PatkaUserUtterance',
+        id: randomUUID(),
+        timestamp: 0,
+        performanceTimestamp: 0,
+        root: none,
+        parent: none,
+        utterance: {content: 'hello', timestamp: new Date(), id: randomUUID()},
+      };
+
+      patkaContextEntries.next({
+        type: 'PatkaToolCall',
+        timestamp: 0,
+        performanceTimestamp: 0,
+        root: some(patkaUserUtterance.id),
+        parent: none,
+        id: randomUUID(),
+        name: 'read_file',
+        input: {path: 'a'},
+      });
+
+      expect(received[0]).toMatchObject({root: some(patkaUserUtterance.id)});
     });
 
     it('runs the tool a tool call names', () => {
@@ -195,7 +258,8 @@ describe('PatkaAgent', () => {
         type: 'PatkaToolCall',
         timestamp: 0,
         performanceTimestamp: 0,
-        origin: none,
+        root: some(randomUUID()),
+        parent: none,
         id: randomUUID(),
         name: 'read_file',
         input: {path: 'a'},
@@ -222,7 +286,8 @@ describe('PatkaAgent', () => {
         type: 'PatkaToolCall',
         timestamp: 0,
         performanceTimestamp: 0,
-        origin: none,
+        root: some(randomUUID()),
+        parent: none,
         id: randomUUID(),
         name: 'read_file',
         input: {path: 'a'},
@@ -254,7 +319,8 @@ describe('PatkaAgent', () => {
         type: 'PatkaToolOutput',
         timestamp: 0,
         performanceTimestamp: 0,
-        origin: none,
+        root: some(randomUUID()),
+        parent: none,
         id: randomUUID(),
         name: 'report_incompetency',
         output: success(none),
@@ -279,7 +345,8 @@ describe('PatkaAgent', () => {
         type: 'PatkaToolOutput',
         timestamp: 0,
         performanceTimestamp: 0,
-        origin: none,
+        root: some(randomUUID()),
+        parent: none,
         id: randomUUID(),
         name: 'report_incompetency',
         output: success(none),
@@ -306,7 +373,8 @@ describe('PatkaAgent', () => {
         type: 'PatkaUserNotification',
         timestamp: 0,
         performanceTimestamp: 0,
-        origin: none,
+        root: some(randomUUID()),
+        parent: none,
         id: randomUUID(),
         content:
           'Patka agent is not providing the necessary tools for the LLM to complete the task.',
@@ -331,7 +399,8 @@ describe('PatkaAgent', () => {
         type: 'PatkaError',
         timestamp: 0,
         performanceTimestamp: 0,
-        origin: none,
+        root: some(randomUUID()),
+        parent: none,
         id: randomUUID(),
         error: new Error('400 invalid_request_error'),
       });
@@ -366,7 +435,8 @@ describe('PatkaAgent', () => {
         type: 'PatkaToolOutput',
         timestamp: 0,
         performanceTimestamp: 0,
-        origin: none,
+        root: some(randomUUID()),
+        parent: none,
         id: randomUUID(),
         name: 'read_file',
         output: success(some('hello')),
