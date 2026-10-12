@@ -1,5 +1,5 @@
 import {match} from 'ts-pattern';
-import type {PatkaContextEntry} from '../context/patka-context-entry.ts';
+import type {PatkaContextEntry} from '../../../packages/agent/context/patka-context-entry.ts';
 import {createTextFromPatkaTextKey} from '../text/patka-text.ts';
 import {createJsonFromToolTry} from '../tools/patka-tool-json.ts';
 import type {PatkaPromptDirective} from './patka-prompt-directive.ts';

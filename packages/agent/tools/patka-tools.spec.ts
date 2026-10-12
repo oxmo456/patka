@@ -1,12 +1,10 @@
 import {firstValueFrom, of, throwError} from 'rxjs';
 import {describe, expect, it, type Mock, vi} from 'vitest';
-import type {JsonObject, JsonValue} from '../../../packages/json/json.ts';
-import {some} from '../../../packages/option/option.ts';
-import {success} from '../../../packages/try/try.ts';
-import {ListFiles} from './list-files/list-files.ts';
+import type {JsonObject, JsonValue} from '../../json/json.ts';
+import {some} from '../../option/option.ts';
+import {success} from '../../try/try.ts';
 import type {PatkaTool} from './patka-tool.ts';
 import {PatkaTools} from './patka-tools.ts';
-import {ReadFile} from './read-file/read-file.ts';
 
 type FakeTool = PatkaTool<JsonObject, JsonValue> & {invoke: Mock};
 
@@ -27,7 +25,7 @@ describe('PatkaTools', () => {
   });
 
   it('lists the manual of every tool it holds', () => {
-    const patkaTools = new PatkaTools([new ListFiles(), new ReadFile()]);
+    const patkaTools = new PatkaTools([aTool('list_files', 'listed'), aTool('read_file', 'read')]);
 
     expect(patkaTools.manuals().map((manual) => manual.name)).toEqual(['list_files', 'read_file']);
   });

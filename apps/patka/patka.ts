@@ -9,15 +9,15 @@ import {
   withLatestFrom,
 } from 'rxjs';
 import {inject, injectable} from 'tsyringe';
+import type {PatkaContextEntry} from '../../packages/agent/context/patka-context-entry.ts';
+import {PatkaAgent} from '../../packages/agent/patka-agent.ts';
 import type {Disposable} from '../../packages/disposable/disposable.ts';
 import {none, type Option, some} from '../../packages/option/option.ts';
 import {PatkaLogger} from '../../packages/patka-logger/patka-logger.ts';
 import {createPerformanceTimestamp} from '../../packages/performance-timestamp/performance-timestamp.ts';
 import {createTimestamp} from '../../packages/timestamp/timestamp.ts';
-import {PatkaAgent} from './agent/patka-agent.ts';
 import {PatkaEngine} from './chat/patka-engine.ts';
 import {PatkaContext} from './context/patka-context.ts';
-import type {PatkaContextEntry} from './context/patka-context-entry.ts';
 import {PatkaContextLogger} from './context/patka-context-logger.ts';
 import {PATKA_UI} from './ui/patka-ui.token.ts';
 import type {PatkaUI} from './ui/patka-ui.ts';

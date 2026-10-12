@@ -1,5 +1,5 @@
+import type {PatkaToolManual} from '../../../packages/agent/tools/patka-tool-manual.ts';
 import {createTextFromPatkaTextKey} from '../text/patka-text.ts';
-import type {PatkaToolManual} from '../tools/patka-tool-manual.ts';
 import type {PatkaPromptDirective} from './patka-prompt-directive.ts';
 import type {PatkaPromptEnvironment} from './patka-prompt-environment.ts';
 

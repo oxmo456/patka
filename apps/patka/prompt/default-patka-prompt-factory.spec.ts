@@ -1,10 +1,10 @@
 import {randomUUID} from 'node:crypto';
 import {describe, expect, it} from 'vitest';
+import type {PatkaContextEntry} from '../../../packages/agent/context/patka-context-entry.ts';
+import {PatkaTools} from '../../../packages/agent/tools/patka-tools.ts';
 import {none, some} from '../../../packages/option/option.ts';
 import {failure, success} from '../../../packages/try/try.ts';
-import type {PatkaContextEntry} from '../context/patka-context-entry.ts';
 import {ListFiles} from '../tools/list-files/list-files.ts';
-import {PatkaTools} from '../tools/patka-tools.ts';
 import {ReadFile} from '../tools/read-file/read-file.ts';
 import {DefaultPatkaPromptFactory} from './default-patka-prompt-factory.ts';
 import {createPatkaPromptDirective} from './patka-prompt-directives.ts';

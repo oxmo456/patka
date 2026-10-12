@@ -1,9 +1,9 @@
 import {randomUUID} from 'node:crypto';
 import {describe, expect, it} from 'vitest';
+import type {PatkaContextEntry} from '../../../packages/agent/context/patka-context-entry.ts';
 import {none, some} from '../../../packages/option/option.ts';
 import {success} from '../../../packages/try/try.ts';
 import {PatkaContext} from './patka-context.ts';
-import type {PatkaContextEntry} from './patka-context-entry.ts';
 
 describe('PatkaContext', () => {
   it('gives nothing when it holds nothing', () => {

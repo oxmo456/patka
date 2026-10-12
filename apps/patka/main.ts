@@ -2,8 +2,11 @@ import 'reflect-metadata';
 import blessed from 'blessed';
 import {container, type DependencyContainer} from 'tsyringe';
 import {$} from 'zx';
+import {PatkaAgent} from '../../packages/agent/patka-agent.ts';
+import {PatkaTools} from '../../packages/agent/tools/patka-tools.ts';
 import {WORKING_DIRECTORY} from '../../packages/working-directory/working-directory.token.ts';
 import {AGENT_NAME} from './agent/agent-name.token.ts';
+import {createPatkaAgentFromDependencyContainer} from './agent/patka-agent-factory.ts';
 import {PatkaContext} from './context/patka-context.ts';
 import {PATKA_CONTEXT_ENTRIES} from './context/patka-context-entries.token.ts';
 import {INFERENCE_CLIENT} from './inference/inference-client.token.ts';
@@ -23,6 +26,7 @@ import {GitStatus} from './tools/git-status/git-status.ts';
 import {GrepFiles} from './tools/grep-files/grep-files.ts';
 import {ListFiles} from './tools/list-files/list-files.ts';
 import {PATKA_TOOL} from './tools/patka-tool.token.ts';
+import {createPatkaToolsFromDependencyContainer} from './tools/patka-tools-factory.ts';
 import {ReadFile} from './tools/read-file/read-file.ts';
 import {ReportIncompetency} from './tools/report-incompetency/report-incompetency.ts';
 import {WriteFile} from './tools/write-file/write-file.ts';
@@ -39,6 +43,8 @@ container.register(PATKA_PROMPT_DIRECTIVE, {
 });
 container.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
 container.register(AGENT_NAME, {useValue: 'ROOT'});
+container.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
+container.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
 container.register(BLESSED, {useValue: blessed});
 container.register(INFERENCE_CLIENT, {
   useValue: buildInferenceClient(

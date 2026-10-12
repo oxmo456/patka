@@ -18,13 +18,14 @@ def ptk_library(name, srcs, test_srcs = [], deps = [], npm_deps = []):
     js_library(
         name = "test_data",
         srcs = srcs,
+        deps = [dep + ":test_data" for dep in deps],
         visibility = ["//visibility:public"],
     )
 
     if test_srcs:
         vitest_bin.vitest_test(
             name = "test",
-            args = ["run", "--config", "../vitest.config.ts"],
+            args = ["run", "--config", "../" * (len(native.package_name().split("/")) - 1) + "vitest.config.ts"],
             chdir = native.package_name(),
             data = srcs + test_srcs + [
                 "//packages:vitest_config",
@@ -32,7 +33,8 @@ def ptk_library(name, srcs, test_srcs = [], deps = [], npm_deps = []):
                 "//:package_json",
                 "//:node_modules/reflect-metadata",
                 "//:node_modules/vitest",
-            ] + [dep + ":test_data" for dep in deps] + npm_deps,
+                ":test_data",
+            ] + npm_deps,
         )
 
     biome_lint(srcs = srcs + test_srcs)

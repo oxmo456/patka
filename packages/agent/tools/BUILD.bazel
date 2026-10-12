@@ -1,0 +1,25 @@
+load("//tools:ptk_library.bzl", "ptk_library")
+
+ptk_library(
+    name = "tools",
+    srcs = [
+        "patka-tool-manual.ts",
+        "patka-tool-protocol.ts",
+        "patka-tool.ts",
+        "patka-tools.ts",
+        "report-incompetency.ts",
+    ],
+    test_srcs = [
+        "patka-tool-protocol.spec.ts",
+        "patka-tools.spec.ts",
+    ],
+    deps = [
+        "//packages/json",
+        "//packages/option",
+        "//packages/try",
+    ],
+    npm_deps = [
+        "//:node_modules/ajv",
+        "//:node_modules/rxjs",
+    ],
+)

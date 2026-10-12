@@ -1,8 +1,8 @@
 import type {Ollama} from 'ollama';
 import {defer, from, map, type Observable} from 'rxjs';
-import type {InferenceClient} from './inference-client.ts';
-import type {InferenceClientInput} from './inference-client-input.ts';
-import type {InferenceClientResponse} from './inference-client-response.ts';
+import type {InferenceClient} from '../../../packages/agent/inference/inference-client.ts';
+import type {InferenceClientInput} from '../../../packages/agent/inference/inference-client-input.ts';
+import type {InferenceClientResponse} from '../../../packages/agent/inference/inference-client-response.ts';
 
 export class OllamaInferenceClient implements InferenceClient {
   private readonly model: string;

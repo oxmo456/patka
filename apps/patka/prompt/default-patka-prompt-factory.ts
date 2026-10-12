@@ -1,11 +1,11 @@
 import {inject, injectable} from 'tsyringe';
+import type {PatkaContextEntry} from '../../../packages/agent/context/patka-context-entry.ts';
+import type {PatkaPromptFactory} from '../../../packages/agent/prompt/patka-prompt-factory.ts';
+import {PatkaTools} from '../../../packages/agent/tools/patka-tools.ts';
 import {WORKING_DIRECTORY} from '../../../packages/working-directory/working-directory.token.ts';
-import type {PatkaContextEntry} from '../context/patka-context-entry.ts';
-import {PatkaTools} from '../tools/patka-tools.ts';
 import {PATKA_PROMPT_DIRECTIVE} from './patka-prompt-directive.token.ts';
 import type {PatkaPromptDirective} from './patka-prompt-directive.ts';
 import type {PatkaPromptEnvironment} from './patka-prompt-environment.ts';
-import type {PatkaPromptFactory} from './patka-prompt-factory.ts';
 import {createMarkdownFromPatkaPromptDirective} from './patka-prompt-markdown.ts';
 
 @injectable()

@@ -1,0 +1,12 @@
+load("//tools:ptk_library.bzl", "ptk_library")
+
+ptk_library(
+    name = "inference",
+    srcs = [
+        "inference-client-input.ts",
+        "inference-client-response.ts",
+        "inference-client.ts",
+        "inference-usage.ts",
+    ],
+    npm_deps = ["//:node_modules/rxjs"],
+)

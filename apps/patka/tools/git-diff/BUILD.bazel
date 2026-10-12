@@ -12,6 +12,7 @@ ptk_package(
         "//:node_modules/tsyringe",
         "//:node_modules/zx",
         "//apps/patka/tools",
+        "//packages/agent/tools",
         "//packages/option",
         "//packages/try",
     ],

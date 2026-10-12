@@ -1,11 +1,9 @@
 import {randomUUID} from 'node:crypto';
 import {catchError, concatMap, EMPTY, map, type Observable, of, scan} from 'rxjs';
 import {match} from 'ts-pattern';
-import {inject, injectable} from 'tsyringe';
-import {type Option, some} from '../../../packages/option/option.ts';
-import {createPerformanceTimestamp} from '../../../packages/performance-timestamp/performance-timestamp.ts';
-import {createTimestamp} from '../../../packages/timestamp/timestamp.ts';
-import {PATKA_CONTEXT_ENTRIES} from '../context/patka-context-entries.token.ts';
+import {type Option, some} from '../option/option.ts';
+import {createPerformanceTimestamp} from '../performance-timestamp/performance-timestamp.ts';
+import {createTimestamp} from '../timestamp/timestamp.ts';
 import type {
   PatkaAgentUtterance,
   PatkaContextEntry,
@@ -14,43 +12,42 @@ import type {
   PatkaToolCall,
   PatkaToolOutput,
   PatkaUserNotification,
-} from '../context/patka-context-entry.ts';
-import type {PatkaContextEntryID} from '../context/patka-context-entry-id.ts';
-import {INFERENCE_CLIENT} from '../inference/inference-client.token.ts';
-import type {InferenceClient} from '../inference/inference-client.ts';
-import {PATKA_PROMPT_FACTORY} from '../prompt/patka-prompt-factory.token.ts';
-import type {PatkaPromptFactory} from '../prompt/patka-prompt-factory.ts';
-import {createTextFromPatkaTextKey} from '../text/patka-text.ts';
-import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
-import {PatkaTools} from '../tools/patka-tools.ts';
-import {REPORT_INCOMPETENCY} from '../tools/report-incompetency/report-incompetency.ts';
-import {AGENT_NAME} from './agent-name.token.ts';
+} from './context/patka-context-entry.ts';
+import type {PatkaContextEntryID} from './context/patka-context-entry-id.ts';
+import type {InferenceClient} from './inference/inference-client.ts';
+import type {PatkaAgentText} from './patka-agent-text.ts';
+import type {PatkaPromptFactory} from './prompt/patka-prompt-factory.ts';
+import {PatkaToolProtocol} from './tools/patka-tool-protocol.ts';
+import type {PatkaTools} from './tools/patka-tools.ts';
+import {REPORT_INCOMPETENCY} from './tools/report-incompetency.ts';
 
 function createRootFromParent(parent: PatkaContextEntry): Option<PatkaContextEntryID> {
   return parent.root.type === 'some' ? parent.root : some(parent.id);
 }
 
-@injectable()
 export class PatkaAgent {
   private readonly patkaTools: PatkaTools;
   private readonly patkaPromptFactory: PatkaPromptFactory;
   private readonly inferenceClient: InferenceClient;
+  private readonly patkaAgentText: PatkaAgentText;
   private readonly patkaToolProtocol = new PatkaToolProtocol();
 
   readonly name: string;
   readonly output: Observable<PatkaContextEntry>;
 
   constructor(
-    @inject(AGENT_NAME) name: string,
-    @inject(PatkaTools) patkaTools: PatkaTools,
-    @inject(INFERENCE_CLIENT) inferenceClient: InferenceClient,
-    @inject(PATKA_CONTEXT_ENTRIES) input: Observable<PatkaContextEntry>,
-    @inject(PATKA_PROMPT_FACTORY) patkaPromptFactory: PatkaPromptFactory,
+    name: string,
+    patkaTools: PatkaTools,
+    inferenceClient: InferenceClient,
+    input: Observable<PatkaContextEntry>,
+    patkaPromptFactory: PatkaPromptFactory,
+    patkaAgentText: PatkaAgentText,
   ) {
     this.name = name;
     this.patkaTools = patkaTools;
     this.inferenceClient = inferenceClient;
     this.patkaPromptFactory = patkaPromptFactory;
+    this.patkaAgentText = patkaAgentText;
     this.output = input.pipe(
       scan(
         (accumulator: ReadonlyArray<PatkaContextEntry>, patkaContextEntry: PatkaContextEntry) => [
@@ -98,7 +95,7 @@ export class PatkaAgent {
       performanceTimestamp: createPerformanceTimestamp(),
       root: createRootFromParent(parent),
       parent: some(parent.id),
-      content: createTextFromPatkaTextKey('agent.missingTools'),
+      content: this.patkaAgentText.missingTools,
     } satisfies PatkaUserNotification);
   }
 
@@ -110,10 +107,9 @@ export class PatkaAgent {
       performanceTimestamp: createPerformanceTimestamp(),
       root: createRootFromParent(patkaError),
       parent: some(patkaError.id),
-      content: createTextFromPatkaTextKey('agent.error', {
-        message:
-          patkaError.error instanceof Error ? patkaError.error.message : String(patkaError.error),
-      }),
+      content: this.patkaAgentText.error(
+        patkaError.error instanceof Error ? patkaError.error.message : String(patkaError.error),
+      ),
     } satisfies PatkaUserNotification);
   }
 
@@ -180,9 +176,7 @@ export class PatkaAgent {
                 performanceTimestamp: createPerformanceTimestamp(),
                 root: createRootFromParent(patkaInferenceClientResponse),
                 parent: some(patkaInferenceClientResponse.id),
-                content: createTextFromPatkaTextKey('agent.unreadableToolInvocation', {
-                  message: error.message,
-                }),
+                content: this.patkaAgentText.unreadableToolInvocation(error.message),
               } satisfies PatkaAgentUtterance)
             : EMPTY,
       )

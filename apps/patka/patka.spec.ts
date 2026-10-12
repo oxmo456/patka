@@ -2,12 +2,15 @@ import {randomUUID} from 'node:crypto';
 import {of, Subject} from 'rxjs';
 import {container, type DependencyContainer} from 'tsyringe';
 import {describe, expect, it, vi} from 'vitest';
+import type {PatkaContextEntry} from '../../packages/agent/context/patka-context-entry.ts';
+import {PatkaAgent} from '../../packages/agent/patka-agent.ts';
+import {PatkaTools} from '../../packages/agent/tools/patka-tools.ts';
 import {some} from '../../packages/option/option.ts';
 import {WORKING_DIRECTORY} from '../../packages/working-directory/working-directory.token.ts';
 import {AGENT_NAME} from './agent/agent-name.token.ts';
+import {createPatkaAgentFromDependencyContainer} from './agent/patka-agent-factory.ts';
 import {PatkaContext} from './context/patka-context.ts';
 import {PATKA_CONTEXT_ENTRIES} from './context/patka-context-entries.token.ts';
-import type {PatkaContextEntry} from './context/patka-context-entry.ts';
 import {INFERENCE_CLIENT} from './inference/inference-client.token.ts';
 import {Patka} from './patka.ts';
 import {DefaultPatkaPromptFactory} from './prompt/default-patka-prompt-factory.ts';
@@ -16,6 +19,7 @@ import {createPatkaPromptDirective} from './prompt/patka-prompt-directives.ts';
 import {PATKA_PROMPT_FACTORY} from './prompt/patka-prompt-factory.token.ts';
 import {ListFiles} from './tools/list-files/list-files.ts';
 import {PATKA_TOOL} from './tools/patka-tool.token.ts';
+import {createPatkaToolsFromDependencyContainer} from './tools/patka-tools-factory.ts';
 import {ReadFile} from './tools/read-file/read-file.ts';
 import {BLESSED} from './ui/blessed.token.ts';
 import type {Blessed} from './ui/patka-tui.ts';
@@ -38,6 +42,8 @@ describe('Patka', () => {
     });
     child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
+    child.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
+    child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {useValue: {generate: vi.fn()}});
     child.register(PATKA_TOOL, {useClass: ListFiles});
@@ -60,6 +66,8 @@ describe('Patka', () => {
     });
     child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
+    child.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
+    child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {
       useValue: {generate: () => of({content: 'Paris', usage: {inputTokens: 0, outputTokens: 0}})},
@@ -96,6 +104,8 @@ describe('Patka', () => {
     });
     child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
+    child.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
+    child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {
       useValue: {generate: () => of({content: 'Paris', usage: {inputTokens: 0, outputTokens: 0}})},
@@ -129,6 +139,8 @@ describe('Patka', () => {
     });
     child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
+    child.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
+    child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {
       useValue: {generate: () => of({content: 'Paris', usage: {inputTokens: 0, outputTokens: 0}})},

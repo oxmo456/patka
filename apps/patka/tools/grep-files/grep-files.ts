@@ -1,10 +1,10 @@
 import {catchError, defer, from, map, type Observable, of} from 'rxjs';
 import {injectable} from 'tsyringe';
 import {$} from 'zx';
+import type {PatkaTool} from '../../../../packages/agent/tools/patka-tool.ts';
+import type {PatkaToolManual} from '../../../../packages/agent/tools/patka-tool-manual.ts';
 import {type Option, some} from '../../../../packages/option/option.ts';
 import {failure, success, type Try} from '../../../../packages/try/try.ts';
-import type {PatkaTool} from '../patka-tool.ts';
-import type {PatkaToolManual} from '../patka-tool-manual.ts';
 import {assertRelativePathInsideTheWorkingDirectory} from '../patka-tool-relative-path.ts';
 
 export type GrepFilesInput = {
