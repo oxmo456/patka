@@ -17,16 +17,12 @@ import {INFERENCE_CLIENT} from '../inference/inference-client.token.ts';
 import type {InferenceClient} from '../inference/inference-client.ts';
 import {type Option, some} from '../option.ts';
 import {createPerformanceTimestamp} from '../performance-timestamp.ts';
-import {DefaultPatkaPromptFactory} from '../prompt/default-patka-prompt-factory.ts';
-import {PATKA_PROMPT_DIRECTIVE} from '../prompt/patka-prompt-directive.token.ts';
-import type {PatkaPromptDirective} from '../prompt/patka-prompt-directive.ts';
-import type {PatkaPromptEnvironment} from '../prompt/patka-prompt-environment.ts';
+import {PATKA_PROMPT_FACTORY} from '../prompt/patka-prompt-factory.token.ts';
 import type {PatkaPromptFactory} from '../prompt/patka-prompt-factory.ts';
 import {createTimestamp} from '../timestamp.ts';
 import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
 import {REPORT_INCOMPETENCY} from '../tools/report-incompetency/report-incompetency.ts';
-import {WORKING_DIRECTORY} from '../working-directory.token.ts';
 import {AGENT_NAME} from './agent-name.token.ts';
 
 const MISSING_TOOLS_NOTIFICATION =
@@ -51,18 +47,12 @@ export class PatkaAgent {
     @inject(PatkaTools) patkaTools: PatkaTools,
     @inject(INFERENCE_CLIENT) inferenceClient: InferenceClient,
     @inject(PATKA_CONTEXT_ENTRIES) input: Observable<PatkaContextEntry>,
-    @inject(WORKING_DIRECTORY) workingDirectory: string,
-    @inject(PATKA_PROMPT_DIRECTIVE)
-    patkaPromptDirective: PatkaPromptDirective<PatkaPromptEnvironment>,
+    @inject(PATKA_PROMPT_FACTORY) patkaPromptFactory: PatkaPromptFactory,
   ) {
     this.name = name;
     this.patkaTools = patkaTools;
     this.inferenceClient = inferenceClient;
-    this.patkaPromptFactory = new DefaultPatkaPromptFactory(
-      patkaTools,
-      workingDirectory,
-      patkaPromptDirective,
-    );
+    this.patkaPromptFactory = patkaPromptFactory;
     this.output = input.pipe(
       scan(
         (accumulator: ReadonlyArray<PatkaContextEntry>, patkaContextEntry: PatkaContextEntry) => [

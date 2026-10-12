@@ -83,6 +83,26 @@ Assistant: hi there
 Assistant:`);
   });
 
+  it('labels what Patka said', () => {
+    const patkaAgentUtterance: PatkaContextEntry = {
+      type: 'PatkaAgentUtterance',
+      timestamp: 0,
+      performanceTimestamp: 0,
+      root: none,
+      parent: none,
+      id: randomUUID(),
+      content: 'Patka could not read your tool invocation',
+    };
+
+    expect(
+      new DefaultPatkaPromptFactory(
+        new PatkaTools([]),
+        '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
+      ).create([patkaAgentUtterance]),
+    ).toContain('Patka: Patka could not read your tool invocation');
+  });
+
   it('leaves the last cue for the model to answer', () => {
     const patkaConversation = [said('hello')];
 

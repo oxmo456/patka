@@ -1,10 +1,13 @@
 import {randomUUID} from 'node:crypto';
 import {type Observable, of, Subject, throwError} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
-import type {PatkaContextEntry, PatkaUserUtterance} from '../context/patka-context-entry.ts';
-import type {InferenceClientInput} from '../inference/inference-client-input.ts';
+import type {
+  PatkaAgentUtterance,
+  PatkaContextEntry,
+  PatkaToolOutput,
+  PatkaUserUtterance,
+} from '../context/patka-context-entry.ts';
 import {none, type Option, some} from '../option.ts';
-import {PATKA_PROMPT_DIRECTIVE_TREE} from '../prompt/patka-prompt-directive-tree.ts';
 import type {PatkaTool} from '../tools/patka-tool.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
 import {success, type Try} from '../try.ts';
@@ -38,8 +41,7 @@ describe('PatkaAgent', () => {
       new PatkaTools([]),
       {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
       new Subject<PatkaContextEntry>(),
-      '/home/user',
-      PATKA_PROMPT_DIRECTIVE_TREE,
+      {create: () => 'prompt'},
     );
 
     expect(patkaAgent.name).toBe('patka');
@@ -55,8 +57,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate},
         new Subject<PatkaContextEntry>(),
-        '/home/user',
-        PATKA_PROMPT_DIRECTIVE_TREE,
+        {create: () => 'prompt'},
       );
 
       patkaAgent.output.subscribe();
@@ -71,8 +72,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
-        '/home/user',
-        PATKA_PROMPT_DIRECTIVE_TREE,
+        {create: () => 'prompt'},
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -84,7 +84,7 @@ describe('PatkaAgent', () => {
       ]);
     });
 
-    it('prompts the engine with what the user said', () => {
+    it('prompts the engine with the prompt the factory creates', () => {
       const patkaContextEntries = new Subject<PatkaContextEntry>();
       const generate = vi.fn(() =>
         of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}}),
@@ -94,14 +94,13 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate},
         patkaContextEntries,
-        '/home/user',
-        PATKA_PROMPT_DIRECTIVE_TREE,
+        {create: () => 'the prompt'},
       );
       patkaAgent.output.subscribe();
 
       patkaContextEntries.next(said('hello'));
 
-      expect(generate).toHaveBeenCalledWith({prompt: expect.stringContaining('User: hello')});
+      expect(generate).toHaveBeenCalledWith({prompt: 'the prompt'});
     });
 
     it('tells the user when the inference client fails', () => {
@@ -111,8 +110,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate: () => throwError(() => new Error('400 invalid_request_error'))},
         patkaContextEntries,
-        '/home/user',
-        PATKA_PROMPT_DIRECTIVE_TREE,
+        {create: () => 'prompt'},
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -139,8 +137,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([aTool('read_file', 'hello')]),
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
-        '/home/user',
-        PATKA_PROMPT_DIRECTIVE_TREE,
+        {create: () => 'prompt'},
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -168,8 +165,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([aTool('read_file', 'hello')]),
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
-        '/home/user',
-        PATKA_PROMPT_DIRECTIVE_TREE,
+        {create: () => 'prompt'},
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -196,8 +192,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
-        '/home/user',
-        PATKA_PROMPT_DIRECTIVE_TREE,
+        {create: () => 'prompt'},
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -223,8 +218,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([aTool('read_file', 'hello')]),
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
-        '/home/user',
-        PATKA_PROMPT_DIRECTIVE_TREE,
+        {create: () => 'prompt'},
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -259,8 +253,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([aTool('read_file', 'hello')]),
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
-        '/home/user',
-        PATKA_PROMPT_DIRECTIVE_TREE,
+        {create: () => 'prompt'},
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -281,22 +274,18 @@ describe('PatkaAgent', () => {
       ]);
     });
 
-    it('prompts the engine with what the agent said', () => {
+    it('gives the factory what the agent said', () => {
       const patkaContextEntries = new Subject<PatkaContextEntry>();
-      const generate = vi.fn(() =>
-        of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}}),
-      );
+      const create = vi.fn(() => 'prompt');
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        {generate},
+        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
-        '/home/user',
-        PATKA_PROMPT_DIRECTIVE_TREE,
+        {create},
       );
       patkaAgent.output.subscribe();
-
-      patkaContextEntries.next({
+      const patkaAgentUtterance: PatkaAgentUtterance = {
         type: 'PatkaAgentUtterance',
         timestamp: 0,
         performanceTimestamp: 0,
@@ -304,11 +293,11 @@ describe('PatkaAgent', () => {
         parent: none,
         id: randomUUID(),
         content: 'Patka could not read your tool invocation',
-      });
+      };
 
-      expect(generate).toHaveBeenCalledWith({
-        prompt: expect.stringContaining('Patka: Patka could not read your tool invocation'),
-      });
+      patkaContextEntries.next(patkaAgentUtterance);
+
+      expect(create).toHaveBeenCalledWith([patkaAgentUtterance]);
     });
 
     it('runs the tool a tool call names', () => {
@@ -318,8 +307,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([aTool('read_file', 'hello')]),
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
-        '/home/user',
-        PATKA_PROMPT_DIRECTIVE_TREE,
+        {create: () => 'prompt'},
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -347,8 +335,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
-        '/home/user',
-        PATKA_PROMPT_DIRECTIVE_TREE,
+        {create: () => 'prompt'},
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -382,8 +369,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate},
         patkaContextEntries,
-        '/home/user',
-        PATKA_PROMPT_DIRECTIVE_TREE,
+        {create: () => 'prompt'},
       );
       patkaAgent.output.subscribe();
 
@@ -408,8 +394,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
-        '/home/user',
-        PATKA_PROMPT_DIRECTIVE_TREE,
+        {create: () => 'prompt'},
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -437,8 +422,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
-        '/home/user',
-        PATKA_PROMPT_DIRECTIVE_TREE,
+        {create: () => 'prompt'},
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -464,8 +448,7 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
-        '/home/user',
-        PATKA_PROMPT_DIRECTIVE_TREE,
+        {create: () => 'prompt'},
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -488,26 +471,18 @@ describe('PatkaAgent', () => {
       ]);
     });
 
-    it('carries the tool output into the next prompt', () => {
+    it('gives the factory the tool output', () => {
       const patkaContextEntries = new Subject<PatkaContextEntry>();
-      const prompts: Array<string> = [];
+      const create = vi.fn(() => 'prompt');
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        {
-          generate: (inferenceClientInput: InferenceClientInput) => {
-            prompts.push(inferenceClientInput.prompt);
-
-            return of({content: 'the note says hello', usage: {inputTokens: 0, outputTokens: 0}});
-          },
-        },
+        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
-        '/home/user',
-        PATKA_PROMPT_DIRECTIVE_TREE,
+        {create},
       );
       patkaAgent.output.subscribe();
-
-      patkaContextEntries.next({
+      const patkaToolOutput: PatkaToolOutput = {
         type: 'PatkaToolOutput',
         timestamp: 0,
         performanceTimestamp: 0,
@@ -516,11 +491,11 @@ describe('PatkaAgent', () => {
         id: randomUUID(),
         name: 'read_file',
         output: success(some('hello')),
-      });
+      };
 
-      expect(prompts[0]).toContain(
-        'Tool output: {"type":"success","value":{"type":"some","value":"hello"}}',
-      );
+      patkaContextEntries.next(patkaToolOutput);
+
+      expect(create).toHaveBeenCalledWith([patkaToolOutput]);
     });
   });
 });
