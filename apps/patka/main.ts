@@ -14,7 +14,7 @@ import {
 import {Patka} from './patka.ts';
 import {DefaultPatkaPromptFactory} from './prompt/default-patka-prompt-factory.ts';
 import {PATKA_PROMPT_DIRECTIVE} from './prompt/patka-prompt-directive.token.ts';
-import {createPatkaPromptDirectiveFromUrl} from './prompt/patka-prompt-directive-json.ts';
+import {createPatkaPromptDirective} from './prompt/patka-prompt-directives.ts';
 import {PATKA_PROMPT_FACTORY} from './prompt/patka-prompt-factory.token.ts';
 import {ApplyPatch} from './tools/apply-patch/apply-patch.ts';
 import {GitDiff} from './tools/git-diff/git-diff.ts';
@@ -34,9 +34,7 @@ $.quiet = true;
 
 container.register(WORKING_DIRECTORY, {useValue: process.cwd()});
 container.register(PATKA_PROMPT_DIRECTIVE, {
-  useValue: createPatkaPromptDirectiveFromUrl(
-    new URL('./prompt/patka-prompt-directive.json', import.meta.url),
-  ),
+  useValue: createPatkaPromptDirective(),
 });
 container.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
 container.register(AGENT_NAME, {useValue: 'ROOT'});

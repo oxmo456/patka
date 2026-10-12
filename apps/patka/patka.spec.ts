@@ -11,7 +11,7 @@ import {some} from './option.ts';
 import {Patka} from './patka.ts';
 import {DefaultPatkaPromptFactory} from './prompt/default-patka-prompt-factory.ts';
 import {PATKA_PROMPT_DIRECTIVE} from './prompt/patka-prompt-directive.token.ts';
-import {createPatkaPromptDirectiveFromUrl} from './prompt/patka-prompt-directive-json.ts';
+import {createPatkaPromptDirective} from './prompt/patka-prompt-directives.ts';
 import {PATKA_PROMPT_FACTORY} from './prompt/patka-prompt-factory.token.ts';
 import {ListFiles} from './tools/list-files/list-files.ts';
 import {PATKA_TOOL} from './tools/patka-tool.token.ts';
@@ -34,9 +34,7 @@ describe('Patka', () => {
     const child = container.createChildContainer();
     child.register(WORKING_DIRECTORY, {useValue: '/home/user'});
     child.register(PATKA_PROMPT_DIRECTIVE, {
-      useValue: createPatkaPromptDirectiveFromUrl(
-        new URL('./prompt/patka-prompt-directive.json', import.meta.url),
-      ),
+      useValue: createPatkaPromptDirective(),
     });
     child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
@@ -58,9 +56,7 @@ describe('Patka', () => {
     const child = container.createChildContainer();
     child.register(WORKING_DIRECTORY, {useValue: '/home/user'});
     child.register(PATKA_PROMPT_DIRECTIVE, {
-      useValue: createPatkaPromptDirectiveFromUrl(
-        new URL('./prompt/patka-prompt-directive.json', import.meta.url),
-      ),
+      useValue: createPatkaPromptDirective(),
     });
     child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
@@ -96,9 +92,7 @@ describe('Patka', () => {
     const child = container.createChildContainer();
     child.register(WORKING_DIRECTORY, {useValue: '/home/user'});
     child.register(PATKA_PROMPT_DIRECTIVE, {
-      useValue: createPatkaPromptDirectiveFromUrl(
-        new URL('./prompt/patka-prompt-directive.json', import.meta.url),
-      ),
+      useValue: createPatkaPromptDirective(),
     });
     child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
@@ -131,9 +125,7 @@ describe('Patka', () => {
     const child = container.createChildContainer();
     child.register(WORKING_DIRECTORY, {useValue: '/home/user'});
     child.register(PATKA_PROMPT_DIRECTIVE, {
-      useValue: createPatkaPromptDirectiveFromUrl(
-        new URL('./prompt/patka-prompt-directive.json', import.meta.url),
-      ),
+      useValue: createPatkaPromptDirective(),
     });
     child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
     child.register(AGENT_NAME, {useValue: 'ROOT'});

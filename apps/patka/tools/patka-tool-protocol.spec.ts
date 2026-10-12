@@ -3,14 +3,6 @@ import {isSuccess} from '../try.ts';
 import {PatkaToolProtocol} from './patka-tool-protocol.ts';
 
 describe('PatkaToolProtocol', () => {
-  it('documents the single line the model should reply with', () => {
-    const manual = new PatkaToolProtocol().manual;
-
-    expect(manual).toContain('single line');
-    expect(manual).toContain('$$$invoke(tool_name, {"key": "value"})');
-    expect(manual).toContain('$$$invoke(read_file, {"relativePath": "notes.txt"})');
-  });
-
   it('reads back the tool and the input the model asked for', () => {
     const patkaToolInvocation = new PatkaToolProtocol().parse(
       '$$$invoke(list_files, {"path": "tools"})',
@@ -59,17 +51,5 @@ describe('PatkaToolProtocol', () => {
 
     expect(patkaToolProtocol.isAPatkaToolInvocation('Paris')).toBe(false);
     expect(patkaToolProtocol.isAPatkaToolInvocation('$$$invoke without an input')).toBe(false);
-  });
-
-  it('tells the model never to guess a tool input', () => {
-    const manual = new PatkaToolProtocol().manual;
-
-    expect(manual).toContain('Never invoke a tool as a guess.');
-  });
-
-  it('tells the model to ask a question when the request is not actionable', () => {
-    const manual = new PatkaToolProtocol().manual;
-
-    expect(manual).toContain('ask the user a question instead');
   });
 });

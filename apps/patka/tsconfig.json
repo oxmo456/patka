@@ -9,9 +9,11 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "verbatimModuleSyntax": true,
+    "resolveJsonModule": true,
     "rewriteRelativeImportExtensions": true
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "text/default.json"
   ]
 }

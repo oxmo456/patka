@@ -1,11 +1,11 @@
 import {spawn} from 'node:child_process';
 import {map, Observable, type Subscriber} from 'rxjs';
+import {createTextFromPatkaTextKey} from '../text/patka-text.ts';
 import type {InferenceClient} from './inference-client.ts';
 import type {InferenceClientInput} from './inference-client-input.ts';
 import type {InferenceClientResponse} from './inference-client-response.ts';
 
-const SYSTEM_PROMPT =
-  'You are a language model. Continue the conversation, answering directly from your own knowledge.';
+const SYSTEM_PROMPT = createTextFromPatkaTextKey('inference.claude.systemPrompt');
 
 const ARGUMENTS: ReadonlyArray<string> = [
   '--print',

@@ -7,7 +7,7 @@ import {PatkaTools} from '../tools/patka-tools.ts';
 import {ReadFile} from '../tools/read-file/read-file.ts';
 import {failure, success} from '../try.ts';
 import {DefaultPatkaPromptFactory} from './default-patka-prompt-factory.ts';
-import {createPatkaPromptDirectiveFromUrl} from './patka-prompt-directive-json.ts';
+import {createPatkaPromptDirective} from './patka-prompt-directives.ts';
 
 const said = (content: string): PatkaContextEntry => ({
   type: 'PatkaUserUtterance',
@@ -36,9 +36,7 @@ describe('DefaultPatkaPromptFactory', () => {
       new DefaultPatkaPromptFactory(
         new PatkaTools([]),
         '/home/user',
-        createPatkaPromptDirectiveFromUrl(
-          new URL('./patka-prompt-directive.json', import.meta.url),
-        ),
+        createPatkaPromptDirective(),
       ).create([]),
     ).toContain('fewest words possible');
   });
@@ -48,9 +46,7 @@ describe('DefaultPatkaPromptFactory', () => {
       new DefaultPatkaPromptFactory(
         new PatkaTools([]),
         '/home/user',
-        createPatkaPromptDirectiveFromUrl(
-          new URL('./patka-prompt-directive.json', import.meta.url),
-        ),
+        createPatkaPromptDirective(),
       ).create([]),
     ).toContain('If no tool is necessary, answer the user directly.');
   });
@@ -60,24 +56,16 @@ describe('DefaultPatkaPromptFactory', () => {
       new DefaultPatkaPromptFactory(
         new PatkaTools([]),
         '/home/user',
-        createPatkaPromptDirectiveFromUrl(
-          new URL('./patka-prompt-directive.json', import.meta.url),
-        ),
+        createPatkaPromptDirective(),
       ).create([]),
     ).toContain('As an agent, your working directory is: /home/user');
   });
 
   it('asks for an answer when nothing has been said', () => {
     expect(
-      new DefaultPatkaPromptFactory(
-        new PatkaTools([]),
-        '/home/user',
-        createPatkaPromptDirectiveFromUrl(
-          new URL('./patka-prompt-directive.json', import.meta.url),
-        ),
-      )
+      new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user', createPatkaPromptDirective())
         .create([])
-        .endsWith('\n\nAssistant:'),
+        .endsWith('\nAssistant:'),
     ).toBe(true);
   });
 
@@ -88,13 +76,10 @@ describe('DefaultPatkaPromptFactory', () => {
       new DefaultPatkaPromptFactory(
         new PatkaTools([]),
         '/home/user',
-        createPatkaPromptDirectiveFromUrl(
-          new URL('./patka-prompt-directive.json', import.meta.url),
-        ),
+        createPatkaPromptDirective(),
       ).create(patkaConversation),
     ).toContain(`User: hello
-Assistant: hi there
-Assistant:`);
+Assistant: hi there`);
   });
 
   it('labels what Patka said', () => {
@@ -112,9 +97,7 @@ Assistant:`);
       new DefaultPatkaPromptFactory(
         new PatkaTools([]),
         '/home/user',
-        createPatkaPromptDirectiveFromUrl(
-          new URL('./patka-prompt-directive.json', import.meta.url),
-        ),
+        createPatkaPromptDirective(),
       ).create([patkaAgentUtterance]),
     ).toContain('Patka: Patka could not read your tool invocation');
   });
@@ -126,11 +109,10 @@ Assistant:`);
       new DefaultPatkaPromptFactory(
         new PatkaTools([]),
         '/home/user',
-        createPatkaPromptDirectiveFromUrl(
-          new URL('./patka-prompt-directive.json', import.meta.url),
-        ),
+        createPatkaPromptDirective(),
       ).create(patkaConversation),
     ).toContain(`User: hello
+
 Assistant:`);
   });
 
@@ -145,15 +127,12 @@ Assistant:`);
       new DefaultPatkaPromptFactory(
         new PatkaTools([]),
         '/home/user',
-        createPatkaPromptDirectiveFromUrl(
-          new URL('./patka-prompt-directive.json', import.meta.url),
-        ),
+        createPatkaPromptDirective(),
       ).create(patkaConversation),
     ).toContain(
       `User: my name is Zaphod
 Assistant: nice to meet you
-User: what is my name?
-Assistant:`,
+User: what is my name?`,
     );
   });
 
@@ -161,7 +140,7 @@ Assistant:`,
     const prompt = new DefaultPatkaPromptFactory(
       new PatkaTools([]),
       '/home/user',
-      createPatkaPromptDirectiveFromUrl(new URL('./patka-prompt-directive.json', import.meta.url)),
+      createPatkaPromptDirective(),
     ).create([]);
 
     expect(prompt).not.toContain('You can use these tools');
@@ -171,7 +150,7 @@ Assistant:`,
     const defaultPatkaPromptFactory = new DefaultPatkaPromptFactory(
       new PatkaTools([new ListFiles(), new ReadFile()]),
       '/home/user',
-      createPatkaPromptDirectiveFromUrl(new URL('./patka-prompt-directive.json', import.meta.url)),
+      createPatkaPromptDirective(),
     );
 
     const prompt = defaultPatkaPromptFactory.create([]);
@@ -186,7 +165,7 @@ Assistant:`,
     const defaultPatkaPromptFactory = new DefaultPatkaPromptFactory(
       new PatkaTools([new ReadFile()]),
       '/home/user',
-      createPatkaPromptDirectiveFromUrl(new URL('./patka-prompt-directive.json', import.meta.url)),
+      createPatkaPromptDirective(),
     );
 
     const prompt = defaultPatkaPromptFactory.create([]);
@@ -199,7 +178,7 @@ Assistant:`,
     const defaultPatkaPromptFactory = new DefaultPatkaPromptFactory(
       new PatkaTools([new ListFiles()]),
       '/home/user',
-      createPatkaPromptDirectiveFromUrl(new URL('./patka-prompt-directive.json', import.meta.url)),
+      createPatkaPromptDirective(),
     );
 
     const prompt = defaultPatkaPromptFactory.create([]);
@@ -212,7 +191,7 @@ Assistant:`,
     const prompt = new DefaultPatkaPromptFactory(
       new PatkaTools([new ReadFile()]),
       '/home/user',
-      createPatkaPromptDirectiveFromUrl(new URL('./patka-prompt-directive.json', import.meta.url)),
+      createPatkaPromptDirective(),
     ).create([]);
 
     expect(prompt).toContain('single line');
@@ -220,11 +199,31 @@ Assistant:`,
     expect(prompt).toContain('$$$invoke(read_file, {"relativePath": "notes.txt"})');
   });
 
+  it('tells the model never to guess a tool input', () => {
+    const prompt = new DefaultPatkaPromptFactory(
+      new PatkaTools([new ReadFile()]),
+      '/home/user',
+      createPatkaPromptDirective(),
+    ).create([]);
+
+    expect(prompt).toContain('Never invoke a tool as a guess.');
+  });
+
+  it('tells the model to ask a question when the request is not actionable', () => {
+    const prompt = new DefaultPatkaPromptFactory(
+      new PatkaTools([new ReadFile()]),
+      '/home/user',
+      createPatkaPromptDirective(),
+    ).create([]);
+
+    expect(prompt).toContain('ask the user a question instead');
+  });
+
   it('gives the model the success and failure form of each tool output', () => {
     const prompt = new DefaultPatkaPromptFactory(
       new PatkaTools([new ReadFile()]),
       '/home/user',
-      createPatkaPromptDirectiveFromUrl(new URL('./patka-prompt-directive.json', import.meta.url)),
+      createPatkaPromptDirective(),
     ).create([]);
 
     expect(prompt).toContain('"type":{"const":"failure"}');
@@ -245,7 +244,7 @@ Assistant:`,
     const prompt = new DefaultPatkaPromptFactory(
       new PatkaTools([]),
       '/home/user',
-      createPatkaPromptDirectiveFromUrl(new URL('./patka-prompt-directive.json', import.meta.url)),
+      createPatkaPromptDirective(),
     ).create([patkaToolResult]);
 
     expect(prompt).toContain(
@@ -268,7 +267,7 @@ Assistant:`,
     const prompt = new DefaultPatkaPromptFactory(
       new PatkaTools([]),
       '/home/user',
-      createPatkaPromptDirectiveFromUrl(new URL('./patka-prompt-directive.json', import.meta.url)),
+      createPatkaPromptDirective(),
     ).create([patkaToolResult]);
 
     expect(prompt).toContain('Tool output: {"type":"failure","error":"file not found"}');

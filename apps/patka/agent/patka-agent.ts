@@ -19,14 +19,12 @@ import {type Option, some} from '../option.ts';
 import {createPerformanceTimestamp} from '../performance-timestamp.ts';
 import {PATKA_PROMPT_FACTORY} from '../prompt/patka-prompt-factory.token.ts';
 import type {PatkaPromptFactory} from '../prompt/patka-prompt-factory.ts';
+import {createTextFromPatkaTextKey} from '../text/patka-text.ts';
 import {createTimestamp} from '../timestamp.ts';
 import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
 import {REPORT_INCOMPETENCY} from '../tools/report-incompetency/report-incompetency.ts';
 import {AGENT_NAME} from './agent-name.token.ts';
-
-const MISSING_TOOLS_NOTIFICATION =
-  'Patka agent is not providing the necessary tools for the LLM to complete the task.';
 
 function createRootFromParent(parent: PatkaContextEntry): Option<PatkaContextEntryID> {
   return parent.root.type === 'some' ? parent.root : some(parent.id);
@@ -100,7 +98,7 @@ export class PatkaAgent {
       performanceTimestamp: createPerformanceTimestamp(),
       root: createRootFromParent(parent),
       parent: some(parent.id),
-      content: MISSING_TOOLS_NOTIFICATION,
+      content: createTextFromPatkaTextKey('agent.missingTools'),
     } satisfies PatkaUserNotification);
   }
 
@@ -112,7 +110,10 @@ export class PatkaAgent {
       performanceTimestamp: createPerformanceTimestamp(),
       root: createRootFromParent(patkaError),
       parent: some(patkaError.id),
-      content: `Oops something went wrong... ${patkaError.error instanceof Error ? patkaError.error.message : String(patkaError.error)}`,
+      content: createTextFromPatkaTextKey('agent.error', {
+        message:
+          patkaError.error instanceof Error ? patkaError.error.message : String(patkaError.error),
+      }),
     } satisfies PatkaUserNotification);
   }
 
@@ -179,7 +180,9 @@ export class PatkaAgent {
                 performanceTimestamp: createPerformanceTimestamp(),
                 root: createRootFromParent(patkaInferenceClientResponse),
                 parent: some(patkaInferenceClientResponse.id),
-                content: `Patka could not read your tool invocation: ${error.message}`,
+                content: createTextFromPatkaTextKey('agent.unreadableToolInvocation', {
+                  message: error.message,
+                }),
               } satisfies PatkaAgentUtterance)
             : EMPTY,
       )
