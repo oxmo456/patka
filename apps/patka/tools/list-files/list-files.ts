@@ -1,11 +1,11 @@
 import {readdir} from 'node:fs/promises';
-import {isAbsolute as isPathAbsolute} from 'node:path';
 import {catchError, defer, from, map, type Observable, of} from 'rxjs';
 import {injectable} from 'tsyringe';
 import {type Option, some} from '../../option.ts';
 import {failure, success, type Try} from '../../try.ts';
 import type {PatkaTool} from '../patka-tool.ts';
 import type {PatkaToolManual} from '../patka-tool-manual.ts';
+import {assertRelativePathInsideTheWorkingDirectory} from '../patka-tool-relative-path.ts';
 
 export type ListFilesInput = {
   readonly relativePath: string;
@@ -23,7 +23,7 @@ export class ListFiles implements PatkaTool<ListFilesInput, ReadonlyArray<string
         relativePath: {
           type: 'string',
           description:
-            'Relative path of the directory to list, from the working directory (e.g. "." or "src/utils"). Never an absolute path: a path starting with "/" is refused.',
+            'Relative path of the directory to list, from the working directory (e.g. "." or "src/utils"). Never an absolute path and never outside the working directory: such a path is refused.',
         },
       },
       required: ['relativePath'],
@@ -66,11 +66,7 @@ export class ListFiles implements PatkaTool<ListFilesInput, ReadonlyArray<string
 
   invoke(listFilesInput: ListFilesInput): Observable<Try<Option<ReadonlyArray<string>>>> {
     return defer(() => {
-      if (isPathAbsolute(listFilesInput.relativePath)) {
-        throw new Error(
-          `list_files only accepts a relative path, given "${listFilesInput.relativePath}"`,
-        );
-      }
+      assertRelativePathInsideTheWorkingDirectory(listFilesInput.relativePath);
 
       return from(readdir(listFilesInput.relativePath, {withFileTypes: true}));
     }).pipe(

@@ -1,4 +1,3 @@
-import {isAbsolute as isPathAbsolute} from 'node:path';
 import {catchError, defer, from, map, type Observable, of} from 'rxjs';
 import {injectable} from 'tsyringe';
 import {$} from 'zx';
@@ -6,6 +5,7 @@ import {type Option, some} from '../../option.ts';
 import {failure, success, type Try} from '../../try.ts';
 import type {PatkaTool} from '../patka-tool.ts';
 import type {PatkaToolManual} from '../patka-tool-manual.ts';
+import {assertRelativePathInsideTheWorkingDirectory} from '../patka-tool-relative-path.ts';
 
 export type GitDiffInput = {
   readonly relativePath: string;
@@ -23,7 +23,7 @@ export class GitDiff implements PatkaTool<GitDiffInput, string> {
         relativePath: {
           type: 'string',
           description:
-            'Relative path of the file to diff, from the working directory (e.g. "notes.txt" or "src/main.ts"). Never an absolute path: a path starting with "/" is refused.',
+            'Relative path of the file to diff, from the working directory (e.g. "notes.txt" or "src/main.ts"). Never an absolute path and never outside the working directory: such a path is refused.',
         },
       },
       required: ['relativePath'],
@@ -65,11 +65,7 @@ export class GitDiff implements PatkaTool<GitDiffInput, string> {
 
   invoke(gitDiffInput: GitDiffInput): Observable<Try<Option<string>>> {
     return defer(() => {
-      if (isPathAbsolute(gitDiffInput.relativePath)) {
-        throw new Error(
-          `git_diff only accepts a relative path, given "${gitDiffInput.relativePath}"`,
-        );
-      }
+      assertRelativePathInsideTheWorkingDirectory(gitDiffInput.relativePath);
 
       return from($`git -c color.ui=never diff -- ${gitDiffInput.relativePath}`.text());
     }).pipe(

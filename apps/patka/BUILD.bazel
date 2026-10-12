@@ -17,6 +17,7 @@ ts_project(
         "option.ts",
         "tools/patka-tool.ts",
         "tools/patka-tool-manual.ts",
+        "tools/patka-tool-relative-path.ts",
         "try.ts",
     ],
     declaration = True,
@@ -25,6 +26,7 @@ ts_project(
     visibility = ["//apps/patka:__subpackages__"],
     deps = [
         "//:package_json",
+        "//:node_modules/@types/node",
         "//:node_modules/rxjs",
     ],
 )
@@ -39,6 +41,7 @@ ts_project(
             "option.ts",
             "tools/patka-tool.ts",
             "tools/patka-tool-manual.ts",
+            "tools/patka-tool-relative-path.ts",
             "try.ts",
             "vitest.config.ts",
         ],

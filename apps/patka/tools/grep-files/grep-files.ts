@@ -1,4 +1,3 @@
-import {isAbsolute as isPathAbsolute, relative, resolve} from 'node:path';
 import {catchError, defer, from, map, type Observable, of} from 'rxjs';
 import {injectable} from 'tsyringe';
 import {$} from 'zx';
@@ -6,19 +5,14 @@ import {type Option, some} from '../../option.ts';
 import {failure, success, type Try} from '../../try.ts';
 import type {PatkaTool} from '../patka-tool.ts';
 import type {PatkaToolManual} from '../patka-tool-manual.ts';
+import {assertRelativePathInsideTheWorkingDirectory} from '../patka-tool-relative-path.ts';
 
 export type GrepFilesInput = {
   readonly pattern: string;
-  readonly relativePath?: string;
+  readonly relativePath: string;
 };
 
 const MAXIMUM_MATCHES = 200;
-
-function isOutsideTheWorkingDirectory(relativePath: string): boolean {
-  const pathFromTheWorkingDirectory = relative(process.cwd(), resolve(relativePath));
-
-  return pathFromTheWorkingDirectory === '..' || pathFromTheWorkingDirectory.startsWith('../');
-}
 
 function createMatchesFromStdout(stdout: string): string {
   const lines: ReadonlyArray<string> = stdout.split('\n').filter((line) => line !== '');
@@ -51,10 +45,10 @@ export class GrepFiles implements PatkaTool<GrepFilesInput, string> {
         relativePath: {
           type: 'string',
           description:
-            'Relative path of the file or directory to search in, from the working directory (e.g. "." or "src/utils"). Never an absolute path and never outside the working directory: such a path is refused. Defaults to ".".',
+            'Relative path of the file or directory to search in, from the working directory (e.g. "./" for the whole working directory, or "src/utils"). Never an absolute path and never outside the working directory: such a path is refused.',
         },
       },
-      required: ['pattern'],
+      required: ['pattern', 'relativePath'],
     },
     output: {
       oneOf: [
@@ -92,24 +86,14 @@ export class GrepFiles implements PatkaTool<GrepFilesInput, string> {
 
   invoke(grepFilesInput: GrepFilesInput): Observable<Try<Option<string>>> {
     return defer(() => {
-      const relativePath = grepFilesInput.relativePath ?? '.';
-
-      if (isPathAbsolute(relativePath)) {
-        throw new Error(`grep_files only accepts a relative path, given "${relativePath}"`);
-      }
-
-      if (isOutsideTheWorkingDirectory(relativePath)) {
-        throw new Error(
-          `grep_files only accepts a path inside the working directory, given "${relativePath}"`,
-        );
-      }
+      assertRelativePathInsideTheWorkingDirectory(grepFilesInput.relativePath);
 
       return from(
         Promise.resolve(
           $({
             cwd: process.cwd(),
             nothrow: true,
-          })`git --literal-pathspecs -c color.ui=never grep --untracked -I -n -e ${grepFilesInput.pattern} -- ${relativePath}`,
+          })`git --literal-pathspecs -c color.ui=never grep --untracked -I -n -e ${grepFilesInput.pattern} -- ${grepFilesInput.relativePath}`,
         ),
       );
     }).pipe(

@@ -1,11 +1,11 @@
 import {writeFile} from 'node:fs/promises';
-import {isAbsolute as isPathAbsolute} from 'node:path';
 import {catchError, defer, from, map, type Observable, of} from 'rxjs';
 import {injectable} from 'tsyringe';
 import {type Option, some} from '../../option.ts';
 import {failure, success, type Try} from '../../try.ts';
 import type {PatkaTool} from '../patka-tool.ts';
 import type {PatkaToolManual} from '../patka-tool-manual.ts';
+import {assertRelativePathInsideTheWorkingDirectory} from '../patka-tool-relative-path.ts';
 
 export type WriteFileInput = {
   readonly relativePath: string;
@@ -24,7 +24,7 @@ export class WriteFile implements PatkaTool<WriteFileInput, string> {
         relativePath: {
           type: 'string',
           description:
-            'Relative path of the file to write, from the working directory (e.g. "notes.txt" or "src/main.ts"). Never an absolute path: a path starting with "/" is refused.',
+            'Relative path of the file to write, from the working directory (e.g. "notes.txt" or "src/main.ts"). Never an absolute path and never outside the working directory: such a path is refused.',
         },
         content: {
           type: 'string',
@@ -69,11 +69,7 @@ export class WriteFile implements PatkaTool<WriteFileInput, string> {
 
   invoke(writeFileInput: WriteFileInput): Observable<Try<Option<string>>> {
     return defer(() => {
-      if (isPathAbsolute(writeFileInput.relativePath)) {
-        throw new Error(
-          `write_file only accepts a relative path, given "${writeFileInput.relativePath}"`,
-        );
-      }
+      assertRelativePathInsideTheWorkingDirectory(writeFileInput.relativePath);
 
       return from(writeFile(writeFileInput.relativePath, writeFileInput.content, 'utf8')).pipe(
         map(() => success(some(writeFileInput.relativePath))),

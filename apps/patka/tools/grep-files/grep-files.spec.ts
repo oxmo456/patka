@@ -15,10 +15,10 @@ describe('GrepFiles', () => {
     expect(grepFiles.manual.name).toBe('grep_files');
   });
 
-  it('asks for a pattern only', () => {
+  it('asks for a pattern and a path', () => {
     const grepFiles = new GrepFiles();
 
-    expect(grepFiles.manual.input.required).toEqual(['pattern']);
+    expect(grepFiles.manual.input.required).toEqual(['pattern', 'relativePath']);
   });
 
   it('describes the two shapes of its output', () => {
@@ -27,7 +27,7 @@ describe('GrepFiles', () => {
     expect(grepFiles.manual.output.oneOf).toHaveLength(2);
   });
 
-  it('runs git grep on the working directory when no path is given', async () => {
+  it('runs git grep on the whole working directory when the path is "./"', async () => {
     const template = vi.fn(
       (templateStringsArray: TemplateStringsArray, ...values: ReadonlyArray<string>) =>
         Promise.resolve({exitCode: 1, stdout: '', stderr: ''}),
@@ -36,10 +36,10 @@ describe('GrepFiles', () => {
       .mockReset()
       .mockReturnValue(template as never);
 
-    await firstValueFrom(new GrepFiles().invoke({pattern: 'needle'}));
+    await firstValueFrom(new GrepFiles().invoke({pattern: 'needle', relativePath: './'}));
 
     expect(String.raw(...template.mock.calls[0])).toBe(
-      'git --literal-pathspecs -c color.ui=never grep --untracked -I -n -e needle -- .',
+      'git --literal-pathspecs -c color.ui=never grep --untracked -I -n -e needle -- ./',
     );
   });
 
@@ -65,7 +65,7 @@ describe('GrepFiles', () => {
       .mockReset()
       .mockReturnValue(template as never);
 
-    await firstValueFrom(new GrepFiles().invoke({pattern: 'needle'}));
+    await firstValueFrom(new GrepFiles().invoke({pattern: 'needle', relativePath: './'}));
 
     expect($).toHaveBeenCalledWith({cwd: process.cwd(), nothrow: true});
   });
@@ -82,7 +82,9 @@ describe('GrepFiles', () => {
       .mockReset()
       .mockReturnValue(template as never);
 
-    const matches = await firstValueFrom(new GrepFiles().invoke({pattern: 'needle'}));
+    const matches = await firstValueFrom(
+      new GrepFiles().invoke({pattern: 'needle', relativePath: './'}),
+    );
 
     expect(matches).toEqual(success(some('first.ts:1:export const needle = 1;\n')));
   });
@@ -93,7 +95,9 @@ describe('GrepFiles', () => {
       .mockReset()
       .mockReturnValue(template as never);
 
-    const matches = await firstValueFrom(new GrepFiles().invoke({pattern: 'needle'}));
+    const matches = await firstValueFrom(
+      new GrepFiles().invoke({pattern: 'needle', relativePath: './'}),
+    );
 
     expect(matches).toEqual(success(some('')));
   });
@@ -106,7 +110,9 @@ describe('GrepFiles', () => {
       .mockReset()
       .mockReturnValue(template as never);
 
-    const matches = await firstValueFrom(new GrepFiles().invoke({pattern: 'needle'}));
+    const matches = await firstValueFrom(
+      new GrepFiles().invoke({pattern: 'needle', relativePath: './'}),
+    );
 
     expect(matches).toEqual(
       success(
@@ -125,7 +131,9 @@ describe('GrepFiles', () => {
       .mockReset()
       .mockReturnValue(template as never);
 
-    const matches = await firstValueFrom(new GrepFiles().invoke({pattern: 'needle'}));
+    const matches = await firstValueFrom(
+      new GrepFiles().invoke({pattern: 'needle', relativePath: './'}),
+    );
 
     expect(matches).toMatchObject({
       type: 'failure',
@@ -154,7 +162,7 @@ describe('GrepFiles', () => {
   it('does not run git until subscribed', () => {
     vi.mocked($).mockReset();
 
-    new GrepFiles().invoke({pattern: 'needle'});
+    new GrepFiles().invoke({pattern: 'needle', relativePath: './'});
 
     expect($).not.toHaveBeenCalled();
   });

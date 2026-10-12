@@ -1,11 +1,11 @@
 import {readFile} from 'node:fs/promises';
-import {isAbsolute as isPathAbsolute} from 'node:path';
 import {catchError, defer, from, map, type Observable, of} from 'rxjs';
 import {injectable} from 'tsyringe';
 import {type Option, some} from '../../option.ts';
 import {failure, success, type Try} from '../../try.ts';
 import type {PatkaTool} from '../patka-tool.ts';
 import type {PatkaToolManual} from '../patka-tool-manual.ts';
+import {assertRelativePathInsideTheWorkingDirectory} from '../patka-tool-relative-path.ts';
 
 export type ReadFileInput = {
   readonly relativePath: string;
@@ -23,7 +23,7 @@ export class ReadFile implements PatkaTool<ReadFileInput, string> {
         relativePath: {
           type: 'string',
           description:
-            'Relative path of the file to read, from the working directory (e.g. "notes.txt" or "src/main.ts"). Never an absolute path: a path starting with "/" is refused.',
+            'Relative path of the file to read, from the working directory (e.g. "notes.txt" or "src/main.ts"). Never an absolute path and never outside the working directory: such a path is refused.',
         },
       },
       required: ['relativePath'],
@@ -64,11 +64,7 @@ export class ReadFile implements PatkaTool<ReadFileInput, string> {
 
   invoke(readFileInput: ReadFileInput): Observable<Try<Option<string>>> {
     return defer(() => {
-      if (isPathAbsolute(readFileInput.relativePath)) {
-        throw new Error(
-          `read_file only accepts a relative path, given "${readFileInput.relativePath}"`,
-        );
-      }
+      assertRelativePathInsideTheWorkingDirectory(readFileInput.relativePath);
 
       return from(readFile(readFileInput.relativePath, 'utf8')).pipe(
         map((value) => success(some(value))),
