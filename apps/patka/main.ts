@@ -19,6 +19,7 @@ import {PATKA_PROMPT_FACTORY} from './prompt/patka-prompt-factory.token.ts';
 import {ApplyPatch} from './tools/apply-patch/apply-patch.ts';
 import {GitDiff} from './tools/git-diff/git-diff.ts';
 import {GitStatus} from './tools/git-status/git-status.ts';
+import {GrepFiles} from './tools/grep-files/grep-files.ts';
 import {ListFiles} from './tools/list-files/list-files.ts';
 import {PATKA_TOOL} from './tools/patka-tool.token.ts';
 import {ReadFile} from './tools/read-file/read-file.ts';
@@ -46,6 +47,7 @@ container.register(INFERENCE_CLIENT, {
   ),
 });
 container.register(PATKA_TOOL, {useClass: ListFiles});
+container.register(PATKA_TOOL, {useClass: GrepFiles});
 container.register(PATKA_TOOL, {useClass: GitStatus});
 container.register(PATKA_TOOL, {useClass: GitDiff});
 container.register(PATKA_TOOL, {useClass: ApplyPatch});
