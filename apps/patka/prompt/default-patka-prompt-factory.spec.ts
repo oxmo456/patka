@@ -36,6 +36,12 @@ describe('DefaultPatkaPromptFactory', () => {
     );
   });
 
+  it('tells the model to answer directly when no tool is necessary', () => {
+    expect(new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create([])).toContain(
+      'If no tool is necessary, answer the user directly.',
+    );
+  });
+
   it('tells the model the directory where Patka runs', () => {
     expect(new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create([])).toContain(
       'As an agent, your working directory is: /home/user',
@@ -55,7 +61,9 @@ describe('DefaultPatkaPromptFactory', () => {
 
     expect(
       new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create(patkaConversation),
-    ).toContain(['User: hello', 'Assistant: hi there', 'Assistant:'].join('\n'));
+    ).toContain(`User: hello
+Assistant: hi there
+Assistant:`);
   });
 
   it('leaves the last cue for the model to answer', () => {
@@ -63,7 +71,8 @@ describe('DefaultPatkaPromptFactory', () => {
 
     expect(
       new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create(patkaConversation),
-    ).toContain(['User: hello', 'Assistant:'].join('\n'));
+    ).toContain(`User: hello
+Assistant:`);
   });
 
   it('keeps the whole conversation, in order', () => {
@@ -76,12 +85,10 @@ describe('DefaultPatkaPromptFactory', () => {
     expect(
       new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create(patkaConversation),
     ).toContain(
-      [
-        'User: my name is Zaphod',
-        'Assistant: nice to meet you',
-        'User: what is my name?',
-        'Assistant:',
-      ].join('\n'),
+      `User: my name is Zaphod
+Assistant: nice to meet you
+User: what is my name?
+Assistant:`,
     );
   });
 
