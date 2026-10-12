@@ -4,6 +4,7 @@ import {describe, expect, it, vi} from 'vitest';
 import type {PatkaContextEntry, PatkaUserUtterance} from '../context/patka-context-entry.ts';
 import type {InferenceClientInput} from '../inference/inference-client-input.ts';
 import {none, type Option, some} from '../option.ts';
+import {PATKA_PROMPT_DIRECTIVE_TREE} from '../prompt/patka-prompt-directive-tree.ts';
 import type {PatkaTool} from '../tools/patka-tool.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
 import {success, type Try} from '../try.ts';
@@ -38,6 +39,7 @@ describe('PatkaAgent', () => {
       {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
       new Subject<PatkaContextEntry>(),
       '/home/user',
+      PATKA_PROMPT_DIRECTIVE_TREE,
     );
 
     expect(patkaAgent.name).toBe('patka');
@@ -54,6 +56,7 @@ describe('PatkaAgent', () => {
         {generate},
         new Subject<PatkaContextEntry>(),
         '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
       );
 
       patkaAgent.output.subscribe();
@@ -69,6 +72,7 @@ describe('PatkaAgent', () => {
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
         '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -91,6 +95,7 @@ describe('PatkaAgent', () => {
         {generate},
         patkaContextEntries,
         '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
       );
       patkaAgent.output.subscribe();
 
@@ -107,6 +112,7 @@ describe('PatkaAgent', () => {
         {generate: () => throwError(() => new Error('400 invalid_request_error'))},
         patkaContextEntries,
         '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -134,6 +140,7 @@ describe('PatkaAgent', () => {
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
         '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -162,6 +169,7 @@ describe('PatkaAgent', () => {
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
         '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -189,6 +197,7 @@ describe('PatkaAgent', () => {
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
         '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -215,6 +224,7 @@ describe('PatkaAgent', () => {
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
         '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -250,6 +260,7 @@ describe('PatkaAgent', () => {
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
         '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -281,6 +292,7 @@ describe('PatkaAgent', () => {
         {generate},
         patkaContextEntries,
         '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
       );
       patkaAgent.output.subscribe();
 
@@ -307,6 +319,7 @@ describe('PatkaAgent', () => {
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
         '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -335,6 +348,7 @@ describe('PatkaAgent', () => {
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
         '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -369,6 +383,7 @@ describe('PatkaAgent', () => {
         {generate},
         patkaContextEntries,
         '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
       );
       patkaAgent.output.subscribe();
 
@@ -394,6 +409,7 @@ describe('PatkaAgent', () => {
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
         '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -422,6 +438,7 @@ describe('PatkaAgent', () => {
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
         '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -448,6 +465,7 @@ describe('PatkaAgent', () => {
         {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
         patkaContextEntries,
         '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
       );
       const received: Array<PatkaContextEntry> = [];
       patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
@@ -485,6 +503,7 @@ describe('PatkaAgent', () => {
         },
         patkaContextEntries,
         '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
       );
       patkaAgent.output.subscribe();
 

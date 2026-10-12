@@ -12,6 +12,8 @@ import {
   extractOllamaModel,
 } from './inference/patka-inference.ts';
 import {Patka} from './patka.ts';
+import {PATKA_PROMPT_DIRECTIVE} from './prompt/patka-prompt-directive.token.ts';
+import {PATKA_PROMPT_DIRECTIVE_TREE} from './prompt/patka-prompt-directive-tree.ts';
 import {ApplyPatch} from './tools/apply-patch/apply-patch.ts';
 import {GitDiff} from './tools/git-diff/git-diff.ts';
 import {GitStatus} from './tools/git-status/git-status.ts';
@@ -29,6 +31,7 @@ import {WORKING_DIRECTORY} from './working-directory.token.ts';
 $.quiet = true;
 
 container.register(WORKING_DIRECTORY, {useValue: process.cwd()});
+container.register(PATKA_PROMPT_DIRECTIVE, {useValue: PATKA_PROMPT_DIRECTIVE_TREE});
 container.register(AGENT_NAME, {useValue: 'ROOT'});
 container.register(BLESSED, {useValue: blessed});
 container.register(INFERENCE_CLIENT, {

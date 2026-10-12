@@ -18,6 +18,9 @@ import type {InferenceClient} from '../inference/inference-client.ts';
 import {type Option, some} from '../option.ts';
 import {createPerformanceTimestamp} from '../performance-timestamp.ts';
 import {DefaultPatkaPromptFactory} from '../prompt/default-patka-prompt-factory.ts';
+import {PATKA_PROMPT_DIRECTIVE} from '../prompt/patka-prompt-directive.token.ts';
+import type {PatkaPromptDirective} from '../prompt/patka-prompt-directive.ts';
+import type {PatkaPromptEnvironment} from '../prompt/patka-prompt-environment.ts';
 import type {PatkaPromptFactory} from '../prompt/patka-prompt-factory.ts';
 import {createTimestamp} from '../timestamp.ts';
 import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
@@ -49,11 +52,17 @@ export class PatkaAgent {
     @inject(INFERENCE_CLIENT) inferenceClient: InferenceClient,
     @inject(PATKA_CONTEXT_ENTRIES) input: Observable<PatkaContextEntry>,
     @inject(WORKING_DIRECTORY) workingDirectory: string,
+    @inject(PATKA_PROMPT_DIRECTIVE)
+    patkaPromptDirective: PatkaPromptDirective<PatkaPromptEnvironment>,
   ) {
     this.name = name;
     this.patkaTools = patkaTools;
     this.inferenceClient = inferenceClient;
-    this.patkaPromptFactory = new DefaultPatkaPromptFactory(patkaTools, workingDirectory);
+    this.patkaPromptFactory = new DefaultPatkaPromptFactory(
+      patkaTools,
+      workingDirectory,
+      patkaPromptDirective,
+    );
     this.output = input.pipe(
       scan(
         (accumulator: ReadonlyArray<PatkaContextEntry>, patkaContextEntry: PatkaContextEntry) => [

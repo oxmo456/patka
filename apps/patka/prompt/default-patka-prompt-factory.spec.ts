@@ -7,6 +7,7 @@ import {PatkaTools} from '../tools/patka-tools.ts';
 import {ReadFile} from '../tools/read-file/read-file.ts';
 import {failure, success} from '../try.ts';
 import {DefaultPatkaPromptFactory} from './default-patka-prompt-factory.ts';
+import {PATKA_PROMPT_DIRECTIVE_TREE} from './patka-prompt-directive-tree.ts';
 
 const said = (content: string): PatkaContextEntry => ({
   type: 'PatkaUserUtterance',
@@ -31,26 +32,38 @@ const answered = (content: string): PatkaContextEntry => ({
 
 describe('DefaultPatkaPromptFactory', () => {
   it('tells the model to keep its answer short', () => {
-    expect(new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create([])).toContain(
-      'fewest words possible',
-    );
+    expect(
+      new DefaultPatkaPromptFactory(
+        new PatkaTools([]),
+        '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
+      ).create([]),
+    ).toContain('fewest words possible');
   });
 
   it('tells the model to answer directly when no tool is necessary', () => {
-    expect(new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create([])).toContain(
-      'If no tool is necessary, answer the user directly.',
-    );
+    expect(
+      new DefaultPatkaPromptFactory(
+        new PatkaTools([]),
+        '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
+      ).create([]),
+    ).toContain('If no tool is necessary, answer the user directly.');
   });
 
   it('tells the model the directory where Patka runs', () => {
-    expect(new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create([])).toContain(
-      'As an agent, your working directory is: /home/user',
-    );
+    expect(
+      new DefaultPatkaPromptFactory(
+        new PatkaTools([]),
+        '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
+      ).create([]),
+    ).toContain('As an agent, your working directory is: /home/user');
   });
 
   it('asks for an answer when nothing has been said', () => {
     expect(
-      new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user')
+      new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user', PATKA_PROMPT_DIRECTIVE_TREE)
         .create([])
         .endsWith('\n\nAssistant:'),
     ).toBe(true);
@@ -60,7 +73,11 @@ describe('DefaultPatkaPromptFactory', () => {
     const patkaConversation = [said('hello'), answered('hi there')];
 
     expect(
-      new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create(patkaConversation),
+      new DefaultPatkaPromptFactory(
+        new PatkaTools([]),
+        '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
+      ).create(patkaConversation),
     ).toContain(`User: hello
 Assistant: hi there
 Assistant:`);
@@ -70,7 +87,11 @@ Assistant:`);
     const patkaConversation = [said('hello')];
 
     expect(
-      new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create(patkaConversation),
+      new DefaultPatkaPromptFactory(
+        new PatkaTools([]),
+        '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
+      ).create(patkaConversation),
     ).toContain(`User: hello
 Assistant:`);
   });
@@ -83,7 +104,11 @@ Assistant:`);
     ];
 
     expect(
-      new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create(patkaConversation),
+      new DefaultPatkaPromptFactory(
+        new PatkaTools([]),
+        '/home/user',
+        PATKA_PROMPT_DIRECTIVE_TREE,
+      ).create(patkaConversation),
     ).toContain(
       `User: my name is Zaphod
 Assistant: nice to meet you
@@ -93,7 +118,11 @@ Assistant:`,
   });
 
   it('says nothing about tools when it has none', () => {
-    const prompt = new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create([]);
+    const prompt = new DefaultPatkaPromptFactory(
+      new PatkaTools([]),
+      '/home/user',
+      PATKA_PROMPT_DIRECTIVE_TREE,
+    ).create([]);
 
     expect(prompt).not.toContain('You can use these tools');
   });
@@ -102,6 +131,7 @@ Assistant:`,
     const defaultPatkaPromptFactory = new DefaultPatkaPromptFactory(
       new PatkaTools([new ListFiles(), new ReadFile()]),
       '/home/user',
+      PATKA_PROMPT_DIRECTIVE_TREE,
     );
 
     const prompt = defaultPatkaPromptFactory.create([]);
@@ -116,6 +146,7 @@ Assistant:`,
     const defaultPatkaPromptFactory = new DefaultPatkaPromptFactory(
       new PatkaTools([new ReadFile()]),
       '/home/user',
+      PATKA_PROMPT_DIRECTIVE_TREE,
     );
 
     const prompt = defaultPatkaPromptFactory.create([]);
@@ -128,6 +159,7 @@ Assistant:`,
     const defaultPatkaPromptFactory = new DefaultPatkaPromptFactory(
       new PatkaTools([new ListFiles()]),
       '/home/user',
+      PATKA_PROMPT_DIRECTIVE_TREE,
     );
 
     const prompt = defaultPatkaPromptFactory.create([]);
@@ -140,6 +172,7 @@ Assistant:`,
     const prompt = new DefaultPatkaPromptFactory(
       new PatkaTools([new ReadFile()]),
       '/home/user',
+      PATKA_PROMPT_DIRECTIVE_TREE,
     ).create([]);
 
     expect(prompt).toContain('single line');
@@ -151,6 +184,7 @@ Assistant:`,
     const prompt = new DefaultPatkaPromptFactory(
       new PatkaTools([new ReadFile()]),
       '/home/user',
+      PATKA_PROMPT_DIRECTIVE_TREE,
     ).create([]);
 
     expect(prompt).toContain('"type":{"const":"failure"}');
@@ -168,9 +202,11 @@ Assistant:`,
       output: success(some('hello')),
     };
 
-    const prompt = new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create([
-      patkaToolResult,
-    ]);
+    const prompt = new DefaultPatkaPromptFactory(
+      new PatkaTools([]),
+      '/home/user',
+      PATKA_PROMPT_DIRECTIVE_TREE,
+    ).create([patkaToolResult]);
 
     expect(prompt).toContain(
       'Tool output: {"type":"success","value":{"type":"some","value":"hello"}}',
@@ -189,9 +225,11 @@ Assistant:`,
       output: failure(new Error('file not found')),
     };
 
-    const prompt = new DefaultPatkaPromptFactory(new PatkaTools([]), '/home/user').create([
-      patkaToolResult,
-    ]);
+    const prompt = new DefaultPatkaPromptFactory(
+      new PatkaTools([]),
+      '/home/user',
+      PATKA_PROMPT_DIRECTIVE_TREE,
+    ).create([patkaToolResult]);
 
     expect(prompt).toContain('Tool output: {"type":"failure","error":"file not found"}');
   });
