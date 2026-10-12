@@ -1,7 +1,7 @@
 import {inject, injectable} from 'tsyringe';
+import {WORKING_DIRECTORY} from '../../../packages/working-directory/working-directory.token.ts';
 import type {PatkaContextEntry} from '../context/patka-context-entry.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
-import {WORKING_DIRECTORY} from '../working-directory.token.ts';
 import {PATKA_PROMPT_DIRECTIVE} from './patka-prompt-directive.token.ts';
 import type {PatkaPromptDirective} from './patka-prompt-directive.ts';
 import type {PatkaPromptEnvironment} from './patka-prompt-environment.ts';

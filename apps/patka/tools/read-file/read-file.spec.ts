@@ -3,8 +3,8 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it} from 'vitest';
-import {some} from '../../option.ts';
-import {success} from '../../try.ts';
+import {some} from '../../../../packages/option/option.ts';
+import {success} from '../../../../packages/try/try.ts';
 import {ReadFile} from './read-file.ts';
 
 const withAFile = async <T>(content: string, run: () => Promise<T>): Promise<T> => {

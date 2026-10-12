@@ -1,10 +1,10 @@
+import type {JsonObject, JsonValue} from '../../../packages/json/json.ts';
+import type {Option} from '../../../packages/option/option.ts';
+import type {PatkaUtterance} from '../../../packages/patka-utterance/patka-utterance.ts';
+import type {PerformanceTimestamp} from '../../../packages/performance-timestamp/performance-timestamp.ts';
+import type {Timestamp} from '../../../packages/timestamp/timestamp.ts';
+import type {Try} from '../../../packages/try/try.ts';
 import type {InferenceUsage} from '../inference/inference-usage.ts';
-import type {JsonObject, JsonValue} from '../json.ts';
-import type {Option} from '../option.ts';
-import type {PatkaUtterance} from '../patka-utterance.ts';
-import type {PerformanceTimestamp} from '../performance-timestamp.ts';
-import type {Timestamp} from '../timestamp.ts';
-import type {Try} from '../try.ts';
 import type {PatkaContextEntryID} from './patka-context-entry-id.ts';
 
 export type PatkaUserUtterance = {

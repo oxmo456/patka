@@ -1,0 +1,26 @@
+load("//tools:ptk_package.bzl", "ptk_package")
+
+ptk_package(
+    name = "agent",
+    srcs = [
+        "agent-name.token.ts",
+        "patka-agent.ts",
+    ],
+    test_srcs = ["patka-agent.spec.ts"],
+    visibility = ["//apps/patka:__subpackages__"],
+    deps = [
+        "//:node_modules/@types/node",
+        "//:node_modules/rxjs",
+        "//:node_modules/ts-pattern",
+        "//:node_modules/tsyringe",
+        "//apps/patka/context",
+        "//apps/patka/inference",
+        "//apps/patka/prompt",
+        "//apps/patka/text",
+        "//apps/patka/tools",
+        "//apps/patka/tools/report-incompetency",
+        "//packages/option",
+        "//packages/performance-timestamp",
+        "//packages/timestamp",
+    ],
+)

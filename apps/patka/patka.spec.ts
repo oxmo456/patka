@@ -2,12 +2,13 @@ import {randomUUID} from 'node:crypto';
 import {of, Subject} from 'rxjs';
 import {container, type DependencyContainer} from 'tsyringe';
 import {describe, expect, it, vi} from 'vitest';
+import {some} from '../../packages/option/option.ts';
+import {WORKING_DIRECTORY} from '../../packages/working-directory/working-directory.token.ts';
 import {AGENT_NAME} from './agent/agent-name.token.ts';
 import {PatkaContext} from './context/patka-context.ts';
 import {PATKA_CONTEXT_ENTRIES} from './context/patka-context-entries.token.ts';
 import type {PatkaContextEntry} from './context/patka-context-entry.ts';
 import {INFERENCE_CLIENT} from './inference/inference-client.token.ts';
-import {some} from './option.ts';
 import {Patka} from './patka.ts';
 import {DefaultPatkaPromptFactory} from './prompt/default-patka-prompt-factory.ts';
 import {PATKA_PROMPT_DIRECTIVE} from './prompt/patka-prompt-directive.token.ts';
@@ -21,7 +22,6 @@ import type {Blessed} from './ui/patka-tui.ts';
 import {PATKA_UI} from './ui/patka-ui.token.ts';
 import type {PatkaUI} from './ui/patka-ui.ts';
 import type {PatkaUserInput} from './ui/patka-user-input.ts';
-import {WORKING_DIRECTORY} from './working-directory.token.ts';
 
 const aPatkaUI = (): PatkaUI => ({
   userInputs: of(),

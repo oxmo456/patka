@@ -1,0 +1,7 @@
+load("//tools:ptk_library.bzl", "ptk_library")
+
+ptk_library(
+    name = "performance-timestamp",
+    srcs = ["performance-timestamp.ts"],
+    test_srcs = ["performance-timestamp.spec.ts"],
+)

@@ -1,8 +1,8 @@
 import {readFile} from 'node:fs/promises';
 import {catchError, defer, from, map, type Observable, of} from 'rxjs';
 import {injectable} from 'tsyringe';
-import {type Option, some} from '../../option.ts';
-import {failure, success, type Try} from '../../try.ts';
+import {type Option, some} from '../../../../packages/option/option.ts';
+import {failure, success, type Try} from '../../../../packages/try/try.ts';
 import type {PatkaTool} from '../patka-tool.ts';
 import type {PatkaToolManual} from '../patka-tool-manual.ts';
 import {assertRelativePathInsideTheWorkingDirectory} from '../patka-tool-relative-path.ts';

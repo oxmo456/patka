@@ -1,9 +1,9 @@
 import {Ajv} from 'ajv';
 import {catchError, defer, type Observable, of} from 'rxjs';
 import {injectAll, injectable} from 'tsyringe';
-import type {JsonObject, JsonValue} from '../json.ts';
-import type {Option} from '../option.ts';
-import {failure, type Try} from '../try.ts';
+import type {JsonObject, JsonValue} from '../../../packages/json/json.ts';
+import type {Option} from '../../../packages/option/option.ts';
+import {failure, type Try} from '../../../packages/try/try.ts';
 import {PATKA_TOOL} from './patka-tool.token.ts';
 import type {PatkaTool} from './patka-tool.ts';
 import type {PatkaToolManual} from './patka-tool-manual.ts';

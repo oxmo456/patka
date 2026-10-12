@@ -4,14 +4,15 @@ ptk_package(
     name = "grep-files",
     srcs = ["grep-files.ts"],
     test_srcs = ["grep-files.spec.ts"],
-    tsconfig = "//apps/patka:tsconfig",
-    visibility = ["//apps/patka:__pkg__"],
+    visibility = ["//apps/patka:__subpackages__"],
     deps = [
         "//:node_modules/@types/fs-extra",
         "//:node_modules/@types/node",
         "//:node_modules/rxjs",
         "//:node_modules/tsyringe",
         "//:node_modules/zx",
-        "//apps/patka:tool",
+        "//apps/patka/tools",
+        "//packages/option",
+        "//packages/try",
     ],
 )

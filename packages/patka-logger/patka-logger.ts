@@ -1,7 +1,7 @@
 import pino, {type Logger} from 'pino';
 import {type Observable, ReplaySubject} from 'rxjs';
 import {singleton} from 'tsyringe';
-import type {JsonObject} from './json.ts';
+import type {JsonObject} from '../json/json.ts';
 
 @singleton()
 export class PatkaLogger {

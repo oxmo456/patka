@@ -1,0 +1,30 @@
+load("//tools:ptk_package.bzl", "ptk_package")
+
+ptk_package(
+    name = "chat",
+    srcs = [
+        "patka-chat-entry-metadata.ts",
+        "patka-chat-entry.ts",
+        "patka-chat.ts",
+        "patka-engine.ts",
+    ],
+    test_srcs = [
+        "patka-chat.spec.ts",
+        "patka-engine.spec.ts",
+    ],
+    visibility = ["//apps/patka:__subpackages__"],
+    deps = [
+        "//:node_modules/@types/node",
+        "//:node_modules/rxjs",
+        "//:node_modules/ts-pattern",
+        "//:node_modules/tsyringe",
+        "//apps/patka/agent",
+        "//apps/patka/context",
+        "//apps/patka/inference",
+        "//apps/patka/tools",
+        "//packages/disposable",
+        "//packages/duration",
+        "//packages/option",
+        "//packages/patka-role",
+    ],
+)

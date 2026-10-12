@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import blessed from 'blessed';
 import {container, type DependencyContainer} from 'tsyringe';
 import {$} from 'zx';
+import {WORKING_DIRECTORY} from '../../packages/working-directory/working-directory.token.ts';
 import {AGENT_NAME} from './agent/agent-name.token.ts';
 import {PatkaContext} from './context/patka-context.ts';
 import {PATKA_CONTEXT_ENTRIES} from './context/patka-context-entries.token.ts';
@@ -28,7 +29,6 @@ import {WriteFile} from './tools/write-file/write-file.ts';
 import {BLESSED} from './ui/blessed.token.ts';
 import {PatkaTUI} from './ui/patka-tui.ts';
 import {PATKA_UI} from './ui/patka-ui.token.ts';
-import {WORKING_DIRECTORY} from './working-directory.token.ts';
 
 // zx must never write to the terminal: blessed owns the screen.
 $.quiet = true;

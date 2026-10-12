@@ -1,0 +1,29 @@
+load("//tools:ptk_package.bzl", "ptk_package")
+
+ptk_package(
+    name = "tools",
+    srcs = [
+        "patka-tool-json.ts",
+        "patka-tool-manual.ts",
+        "patka-tool-protocol.ts",
+        "patka-tool-relative-path.ts",
+        "patka-tool.token.ts",
+        "patka-tool.ts",
+        "patka-tools.ts",
+    ],
+    test_srcs = [
+        "patka-tool-protocol.spec.ts",
+        "patka-tool-relative-path.spec.ts",
+        "patka-tools.spec.ts",
+    ],
+    visibility = ["//apps/patka:__subpackages__"],
+    deps = [
+        "//:node_modules/@types/node",
+        "//:node_modules/ajv",
+        "//:node_modules/rxjs",
+        "//:node_modules/tsyringe",
+        "//packages/json",
+        "//packages/option",
+        "//packages/try",
+    ],
+)

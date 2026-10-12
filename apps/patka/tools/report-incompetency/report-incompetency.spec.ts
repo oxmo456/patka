@@ -1,7 +1,7 @@
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it} from 'vitest';
-import {none} from '../../option.ts';
-import {success} from '../../try.ts';
+import {none} from '../../../../packages/option/option.ts';
+import {success} from '../../../../packages/try/try.ts';
 import {ReportIncompetency} from './report-incompetency.ts';
 
 describe('ReportIncompetency', () => {

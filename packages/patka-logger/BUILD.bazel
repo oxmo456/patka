@@ -1,0 +1,13 @@
+load("//tools:ptk_library.bzl", "ptk_library")
+
+ptk_library(
+    name = "patka-logger",
+    srcs = ["patka-logger.ts"],
+    test_srcs = ["patka-logger.spec.ts"],
+    deps = ["//packages/json"],
+    npm_deps = [
+        "//:node_modules/pino",
+        "//:node_modules/rxjs",
+        "//:node_modules/tsyringe",
+    ],
+)

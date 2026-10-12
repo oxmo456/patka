@@ -1,16 +1,16 @@
 import {randomUUID} from 'node:crypto';
 import {type Observable, of, Subject, throwError} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
+import {none, type Option, some} from '../../../packages/option/option.ts';
+import {success, type Try} from '../../../packages/try/try.ts';
 import type {
   PatkaAgentUtterance,
   PatkaContextEntry,
   PatkaToolOutput,
   PatkaUserUtterance,
 } from '../context/patka-context-entry.ts';
-import {none, type Option, some} from '../option.ts';
 import type {PatkaTool} from '../tools/patka-tool.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
-import {success, type Try} from '../try.ts';
 import {PatkaAgent} from './patka-agent.ts';
 
 const aTool = (name: string, output: string): PatkaTool<{path: string}, string> => ({

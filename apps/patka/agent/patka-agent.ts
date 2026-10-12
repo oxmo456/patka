@@ -2,6 +2,9 @@ import {randomUUID} from 'node:crypto';
 import {catchError, concatMap, EMPTY, map, type Observable, of, scan} from 'rxjs';
 import {match} from 'ts-pattern';
 import {inject, injectable} from 'tsyringe';
+import {type Option, some} from '../../../packages/option/option.ts';
+import {createPerformanceTimestamp} from '../../../packages/performance-timestamp/performance-timestamp.ts';
+import {createTimestamp} from '../../../packages/timestamp/timestamp.ts';
 import {PATKA_CONTEXT_ENTRIES} from '../context/patka-context-entries.token.ts';
 import type {
   PatkaAgentUtterance,
@@ -15,12 +18,9 @@ import type {
 import type {PatkaContextEntryID} from '../context/patka-context-entry-id.ts';
 import {INFERENCE_CLIENT} from '../inference/inference-client.token.ts';
 import type {InferenceClient} from '../inference/inference-client.ts';
-import {type Option, some} from '../option.ts';
-import {createPerformanceTimestamp} from '../performance-timestamp.ts';
 import {PATKA_PROMPT_FACTORY} from '../prompt/patka-prompt-factory.token.ts';
 import type {PatkaPromptFactory} from '../prompt/patka-prompt-factory.ts';
 import {createTextFromPatkaTextKey} from '../text/patka-text.ts';
-import {createTimestamp} from '../timestamp.ts';
 import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
 import {PatkaTools} from '../tools/patka-tools.ts';
 import {REPORT_INCOMPETENCY} from '../tools/report-incompetency/report-incompetency.ts';

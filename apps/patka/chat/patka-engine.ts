@@ -1,6 +1,9 @@
 import {concatMap, EMPTY, type Observable, of, type Subscription, scan} from 'rxjs';
 import {match} from 'ts-pattern';
 import {inject, injectable} from 'tsyringe';
+import type {Disposable} from '../../../packages/disposable/disposable.ts';
+import type {Duration} from '../../../packages/duration/duration.ts';
+import {none, type Option, some} from '../../../packages/option/option.ts';
 import {AGENT_NAME} from '../agent/agent-name.token.ts';
 import {PatkaContext} from '../context/patka-context.ts';
 import type {
@@ -9,10 +12,7 @@ import type {
   PatkaUserNotification,
   PatkaUserUtterance,
 } from '../context/patka-context-entry.ts';
-import type {Disposable} from '../disposable.ts';
-import type {Duration} from '../duration.ts';
 import type {InferenceUsage} from '../inference/inference-usage.ts';
-import {none, type Option, some} from '../option.ts';
 import {PatkaToolProtocol} from '../tools/patka-tool-protocol.ts';
 import {PatkaChat} from './patka-chat.ts';
 import type {PatkaChatEntry} from './patka-chat-entry.ts';

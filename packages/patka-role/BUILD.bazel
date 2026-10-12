@@ -1,0 +1,6 @@
+load("//tools:ptk_library.bzl", "ptk_library")
+
+ptk_library(
+    name = "patka-role",
+    srcs = ["patka-role.ts"],
+)

@@ -1,0 +1,7 @@
+load("//tools:ptk_library.bzl", "ptk_library")
+
+ptk_library(
+    name = "timestamp",
+    srcs = ["timestamp.ts"],
+    test_srcs = ["timestamp.spec.ts"],
+)

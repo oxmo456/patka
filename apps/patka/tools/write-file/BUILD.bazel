@@ -4,12 +4,13 @@ ptk_package(
     name = "write-file",
     srcs = ["write-file.ts"],
     test_srcs = ["write-file.spec.ts"],
-    tsconfig = "//apps/patka:tsconfig",
-    visibility = ["//apps/patka:__pkg__"],
+    visibility = ["//apps/patka:__subpackages__"],
     deps = [
         "//:node_modules/@types/node",
         "//:node_modules/rxjs",
         "//:node_modules/tsyringe",
-        "//apps/patka:tool",
+        "//apps/patka/tools",
+        "//packages/option",
+        "//packages/try",
     ],
 )

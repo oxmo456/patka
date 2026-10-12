@@ -1,8 +1,8 @@
 import {randomUUID} from 'node:crypto';
 import {describe, expect, it} from 'vitest';
+import {none, some} from '../../../packages/option/option.ts';
+import {success} from '../../../packages/try/try.ts';
 import {PatkaContext} from '../context/patka-context.ts';
-import {none, some} from '../option.ts';
-import {success} from '../try.ts';
 import type {PatkaChatEntry} from './patka-chat-entry.ts';
 import {PatkaEngine} from './patka-engine.ts';
 

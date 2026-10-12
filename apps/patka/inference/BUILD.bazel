@@ -1,0 +1,32 @@
+load("//tools:ptk_package.bzl", "ptk_package")
+
+ptk_package(
+    name = "inference",
+    srcs = [
+        "anthropic-inference-client.ts",
+        "claude-inference-client.ts",
+        "inference-client-input.ts",
+        "inference-client-response.ts",
+        "inference-client.token.ts",
+        "inference-client.ts",
+        "inference-usage.ts",
+        "ollama-inference-client.ts",
+        "patka-inference.ts",
+    ],
+    test_srcs = [
+        "anthropic-inference-client.spec.ts",
+        "claude-inference-client.spec.ts",
+        "ollama-inference-client.spec.ts",
+        "patka-inference.spec.ts",
+    ],
+    visibility = ["//apps/patka:__subpackages__"],
+    deps = [
+        "//:node_modules/@anthropic-ai/sdk",
+        "//:node_modules/@types/node",
+        "//:node_modules/ollama",
+        "//:node_modules/rxjs",
+        "//:node_modules/ts-pattern",
+        "//:node_modules/tsyringe",
+        "//apps/patka/text",
+    ],
+)

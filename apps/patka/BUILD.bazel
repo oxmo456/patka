@@ -1,37 +1,12 @@
-load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("//tools:ptk_app.bzl", "ptk_app")
-
-ts_config(
-    name = "tsconfig",
-    src = "tsconfig.json",
-    visibility = ["//apps/patka:__subpackages__"],
-)
-
-# What every tool package needs to implement PatkaTool.
-ts_project(
-    name = "tool",
-    srcs = [
-        "json.ts",
-        "option.ts",
-        "tools/patka-tool.ts",
-        "tools/patka-tool-manual.ts",
-        "tools/patka-tool-relative-path.ts",
-        "try.ts",
-    ],
-    declaration = True,
-    transpiler = "tsc",
-    tsconfig = "tsconfig.json",
-    visibility = ["//apps/patka:__subpackages__"],
-    deps = [
-        "//:package_json",
-        "//:node_modules/@types/node",
-        "//:node_modules/rxjs",
-    ],
-)
 
 ptk_app(
     name = "patka",
-    data = ["text/default.json"],
+    srcs = [
+        "bootstrap.ts",
+        "main.ts",
+        "patka.ts",
+    ],
     entry_point = "bootstrap.js",
     npm_deps = [
         "//:node_modules/@anthropic-ai/sdk",
@@ -46,6 +21,13 @@ ptk_app(
         "//:node_modules/zx",
     ],
     packages = [
+        "//apps/patka/agent",
+        "//apps/patka/chat",
+        "//apps/patka/context",
+        "//apps/patka/inference",
+        "//apps/patka/prompt",
+        "//apps/patka/text",
+        "//apps/patka/tools",
         "//apps/patka/tools/apply-patch",
         "//apps/patka/tools/git-diff",
         "//apps/patka/tools/git-status",
@@ -54,24 +36,25 @@ ptk_app(
         "//apps/patka/tools/read-file",
         "//apps/patka/tools/report-incompetency",
         "//apps/patka/tools/write-file",
+        "//apps/patka/ui",
+        "//packages/disposable",
+        "//packages/duration",
+        "//packages/json",
+        "//packages/option",
+        "//packages/patka-logger",
+        "//packages/patka-role",
+        "//packages/patka-utterance",
+        "//packages/performance-timestamp",
+        "//packages/timestamp",
+        "//packages/try",
+        "//packages/working-directory",
     ],
-    srcs = glob(
-        ["**/*.ts"],
-        exclude = [
-            "**/*.spec.ts",
-            "json.ts",
-            "option.ts",
-            "tools/patka-tool.ts",
-            "tools/patka-tool-manual.ts",
-            "tools/patka-tool-relative-path.ts",
-            "try.ts",
-            "vitest.config.ts",
-        ],
-    ),
-    test_srcs = glob(["**/*.ts"]),
+    test_srcs = [
+        "patka.spec.ts",
+        "vitest.config.ts",
+    ],
     type_deps = [
         "//:node_modules/@types/blessed",
         "//:node_modules/@types/node",
     ],
-    deps = [":tool"],
 )

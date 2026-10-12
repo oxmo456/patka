@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {isSuccess} from '../try.ts';
+import {isSuccess} from '../../../packages/try/try.ts';
 import {PatkaToolProtocol} from './patka-tool-protocol.ts';
 
 describe('PatkaToolProtocol', () => {
