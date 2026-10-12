@@ -11,7 +11,7 @@ import {some} from './option.ts';
 import {Patka} from './patka.ts';
 import {DefaultPatkaPromptFactory} from './prompt/default-patka-prompt-factory.ts';
 import {PATKA_PROMPT_DIRECTIVE} from './prompt/patka-prompt-directive.token.ts';
-import {PATKA_PROMPT_DIRECTIVE_TREE} from './prompt/patka-prompt-directive-tree.ts';
+import {createPatkaPromptDirectiveFromUrl} from './prompt/patka-prompt-directive-json.ts';
 import {PATKA_PROMPT_FACTORY} from './prompt/patka-prompt-factory.token.ts';
 import {ListFiles} from './tools/list-files/list-files.ts';
 import {PATKA_TOOL} from './tools/patka-tool.token.ts';
@@ -33,7 +33,11 @@ describe('Patka', () => {
   it('resolves the whole graph from the container', () => {
     const child = container.createChildContainer();
     child.register(WORKING_DIRECTORY, {useValue: '/home/user'});
-    child.register(PATKA_PROMPT_DIRECTIVE, {useValue: PATKA_PROMPT_DIRECTIVE_TREE});
+    child.register(PATKA_PROMPT_DIRECTIVE, {
+      useValue: createPatkaPromptDirectiveFromUrl(
+        new URL('./prompt/patka-prompt-directive.json', import.meta.url),
+      ),
+    });
     child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
@@ -53,7 +57,11 @@ describe('Patka', () => {
     const userInputs = new Subject<PatkaUserInput>();
     const child = container.createChildContainer();
     child.register(WORKING_DIRECTORY, {useValue: '/home/user'});
-    child.register(PATKA_PROMPT_DIRECTIVE, {useValue: PATKA_PROMPT_DIRECTIVE_TREE});
+    child.register(PATKA_PROMPT_DIRECTIVE, {
+      useValue: createPatkaPromptDirectiveFromUrl(
+        new URL('./prompt/patka-prompt-directive.json', import.meta.url),
+      ),
+    });
     child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
@@ -87,7 +95,11 @@ describe('Patka', () => {
     const userInputs = new Subject<PatkaUserInput>();
     const child = container.createChildContainer();
     child.register(WORKING_DIRECTORY, {useValue: '/home/user'});
-    child.register(PATKA_PROMPT_DIRECTIVE, {useValue: PATKA_PROMPT_DIRECTIVE_TREE});
+    child.register(PATKA_PROMPT_DIRECTIVE, {
+      useValue: createPatkaPromptDirectiveFromUrl(
+        new URL('./prompt/patka-prompt-directive.json', import.meta.url),
+      ),
+    });
     child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
@@ -118,7 +130,11 @@ describe('Patka', () => {
     const userInputs = new Subject<PatkaUserInput>();
     const child = container.createChildContainer();
     child.register(WORKING_DIRECTORY, {useValue: '/home/user'});
-    child.register(PATKA_PROMPT_DIRECTIVE, {useValue: PATKA_PROMPT_DIRECTIVE_TREE});
+    child.register(PATKA_PROMPT_DIRECTIVE, {
+      useValue: createPatkaPromptDirectiveFromUrl(
+        new URL('./prompt/patka-prompt-directive.json', import.meta.url),
+      ),
+    });
     child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});

@@ -43,6 +43,7 @@ ts_project(
             "vitest.config.ts",
         ],
     ),
+    assets = ["prompt/patka-prompt-directive.json"],
     declaration = True,
     transpiler = "tsc",
     tsconfig = "tsconfig.json",
@@ -96,6 +97,7 @@ vitest_bin.vitest_test(
     args = ["run"],
     chdir = package_name(),
     data = glob(["**/*.ts"]) + [
+        "prompt/patka-prompt-directive.json",
         "tsconfig.json",
         "//apps/patka/tools/apply-patch:test_data",
         "//apps/patka/tools/git-diff:test_data",
