@@ -1,7 +1,5 @@
-load("@aspect_rules_js//js:defs.bzl", "js_binary")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
-load("@npm//:vitest/package_json.bzl", vitest_bin = "bin")
-load("//tools:lint.bzl", "biome_lint")
+load("//tools:ptk_app.bzl", "ptk_app")
 
 ts_config(
     name = "tsconfig",
@@ -31,8 +29,32 @@ ts_project(
     ],
 )
 
-ts_project(
-    name = "lib",
+ptk_app(
+    name = "patka",
+    data = ["text/default.json"],
+    entry_point = "bootstrap.js",
+    npm_deps = [
+        "//:node_modules/@anthropic-ai/sdk",
+        "//:node_modules/ajv",
+        "//:node_modules/blessed",
+        "//:node_modules/ollama",
+        "//:node_modules/pino",
+        "//:node_modules/reflect-metadata",
+        "//:node_modules/rxjs",
+        "//:node_modules/ts-pattern",
+        "//:node_modules/tsyringe",
+        "//:node_modules/zx",
+    ],
+    packages = [
+        "//apps/patka/tools/apply-patch",
+        "//apps/patka/tools/git-diff",
+        "//apps/patka/tools/git-status",
+        "//apps/patka/tools/grep-files",
+        "//apps/patka/tools/list-files",
+        "//apps/patka/tools/read-file",
+        "//apps/patka/tools/report-incompetency",
+        "//apps/patka/tools/write-file",
+    ],
     srcs = glob(
         ["**/*.ts"],
         exclude = [
@@ -45,85 +67,11 @@ ts_project(
             "try.ts",
             "vitest.config.ts",
         ],
-    ) + ["text/default.json"],
-    declaration = True,
-    resolve_json_module = True,
-    transpiler = "tsc",
-    tsconfig = "tsconfig.json",
-    deps = [
-        ":tool",
-        "//apps/patka/tools/apply-patch",
-        "//apps/patka/tools/git-diff",
-        "//apps/patka/tools/git-status",
-        "//apps/patka/tools/grep-files",
-        "//apps/patka/tools/list-files",
-        "//apps/patka/tools/read-file",
-        "//apps/patka/tools/report-incompetency",
-        "//apps/patka/tools/write-file",
-        "//:package_json",
-        "//:node_modules/@anthropic-ai/sdk",
-        "//:node_modules/ajv",
+    ),
+    test_srcs = glob(["**/*.ts"]),
+    type_deps = [
         "//:node_modules/@types/blessed",
         "//:node_modules/@types/node",
-        "//:node_modules/blessed",
-        "//:node_modules/ollama",
-        "//:node_modules/pino",
-        "//:node_modules/reflect-metadata",
-        "//:node_modules/tsyringe",
-        "//:node_modules/rxjs",
-        "//:node_modules/ts-pattern",
-        "//:node_modules/zx",
     ],
+    deps = [":tool"],
 )
-
-js_binary(
-    name = "patka",
-    data = [
-        ":lib",
-        "//:package_json",
-        "//:node_modules/@anthropic-ai/sdk",
-        "//:node_modules/ajv",
-        "//:node_modules/blessed",
-        "//:node_modules/ollama",
-        "//:node_modules/pino",
-        "//:node_modules/reflect-metadata",
-        "//:node_modules/tsyringe",
-        "//:node_modules/rxjs",
-        "//:node_modules/ts-pattern",
-        "//:node_modules/zx",
-    ],
-    entry_point = "bootstrap.js",
-    visibility = ["//visibility:public"],
-)
-
-vitest_bin.vitest_test(
-    name = "patka_test",
-    args = ["run"],
-    chdir = package_name(),
-    data = glob(["**/*.ts"]) + [
-        "text/default.json",
-        "tsconfig.json",
-        "//apps/patka/tools/apply-patch:test_data",
-        "//apps/patka/tools/git-diff:test_data",
-        "//apps/patka/tools/git-status:test_data",
-        "//apps/patka/tools/grep-files:test_data",
-        "//apps/patka/tools/list-files:test_data",
-        "//apps/patka/tools/read-file:test_data",
-        "//apps/patka/tools/report-incompetency:test_data",
-        "//apps/patka/tools/write-file:test_data",
-        "//:package_json",
-        "//:node_modules/@anthropic-ai/sdk",
-        "//:node_modules/ajv",
-        "//:node_modules/blessed",
-        "//:node_modules/ollama",
-        "//:node_modules/pino",
-        "//:node_modules/reflect-metadata",
-        "//:node_modules/tsyringe",
-        "//:node_modules/rxjs",
-        "//:node_modules/ts-pattern",
-        "//:node_modules/zx",
-        "//:node_modules/vitest",
-    ],
-)
-
-biome_lint()
