@@ -83,6 +83,21 @@
       "purpose": "Group what the model needs to act with tools.",
       "text": "Tools",
       "children": [{"type": "tools"}]
+    },
+    {
+      "type": "text",
+      "name": "conversation",
+      "purpose": "Let the model know where the conversation starts and who speaks.",
+      "text": "Conversation",
+      "children": [
+        {
+          "type": "text",
+          "name": "conversation-introduction",
+          "purpose": "Tell the model what follows and that it answers as the assistant.",
+          "text": "Below is the conversation so far. Answer as the Assistant."
+        },
+        {"type": "context"}
+      ]
     }
   ]
 }

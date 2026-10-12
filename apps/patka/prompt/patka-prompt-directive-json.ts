@@ -3,6 +3,7 @@ import {Ajv} from 'ajv';
 import {match} from 'ts-pattern';
 import type {JsonValue} from '../json.ts';
 import {failure, success, type Try} from '../try.ts';
+import {ContextPromptDirective} from './context-prompt-directive.ts';
 import {DefaultPatkaPromptDirective} from './default-patka-prompt-directive.ts';
 import type {PatkaPromptDirective} from './patka-prompt-directive.ts';
 import type {PatkaPromptEnvironment} from './patka-prompt-environment.ts';
@@ -18,7 +19,8 @@ export type PatkaPromptDirectiveJson =
       readonly children?: ReadonlyArray<PatkaPromptDirectiveJson>;
     }
   | {readonly type: 'working-directory'}
-  | {readonly type: 'tools'};
+  | {readonly type: 'tools'}
+  | {readonly type: 'context'};
 
 const PATKA_PROMPT_DIRECTIVE_JSON_SCHEMA = {
   $ref: '#/definitions/directive',
@@ -46,6 +48,12 @@ const PATKA_PROMPT_DIRECTIVE_JSON_SCHEMA = {
         {
           type: 'object',
           properties: {type: {const: 'tools'}},
+          required: ['type'],
+          additionalProperties: false,
+        },
+        {
+          type: 'object',
+          properties: {type: {const: 'context'}},
           required: ['type'],
           additionalProperties: false,
         },
@@ -88,6 +96,7 @@ export function createPatkaPromptDirectiveFromJson(
     )
     .with({type: 'working-directory'}, () => new WorkingDirectoryPromptDirective())
     .with({type: 'tools'}, () => new ToolsPromptDirective())
+    .with({type: 'context'}, () => new ContextPromptDirective())
     .exhaustive();
 }
 

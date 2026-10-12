@@ -1,4 +1,5 @@
 import {describe, expect, it} from 'vitest';
+import {ContextPromptDirective} from './context-prompt-directive.ts';
 import {
   createPatkaPromptDirectiveFromJson,
   createPatkaPromptDirectiveJsonFromJsonValue,
@@ -16,7 +17,11 @@ describe('createPatkaPromptDirectiveFromJson', () => {
     });
 
     expect(
-      patkaPromptDirective.render({workingDirectory: '/home/user', patkaToolManuals: []}),
+      patkaPromptDirective.render({
+        workingDirectory: '/home/user',
+        patkaToolManuals: [],
+        patkaContextEntries: [],
+      }),
     ).toBe('Be brief.');
   });
 
@@ -71,6 +76,12 @@ describe('createPatkaPromptDirectiveFromJson', () => {
     expect(patkaPromptDirective).toBeInstanceOf(WorkingDirectoryPromptDirective);
   });
 
+  it('creates a context directive', () => {
+    const patkaPromptDirective = createPatkaPromptDirectiveFromJson({type: 'context'});
+
+    expect(patkaPromptDirective).toBeInstanceOf(ContextPromptDirective);
+  });
+
   it('creates a tools directive', () => {
     const patkaPromptDirective = createPatkaPromptDirectiveFromJson({type: 'tools'});
 
@@ -100,6 +111,10 @@ describe('createPatkaPromptDirectiveJsonFromJsonValue', () => {
         children: [{type: 'working-directory'}, {type: 'tools'}],
       }).type,
     ).toBe('success');
+  });
+
+  it('accepts a context directive', () => {
+    expect(createPatkaPromptDirectiveJsonFromJsonValue({type: 'context'}).type).toBe('success');
   });
 
   it('rejects a directive of an unknown type', () => {
