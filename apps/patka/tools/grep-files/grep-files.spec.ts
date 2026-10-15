@@ -28,9 +28,8 @@ describe('GrepFiles', () => {
   });
 
   it('runs git grep on the whole working directory when the path is "./"', async () => {
-    const template = vi.fn(
-      (templateStringsArray: TemplateStringsArray, ...values: ReadonlyArray<string>) =>
-        Promise.resolve({exitCode: 1, stdout: '', stderr: ''}),
+    const template = vi.fn((_: TemplateStringsArray, ...__: ReadonlyArray<string>) =>
+      Promise.resolve({exitCode: 1, stdout: '', stderr: ''}),
     );
     vi.mocked($)
       .mockReset()
@@ -44,9 +43,8 @@ describe('GrepFiles', () => {
   });
 
   it('runs git grep on the given path', async () => {
-    const template = vi.fn(
-      (templateStringsArray: TemplateStringsArray, ...values: ReadonlyArray<string>) =>
-        Promise.resolve({exitCode: 1, stdout: '', stderr: ''}),
+    const template = vi.fn((_: TemplateStringsArray, ...__: ReadonlyArray<string>) =>
+      Promise.resolve({exitCode: 1, stdout: '', stderr: ''}),
     );
     vi.mocked($)
       .mockReset()

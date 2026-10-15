@@ -35,6 +35,11 @@ alias(
     actual = "//tools:format",
 )
 
+alias(
+    name = "lint",
+    actual = "//tools:lint",
+)
+
 bazel_env(
     name = "env",
     tools = {

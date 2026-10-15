@@ -1,7 +1,7 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@npm//:vitest/package_json.bzl", vitest_bin = "bin")
-load("//tools:lint.bzl", "biome_lint")
+load("@npm//:@biomejs/biome/package_json.bzl", biome_bin = "bin")
 
 def ptk_app(name, entry_point, srcs, test_srcs, npm_deps, packages, type_deps = []):
     ts_project(
@@ -30,4 +30,8 @@ def ptk_app(name, entry_point, srcs, test_srcs, npm_deps, packages, type_deps = 
                ["//:package_json", "//:node_modules/vitest"] + npm_deps,
     )
 
-    biome_lint(srcs = srcs + test_srcs)
+    biome_bin.biome_test(
+        name = "lint",
+        args = ["ci"] + ["{}/{}".format(native.package_name(), src) for src in srcs + test_srcs],
+        data = srcs + test_srcs + ["//:biome_json"],
+    )

@@ -8,6 +8,5 @@ ptk_library(
     npm_deps = [
         "//:node_modules/pino",
         "//:node_modules/rxjs",
-        "//:node_modules/tsyringe",
     ],
 )

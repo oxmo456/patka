@@ -8,6 +8,17 @@ js_binary(
         ".",
     ],
     data = ["//:node_modules/@biomejs/biome"],
-    entry_point = "format.mjs",
+    entry_point = "biome.mjs",
+    visibility = ["//visibility:public"],
+)
+
+js_binary(
+    name = "lint",
+    args = [
+        "check",
+        ".",
+    ],
+    data = ["//:node_modules/@biomejs/biome"],
+    entry_point = "biome.mjs",
     visibility = ["//visibility:public"],
 )

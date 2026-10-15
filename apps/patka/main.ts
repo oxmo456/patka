@@ -1,3 +1,4 @@
+import {PatkaLogger} from '../../packages/patka-logger/patka-logger.ts';
 import 'reflect-metadata';
 import blessed from 'blessed';
 import {container, type DependencyContainer} from 'tsyringe';
@@ -43,6 +44,7 @@ container.register(PATKA_PROMPT_DIRECTIVE, {
 });
 container.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
 container.register(AGENT_NAME, {useValue: 'ROOT'});
+container.registerSingleton(PatkaLogger);
 container.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
 container.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
 container.register(BLESSED, {useValue: blessed});

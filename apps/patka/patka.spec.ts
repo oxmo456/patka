@@ -6,6 +6,7 @@ import {some} from '../../packages/option/option.ts';
 import type {PatkaContextEntry} from '../../packages/patka-agent/context/patka-context-entry.ts';
 import {PatkaAgent} from '../../packages/patka-agent/patka-agent.ts';
 import {PatkaTools} from '../../packages/patka-agent/tools/patka-tools.ts';
+import {PatkaLogger} from '../../packages/patka-logger/patka-logger.ts';
 import {WORKING_DIRECTORY} from '../../packages/working-directory/working-directory.token.ts';
 import {AGENT_NAME} from './agent/agent-name.token.ts';
 import {createPatkaAgentFromDependencyContainer} from './agent/patka-agent-factory.ts';
@@ -42,6 +43,7 @@ describe('Patka', () => {
     });
     child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
+    child.registerSingleton(PatkaLogger);
     child.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
     child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
@@ -66,6 +68,7 @@ describe('Patka', () => {
     });
     child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
+    child.registerSingleton(PatkaLogger);
     child.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
     child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
@@ -104,6 +107,7 @@ describe('Patka', () => {
     });
     child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
+    child.registerSingleton(PatkaLogger);
     child.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
     child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
@@ -139,6 +143,7 @@ describe('Patka', () => {
     });
     child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
+    child.registerSingleton(PatkaLogger);
     child.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
     child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});

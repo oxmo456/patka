@@ -1,6 +1,6 @@
 load("@aspect_rules_js//js:defs.bzl", "js_library")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
-load("//tools:lint.bzl", "biome_lint")
+load("@npm//:@biomejs/biome/package_json.bzl", biome_bin = "bin")
 
 def ptk_package(name, srcs, test_srcs, visibility, deps = [], data = []):
     js_library(
@@ -27,4 +27,8 @@ def ptk_package(name, srcs, test_srcs, visibility, deps = [], data = []):
         visibility = visibility,
     )
 
-    biome_lint(srcs = srcs + test_srcs)
+    biome_bin.biome_test(
+        name = "lint",
+        args = ["ci"] + ["{}/{}".format(native.package_name(), src) for src in srcs + test_srcs],
+        data = srcs + test_srcs + ["//:biome_json"],
+    )

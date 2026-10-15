@@ -8,7 +8,7 @@
     "check": "tsc -p apps/patka --noEmit",
     "test": "bazel test //...",
     "format": "bazel run //:format",
-    "lint": "bazel test //..."
+    "lint": "bazel run //:lint"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.124.0",
