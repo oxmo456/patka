@@ -7,7 +7,7 @@ ptk_library(
         "patka-context-entry.ts",
     ],
     deps = [
-        "//packages/agent/inference",
+        "//packages/patka-agent/inference",
         "//packages/json",
         "//packages/option",
         "//packages/patka-utterance",

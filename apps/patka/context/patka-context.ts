@@ -1,6 +1,6 @@
 import {type Observable, queueScheduler, ReplaySubject} from 'rxjs';
 import {Lifecycle, scoped} from 'tsyringe';
-import type {PatkaContextEntry} from '../../../packages/agent/context/patka-context-entry.ts';
+import type {PatkaContextEntry} from '../../../packages/patka-agent/context/patka-context-entry.ts';
 
 @scoped(Lifecycle.ContainerScoped)
 export class PatkaContext {

@@ -15,7 +15,7 @@ ptk_package(
         "//:node_modules/ts-pattern",
         "//:node_modules/tsyringe",
         "//apps/patka/tools",
-        "//packages/agent/context",
+        "//packages/patka-agent/context",
         "//packages/disposable",
         "//packages/json",
         "//packages/patka-logger",

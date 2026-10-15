@@ -1,17 +1,17 @@
 load("//tools:ptk_library.bzl", "ptk_library")
 
 ptk_library(
-    name = "agent",
+    name = "patka-agent",
     srcs = [
         "patka-agent-text.ts",
         "patka-agent.ts",
     ],
     test_srcs = ["patka-agent.spec.ts"],
     deps = [
-        "//packages/agent/context",
-        "//packages/agent/inference",
-        "//packages/agent/prompt",
-        "//packages/agent/tools",
+        "//packages/patka-agent/context",
+        "//packages/patka-agent/inference",
+        "//packages/patka-agent/prompt",
+        "//packages/patka-agent/tools",
         "//packages/option",
         "//packages/performance-timestamp",
         "//packages/timestamp",

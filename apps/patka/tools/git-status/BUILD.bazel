@@ -11,7 +11,7 @@ ptk_package(
         "//:node_modules/rxjs",
         "//:node_modules/tsyringe",
         "//:node_modules/zx",
-        "//packages/agent/tools",
+        "//packages/patka-agent/tools",
         "//packages/option",
         "//packages/try",
     ],

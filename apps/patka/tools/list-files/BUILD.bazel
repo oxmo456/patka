@@ -10,7 +10,7 @@ ptk_package(
         "//:node_modules/rxjs",
         "//:node_modules/tsyringe",
         "//apps/patka/tools",
-        "//packages/agent/tools",
+        "//packages/patka-agent/tools",
         "//packages/option",
         "//packages/try",
     ],

@@ -13,7 +13,7 @@ ptk_package(
     deps = [
         "//:node_modules/@types/node",
         "//:node_modules/tsyringe",
-        "//packages/agent/tools",
+        "//packages/patka-agent/tools",
         "//packages/json",
         "//packages/option",
         "//packages/try",

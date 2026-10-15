@@ -1,17 +1,17 @@
 import {concatMap, EMPTY, type Observable, of, type Subscription, scan} from 'rxjs';
 import {match} from 'ts-pattern';
 import {inject, injectable} from 'tsyringe';
+import type {Disposable} from '../../../packages/disposable/disposable.ts';
+import type {Duration} from '../../../packages/duration/duration.ts';
+import {none, type Option, some} from '../../../packages/option/option.ts';
 import type {
   PatkaContextEntry,
   PatkaInferenceClientResponse,
   PatkaUserNotification,
   PatkaUserUtterance,
-} from '../../../packages/agent/context/patka-context-entry.ts';
-import type {InferenceUsage} from '../../../packages/agent/inference/inference-usage.ts';
-import {PatkaToolProtocol} from '../../../packages/agent/tools/patka-tool-protocol.ts';
-import type {Disposable} from '../../../packages/disposable/disposable.ts';
-import type {Duration} from '../../../packages/duration/duration.ts';
-import {none, type Option, some} from '../../../packages/option/option.ts';
+} from '../../../packages/patka-agent/context/patka-context-entry.ts';
+import type {InferenceUsage} from '../../../packages/patka-agent/inference/inference-usage.ts';
+import {PatkaToolProtocol} from '../../../packages/patka-agent/tools/patka-tool-protocol.ts';
 import {AGENT_NAME} from '../agent/agent-name.token.ts';
 import {PatkaContext} from '../context/patka-context.ts';
 import {PatkaChat} from './patka-chat.ts';

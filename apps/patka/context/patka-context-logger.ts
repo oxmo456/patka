@@ -1,9 +1,9 @@
 import type {Subscription} from 'rxjs';
 import {match} from 'ts-pattern';
 import {inject, injectable} from 'tsyringe';
-import type {PatkaContextEntry} from '../../../packages/agent/context/patka-context-entry.ts';
 import type {Disposable} from '../../../packages/disposable/disposable.ts';
 import type {JsonObject} from '../../../packages/json/json.ts';
+import type {PatkaContextEntry} from '../../../packages/patka-agent/context/patka-context-entry.ts';
 import {PatkaLogger} from '../../../packages/patka-logger/patka-logger.ts';
 import {createJsonFromToolTry} from '../tools/patka-tool-json.ts';
 import {PatkaContext} from './patka-context.ts';

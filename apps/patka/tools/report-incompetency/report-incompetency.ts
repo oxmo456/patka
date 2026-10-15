@@ -1,9 +1,9 @@
 import {type Observable, of} from 'rxjs';
 import {injectable} from 'tsyringe';
-import type {PatkaTool} from '../../../../packages/agent/tools/patka-tool.ts';
-import type {PatkaToolManual} from '../../../../packages/agent/tools/patka-tool-manual.ts';
-import {REPORT_INCOMPETENCY} from '../../../../packages/agent/tools/report-incompetency.ts';
 import {none, type Option} from '../../../../packages/option/option.ts';
+import type {PatkaTool} from '../../../../packages/patka-agent/tools/patka-tool.ts';
+import type {PatkaToolManual} from '../../../../packages/patka-agent/tools/patka-tool-manual.ts';
+import {REPORT_INCOMPETENCY} from '../../../../packages/patka-agent/tools/report-incompetency.ts';
 import {success, type Try} from '../../../../packages/try/try.ts';
 
 export type ReportIncompetencyInput = {

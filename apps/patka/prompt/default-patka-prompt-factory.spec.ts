@@ -1,8 +1,8 @@
 import {randomUUID} from 'node:crypto';
 import {describe, expect, it} from 'vitest';
-import type {PatkaContextEntry} from '../../../packages/agent/context/patka-context-entry.ts';
-import {PatkaTools} from '../../../packages/agent/tools/patka-tools.ts';
 import {none, some} from '../../../packages/option/option.ts';
+import type {PatkaContextEntry} from '../../../packages/patka-agent/context/patka-context-entry.ts';
+import {PatkaTools} from '../../../packages/patka-agent/tools/patka-tools.ts';
 import {failure, success} from '../../../packages/try/try.ts';
 import {ListFiles} from '../tools/list-files/list-files.ts';
 import {ReadFile} from '../tools/read-file/read-file.ts';

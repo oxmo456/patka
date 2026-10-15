@@ -26,9 +26,9 @@ ptk_package(
         "//:node_modules/tsyringe",
         "//apps/patka/text",
         "//apps/patka/tools",
-        "//packages/agent/context",
-        "//packages/agent/prompt",
-        "//packages/agent/tools",
+        "//packages/patka-agent/context",
+        "//packages/patka-agent/prompt",
+        "//packages/patka-agent/tools",
         "//packages/working-directory",
     ],
 )

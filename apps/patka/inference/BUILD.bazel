@@ -24,6 +24,6 @@ ptk_package(
         "//:node_modules/ts-pattern",
         "//:node_modules/tsyringe",
         "//apps/patka/text",
-        "//packages/agent/inference",
+        "//packages/patka-agent/inference",
     ],
 )
