@@ -1,0 +1,22 @@
+load("//tools:ptk_library.bzl", "ptk_library")
+
+ptk_library(
+    name = "patka-prompt",
+    srcs = [
+        "context-prompt-directive.ts",
+        "default-patka-prompt-directive.ts",
+        "default-patka-prompt-factory.ts",
+        "patka-prompt-directive.ts",
+        "patka-prompt-environment.ts",
+        "patka-prompt-factory.ts",
+        "patka-prompt-markdown.ts",
+        "tools-prompt-directive.ts",
+        "working-directory-prompt-directive.ts",
+    ],
+    test_srcs = ["patka-prompt-markdown.spec.ts"],
+    deps = [
+        "//packages/patka-agent/context",
+        "//packages/patka-agent/tools",
+    ],
+    npm_deps = ["//:node_modules/ts-pattern"],
+)

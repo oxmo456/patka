@@ -1,10 +1,11 @@
+import type {PatkaToolManual} from '../../../packages/patka-agent/tools/patka-tool-manual.ts';
+import {ContextPromptDirective} from '../../../packages/patka-prompt/context-prompt-directive.ts';
+import {DefaultPatkaPromptDirective} from '../../../packages/patka-prompt/default-patka-prompt-directive.ts';
+import type {PatkaPromptDirective} from '../../../packages/patka-prompt/patka-prompt-directive.ts';
+import type {PatkaPromptEnvironment} from '../../../packages/patka-prompt/patka-prompt-environment.ts';
+import {ToolsPromptDirective} from '../../../packages/patka-prompt/tools-prompt-directive.ts';
+import {WorkingDirectoryPromptDirective} from '../../../packages/patka-prompt/working-directory-prompt-directive.ts';
 import {createTextFromPatkaTextKey} from '../text/patka-text.ts';
-import {ContextPromptDirective} from './context-prompt-directive.ts';
-import {DefaultPatkaPromptDirective} from './default-patka-prompt-directive.ts';
-import type {PatkaPromptDirective} from './patka-prompt-directive.ts';
-import type {PatkaPromptEnvironment} from './patka-prompt-environment.ts';
-import {ToolsPromptDirective} from './tools-prompt-directive.ts';
-import {WorkingDirectoryPromptDirective} from './working-directory-prompt-directive.ts';
 
 export function createPatkaPromptDirective(): PatkaPromptDirective<PatkaPromptEnvironment> {
   return new DefaultPatkaPromptDirective<PatkaPromptEnvironment>(
@@ -72,13 +73,37 @@ export function createPatkaPromptDirective(): PatkaPromptDirective<PatkaPromptEn
         'environment',
         'Let the model know where it acts.',
         createTextFromPatkaTextKey('prompt.environment'),
-        [new WorkingDirectoryPromptDirective()],
+        [
+          new WorkingDirectoryPromptDirective((workingDirectory: string) =>
+            createTextFromPatkaTextKey('prompt.environment.workingDirectory', {workingDirectory}),
+          ),
+        ],
       ),
       new DefaultPatkaPromptDirective(
         'tools-section',
         'Group what the model needs to act with tools.',
         createTextFromPatkaTextKey('prompt.tools'),
-        [new ToolsPromptDirective()],
+        [
+          new ToolsPromptDirective({
+            introduction: createTextFromPatkaTextKey('prompt.tools.introduction'),
+            tool: (patkaToolManual: PatkaToolManual) =>
+              createTextFromPatkaTextKey('prompt.tools.tool', {
+                name: patkaToolManual.name,
+                summary: patkaToolManual.summary,
+                usage: patkaToolManual.usage,
+                input: JSON.stringify(patkaToolManual.input),
+                output: JSON.stringify(patkaToolManual.output),
+              }),
+            protocol: [
+              createTextFromPatkaTextKey('prompt.tools.protocol.singleLine'),
+              createTextFromPatkaTextKey('prompt.tools.protocol.format'),
+              createTextFromPatkaTextKey('prompt.tools.protocol.example'),
+              createTextFromPatkaTextKey('prompt.tools.protocol.inputSchema'),
+              createTextFromPatkaTextKey('prompt.tools.protocol.neverGuess'),
+              createTextFromPatkaTextKey('prompt.tools.protocol.askWhenUnclear'),
+            ],
+          }),
+        ],
       ),
       new DefaultPatkaPromptDirective(
         'conversation',
@@ -90,7 +115,16 @@ export function createPatkaPromptDirective(): PatkaPromptDirective<PatkaPromptEn
             'Tell the model what follows and that it answers as the assistant.',
             createTextFromPatkaTextKey('prompt.conversation.introduction'),
           ),
-          new ContextPromptDirective(),
+          new ContextPromptDirective({
+            userUtterance: (content: string) =>
+              createTextFromPatkaTextKey('prompt.conversation.userUtterance', {content}),
+            inferenceClientResponse: (content: string) =>
+              createTextFromPatkaTextKey('prompt.conversation.inferenceClientResponse', {content}),
+            agentUtterance: (content: string) =>
+              createTextFromPatkaTextKey('prompt.conversation.agentUtterance', {content}),
+            toolOutput: (output: string) =>
+              createTextFromPatkaTextKey('prompt.conversation.toolOutput', {output}),
+          }),
         ],
       ),
       new DefaultPatkaPromptDirective(

@@ -10,7 +10,7 @@ ptk_library(
     deps = [
         "//packages/patka-agent/context",
         "//packages/patka-agent/inference",
-        "//packages/patka-agent/prompt",
+        "//packages/patka-prompt",
         "//packages/patka-agent/tools",
         "//packages/option",
         "//packages/performance-timestamp",

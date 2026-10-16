@@ -1,7 +1,0 @@
-load("//tools:ptk_library.bzl", "ptk_library")
-
-ptk_library(
-    name = "prompt",
-    srcs = ["patka-prompt-factory.ts"],
-    deps = ["//packages/patka-agent/context"],
-)

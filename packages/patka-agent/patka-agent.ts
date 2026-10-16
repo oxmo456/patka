@@ -2,6 +2,7 @@ import {randomUUID} from 'node:crypto';
 import {catchError, concatMap, EMPTY, map, type Observable, of, scan} from 'rxjs';
 import {match} from 'ts-pattern';
 import {type Option, some} from '../option/option.ts';
+import type {PatkaPromptFactory} from '../patka-prompt/patka-prompt-factory.ts';
 import {createPerformanceTimestamp} from '../performance-timestamp/performance-timestamp.ts';
 import {createTimestamp} from '../timestamp/timestamp.ts';
 import type {
@@ -16,7 +17,6 @@ import type {
 import type {PatkaContextEntryID} from './context/patka-context-entry-id.ts';
 import type {InferenceClient} from './inference/inference-client.ts';
 import type {PatkaAgentText} from './patka-agent-text.ts';
-import type {PatkaPromptFactory} from './prompt/patka-prompt-factory.ts';
 import {PatkaToolProtocol} from './tools/patka-tool-protocol.ts';
 import type {PatkaTools} from './tools/patka-tools.ts';
 import {REPORT_INCOMPETENCY} from './tools/report-incompetency.ts';

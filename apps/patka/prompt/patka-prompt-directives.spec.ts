@@ -3,10 +3,10 @@ import {describe, expect, it} from 'vitest';
 import {none, some} from '../../../packages/option/option.ts';
 import type {PatkaContextEntry} from '../../../packages/patka-agent/context/patka-context-entry.ts';
 import {PatkaTools} from '../../../packages/patka-agent/tools/patka-tools.ts';
+import {DefaultPatkaPromptFactory} from '../../../packages/patka-prompt/default-patka-prompt-factory.ts';
 import {failure, success} from '../../../packages/try/try.ts';
 import {ListFiles} from '../tools/list-files/list-files.ts';
 import {ReadFile} from '../tools/read-file/read-file.ts';
-import {DefaultPatkaPromptFactory} from './default-patka-prompt-factory.ts';
 import {createPatkaPromptDirective} from './patka-prompt-directives.ts';
 
 const said = (content: string): PatkaContextEntry => ({
@@ -30,7 +30,7 @@ const answered = (content: string): PatkaContextEntry => ({
   content,
 });
 
-describe('DefaultPatkaPromptFactory', () => {
+describe('createPatkaPromptDirective', () => {
   it('tells the model to keep its answer short', () => {
     expect(
       new DefaultPatkaPromptFactory(

@@ -5,6 +5,7 @@ import {container, type DependencyContainer} from 'tsyringe';
 import {$} from 'zx';
 import {PatkaAgent} from '../../packages/patka-agent/patka-agent.ts';
 import {PatkaTools} from '../../packages/patka-agent/tools/patka-tools.ts';
+import {DefaultPatkaPromptFactory} from '../../packages/patka-prompt/default-patka-prompt-factory.ts';
 import {WORKING_DIRECTORY} from '../../packages/working-directory/working-directory.token.ts';
 import {AGENT_NAME} from './agent/agent-name.token.ts';
 import {createPatkaAgentFromDependencyContainer} from './agent/patka-agent-factory.ts';
@@ -17,7 +18,6 @@ import {
   extractOllamaModel,
 } from './inference/patka-inference.ts';
 import {Patka} from './patka.ts';
-import {DefaultPatkaPromptFactory} from './prompt/default-patka-prompt-factory.ts';
 import {PATKA_PROMPT_DIRECTIVE} from './prompt/patka-prompt-directive.token.ts';
 import {createPatkaPromptDirective} from './prompt/patka-prompt-directives.ts';
 import {PATKA_PROMPT_FACTORY} from './prompt/patka-prompt-factory.token.ts';
@@ -42,7 +42,14 @@ container.register(WORKING_DIRECTORY, {useValue: process.cwd()});
 container.register(PATKA_PROMPT_DIRECTIVE, {
   useValue: createPatkaPromptDirective(),
 });
-container.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
+container.register(PATKA_PROMPT_FACTORY, {
+  useFactory: (dependencyContainer: DependencyContainer) =>
+    new DefaultPatkaPromptFactory(
+      dependencyContainer.resolve(PatkaTools),
+      dependencyContainer.resolve(WORKING_DIRECTORY),
+      dependencyContainer.resolve(PATKA_PROMPT_DIRECTIVE),
+    ),
+});
 container.register(AGENT_NAME, {useValue: 'ROOT'});
 container.registerSingleton(PatkaLogger);
 container.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});

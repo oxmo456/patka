@@ -7,6 +7,7 @@ import type {PatkaContextEntry} from '../../packages/patka-agent/context/patka-c
 import {PatkaAgent} from '../../packages/patka-agent/patka-agent.ts';
 import {PatkaTools} from '../../packages/patka-agent/tools/patka-tools.ts';
 import {PatkaLogger} from '../../packages/patka-logger/patka-logger.ts';
+import {DefaultPatkaPromptFactory} from '../../packages/patka-prompt/default-patka-prompt-factory.ts';
 import {WORKING_DIRECTORY} from '../../packages/working-directory/working-directory.token.ts';
 import {AGENT_NAME} from './agent/agent-name.token.ts';
 import {createPatkaAgentFromDependencyContainer} from './agent/patka-agent-factory.ts';
@@ -14,7 +15,6 @@ import {PatkaContext} from './context/patka-context.ts';
 import {PATKA_CONTEXT_ENTRIES} from './context/patka-context-entries.token.ts';
 import {INFERENCE_CLIENT} from './inference/inference-client.token.ts';
 import {Patka} from './patka.ts';
-import {DefaultPatkaPromptFactory} from './prompt/default-patka-prompt-factory.ts';
 import {PATKA_PROMPT_DIRECTIVE} from './prompt/patka-prompt-directive.token.ts';
 import {createPatkaPromptDirective} from './prompt/patka-prompt-directives.ts';
 import {PATKA_PROMPT_FACTORY} from './prompt/patka-prompt-factory.token.ts';
@@ -41,7 +41,14 @@ describe('Patka', () => {
     child.register(PATKA_PROMPT_DIRECTIVE, {
       useValue: createPatkaPromptDirective(),
     });
-    child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
+    child.register(PATKA_PROMPT_FACTORY, {
+      useFactory: (dependencyContainer: DependencyContainer) =>
+        new DefaultPatkaPromptFactory(
+          dependencyContainer.resolve(PatkaTools),
+          dependencyContainer.resolve(WORKING_DIRECTORY),
+          dependencyContainer.resolve(PATKA_PROMPT_DIRECTIVE),
+        ),
+    });
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.registerSingleton(PatkaLogger);
     child.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
@@ -66,7 +73,14 @@ describe('Patka', () => {
     child.register(PATKA_PROMPT_DIRECTIVE, {
       useValue: createPatkaPromptDirective(),
     });
-    child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
+    child.register(PATKA_PROMPT_FACTORY, {
+      useFactory: (dependencyContainer: DependencyContainer) =>
+        new DefaultPatkaPromptFactory(
+          dependencyContainer.resolve(PatkaTools),
+          dependencyContainer.resolve(WORKING_DIRECTORY),
+          dependencyContainer.resolve(PATKA_PROMPT_DIRECTIVE),
+        ),
+    });
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.registerSingleton(PatkaLogger);
     child.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
@@ -105,7 +119,14 @@ describe('Patka', () => {
     child.register(PATKA_PROMPT_DIRECTIVE, {
       useValue: createPatkaPromptDirective(),
     });
-    child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
+    child.register(PATKA_PROMPT_FACTORY, {
+      useFactory: (dependencyContainer: DependencyContainer) =>
+        new DefaultPatkaPromptFactory(
+          dependencyContainer.resolve(PatkaTools),
+          dependencyContainer.resolve(WORKING_DIRECTORY),
+          dependencyContainer.resolve(PATKA_PROMPT_DIRECTIVE),
+        ),
+    });
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.registerSingleton(PatkaLogger);
     child.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
@@ -141,7 +162,14 @@ describe('Patka', () => {
     child.register(PATKA_PROMPT_DIRECTIVE, {
       useValue: createPatkaPromptDirective(),
     });
-    child.register(PATKA_PROMPT_FACTORY, {useClass: DefaultPatkaPromptFactory});
+    child.register(PATKA_PROMPT_FACTORY, {
+      useFactory: (dependencyContainer: DependencyContainer) =>
+        new DefaultPatkaPromptFactory(
+          dependencyContainer.resolve(PatkaTools),
+          dependencyContainer.resolve(WORKING_DIRECTORY),
+          dependencyContainer.resolve(PATKA_PROMPT_DIRECTIVE),
+        ),
+    });
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.registerSingleton(PatkaLogger);
     child.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
