@@ -10,7 +10,7 @@ import {
   patkaToolManual,
   property,
   string,
-} from '../../patka-agent/tools/patka-tool-manual-dsl.ts';
+} from '../../patka-agent/tools/patka-tool-manual.ts';
 import {failure, success, type Try} from '../../try/try.ts';
 import {assertRelativePathInsideTheWorkingDirectory} from '../patka-tool-relative-path.ts';
 

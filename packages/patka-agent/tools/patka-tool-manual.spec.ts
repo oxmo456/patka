@@ -8,7 +8,7 @@ import {
   patkaToolManual,
   property,
   string,
-} from './patka-tool-manual-dsl.ts';
+} from './patka-tool-manual.ts';
 
 describe('patkaToolManual', () => {
   it('gathers the name, summary, usage, input and output of a tool', () => {

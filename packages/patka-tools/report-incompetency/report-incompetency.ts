@@ -10,7 +10,7 @@ import {
   patkaToolManual,
   property,
   string,
-} from '../../patka-agent/tools/patka-tool-manual-dsl.ts';
+} from '../../patka-agent/tools/patka-tool-manual.ts';
 import {REPORT_INCOMPETENCY} from '../../patka-agent/tools/report-incompetency.ts';
 import {success, type Try} from '../../try/try.ts';
 
