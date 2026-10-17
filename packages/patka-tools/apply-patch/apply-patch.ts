@@ -2,14 +2,12 @@ import {catchError, defer, type Observable, of} from 'rxjs';
 import {$} from 'zx';
 import {type Option, some} from '../../option/option.ts';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
-import type {PatkaToolManual} from '../../patka-tool/patka-tool-manual.ts';
-import {
-  input,
-  output,
-  patkaToolManual,
-  property,
-  string,
-} from '../../patka-tool/patka-tool-manual.ts';
+import {input} from '../../patka-tool-llm-manual/input.ts';
+import {output} from '../../patka-tool-llm-manual/output.ts';
+import type {PatkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
+import {patkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
+import {property} from '../../patka-tool-llm-manual/property.ts';
+import {string} from '../../patka-tool-llm-manual/string.ts';
 import {failure, success, type Try} from '../../try/try.ts';
 
 export type ApplyPatchInput = {
@@ -17,9 +15,8 @@ export type ApplyPatchInput = {
 };
 
 export class ApplyPatch implements PatkaTool<ApplyPatchInput, string> {
-  readonly manual: PatkaToolManual = patkaToolManual(
+  readonly llmManual: PatkaToolLLMManual = patkaToolLLMManual(
     'apply_patch',
-    'Applies a unified diff to the files: creates, changes or deletes them.',
     'Use it to change part of a file without writing the whole file again. Read the file first, so the context lines of the patch are exact.',
     input(
       property(

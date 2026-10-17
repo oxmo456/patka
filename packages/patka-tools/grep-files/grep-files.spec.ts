@@ -9,22 +9,22 @@ import {GrepFiles} from './grep-files.ts';
 vi.mock('zx', () => ({$: vi.fn()}));
 
 describe('GrepFiles', () => {
-  it('carries a manual for the model', () => {
+  it('carries a manual for the LLM', () => {
     const grepFiles = new GrepFiles();
 
-    expect(grepFiles.manual.name).toBe('grep_files');
+    expect(grepFiles.llmManual.name).toBe('grep_files');
   });
 
   it('asks for a pattern and a path', () => {
     const grepFiles = new GrepFiles();
 
-    expect(grepFiles.manual.input.required).toEqual(['pattern', 'relativePath']);
+    expect(grepFiles.llmManual.input.required).toEqual(['pattern', 'relativePath']);
   });
 
   it('describes the two shapes of its output', () => {
     const grepFiles = new GrepFiles();
 
-    expect(grepFiles.manual.output.oneOf).toHaveLength(2);
+    expect(grepFiles.llmManual.output.oneOf).toHaveLength(2);
   });
 
   it('runs git grep on the whole working directory when the path is "./"', async () => {

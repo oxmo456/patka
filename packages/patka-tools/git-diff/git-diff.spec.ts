@@ -8,8 +8,8 @@ import {cd} from 'zx';
 import {GitDiff} from './git-diff.ts';
 
 describe('GitDiff', () => {
-  it('carries a manual for the model', () => {
-    expect(new GitDiff().manual.name).toBe('git_diff');
+  it('carries a manual for the LLM', () => {
+    expect(new GitDiff().llmManual.name).toBe('git_diff');
   });
 
   it('emits the change made to a committed file', async () => {

@@ -8,8 +8,8 @@ import {cd} from 'zx';
 import {GitStatus} from './git-status.ts';
 
 describe('GitStatus', () => {
-  it('carries a manual for the model', () => {
-    expect(new GitStatus().manual.name).toBe('git_status');
+  it('carries a manual for the LLM', () => {
+    expect(new GitStatus().llmManual.name).toBe('git_status');
   });
 
   it('emits what git status prints in a repository', async () => {

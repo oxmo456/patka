@@ -13,7 +13,7 @@
   "prompt.environment.workingDirectory": "As an agent, your working directory is: {workingDirectory}",
   "prompt.tools": "Tools",
   "prompt.tools.introduction": "You can use these tools:",
-  "prompt.tools.tool": "- {name}: {summary}\n  usage: {usage}\n  input: {input}\n  output: {output}",
+  "prompt.tools.tool": "- {name}: {usage}\n  input: {input}\n  output: {output}",
   "prompt.tools.protocol.singleLine": "If you want to use a tool, reply with a single line and nothing else:",
   "prompt.tools.protocol.format": "$$$invoke(tool_name, {\"key\": \"value\"})",
   "prompt.tools.protocol.example": "For example: $$$invoke(read_file, {\"relativePath\": \"notes.txt\"})",

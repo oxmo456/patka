@@ -156,9 +156,8 @@ User: what is my name?`,
     const prompt = defaultPatkaPromptFactory.create([]);
 
     expect(prompt).toContain('You can use these tools:');
-    expect(prompt).toContain('- list_files: Lists the files');
-    expect(prompt).toContain('- read_file: Reads');
-    expect(prompt).toContain('usage: Use it');
+    expect(prompt).toContain('- list_files: Use it to discover');
+    expect(prompt).toContain('- read_file: Use it once you know');
   });
 
   it('gives the model each tool input and output schema', () => {

@@ -1,0 +1,28 @@
+load("//tools:ptk_library.bzl", "ptk_library")
+
+ptk_library(
+    name = "patka-tool-llm-manual",
+    srcs = [
+        "array.ts",
+        "failure-output.ts",
+        "input.ts",
+        "no-output.ts",
+        "object.ts",
+        "output.ts",
+        "patka-tool-llm-manual-properties.ts",
+        "patka-tool-llm-manual.ts",
+        "property.ts",
+        "string.ts",
+    ],
+    test_srcs = [
+        "array.spec.ts",
+        "input.spec.ts",
+        "no-output.spec.ts",
+        "object.spec.ts",
+        "output.spec.ts",
+        "patka-tool-llm-manual.spec.ts",
+        "property.spec.ts",
+        "string.spec.ts",
+    ],
+    deps = ["//packages/json"],
+)

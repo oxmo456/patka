@@ -9,9 +9,8 @@ import {PatkaTools} from './patka-tools.ts';
 type FakeTool = PatkaTool<JsonObject, JsonValue> & {invoke: Mock};
 
 const aTool = (name: string, answer: string): FakeTool => ({
-  manual: {
+  llmManual: {
     name,
-    summary: `summary of ${name}`,
     usage: `usage of ${name}`,
     input: {type: 'object' as const, properties: {}, required: []},
     output: {type: 'string' as const},
@@ -20,14 +19,17 @@ const aTool = (name: string, answer: string): FakeTool => ({
 });
 
 describe('PatkaTools', () => {
-  it('has no manual when it holds no tool', () => {
-    expect(new PatkaTools([]).manuals()).toEqual([]);
+  it('has no LLM manual when it holds no tool', () => {
+    expect(new PatkaTools([]).llmManuals()).toEqual([]);
   });
 
-  it('lists the manual of every tool it holds', () => {
+  it('lists the LLM manual of every tool it holds', () => {
     const patkaTools = new PatkaTools([aTool('list_files', 'listed'), aTool('read_file', 'read')]);
 
-    expect(patkaTools.manuals().map((manual) => manual.name)).toEqual(['list_files', 'read_file']);
+    expect(patkaTools.llmManuals().map((patkaToolLLMManual) => patkaToolLLMManual.name)).toEqual([
+      'list_files',
+      'read_file',
+    ]);
   });
 
   it('invokes the tool that carries that name', async () => {
@@ -55,9 +57,8 @@ describe('PatkaTools', () => {
 
   it('gives failure when the input misses a required key', async () => {
     const readFile: FakeTool = {
-      manual: {
+      llmManual: {
         name: 'read_file',
-        summary: 'summary of read_file',
         usage: 'usage of read_file',
         input: {
           type: 'object' as const,
@@ -82,9 +83,8 @@ describe('PatkaTools', () => {
 
   it('gives failure when a value of the input has the wrong type', async () => {
     const readFile: FakeTool = {
-      manual: {
+      llmManual: {
         name: 'read_file',
-        summary: 'summary of read_file',
         usage: 'usage of read_file',
         input: {
           type: 'object' as const,
@@ -107,9 +107,8 @@ describe('PatkaTools', () => {
 
   it('does not invoke the tool when its input is not valid', async () => {
     const readFile: FakeTool = {
-      manual: {
+      llmManual: {
         name: 'read_file',
-        summary: 'summary of read_file',
         usage: 'usage of read_file',
         input: {
           type: 'object' as const,

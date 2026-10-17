@@ -5,6 +5,7 @@ ptk_library(
     srcs = ["git-diff.ts"],
     test_srcs = ["git-diff.spec.ts"],
     deps = [
+        "//packages/patka-tool-llm-manual",
         "//packages/option",
         "//packages/patka-tool",
         "//packages/try",

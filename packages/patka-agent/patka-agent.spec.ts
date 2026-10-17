@@ -14,9 +14,8 @@ import {success, type Try} from '../try/try.ts';
 import {PatkaAgent} from './patka-agent.ts';
 
 const aTool = (name: string, output: string): PatkaTool<{path: string}, string> => ({
-  manual: {
+  llmManual: {
     name,
-    summary: `summary of ${name}`,
     usage: `usage of ${name}`,
     input: {type: 'object', properties: {}, required: []},
     output: {type: 'string'},

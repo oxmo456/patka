@@ -2,14 +2,16 @@ import {catchError, defer, from, map, type Observable, of} from 'rxjs';
 import {$} from 'zx';
 import {type Option, some} from '../../option/option.ts';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
-import type {PatkaToolManual} from '../../patka-tool/patka-tool-manual.ts';
-import {input, output, patkaToolManual, string} from '../../patka-tool/patka-tool-manual.ts';
+import {input} from '../../patka-tool-llm-manual/input.ts';
+import {output} from '../../patka-tool-llm-manual/output.ts';
+import type {PatkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
+import {patkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
+import {string} from '../../patka-tool-llm-manual/string.ts';
 import {failure, success, type Try} from '../../try/try.ts';
 
 export class GitStatus implements PatkaTool<Record<string, never>, string> {
-  readonly manual: PatkaToolManual = patkaToolManual(
+  readonly llmManual: PatkaToolLLMManual = patkaToolLLMManual(
     'git_status',
-    'Shows the git status of the working directory.',
     'Use it to know which files are changed, staged or not tracked by git.',
     input(),
     output(string('The text that "git status" prints.')),

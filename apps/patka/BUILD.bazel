@@ -33,6 +33,7 @@ ptk_app(
         "//packages/patka-context",
         "//packages/patka-inference",
         "//packages/patka-tool",
+        "//packages/patka-tool-llm-manual",
         "//packages/disposable",
         "//packages/duration",
         "//packages/json",

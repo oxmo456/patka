@@ -20,16 +20,15 @@ const inADirectory = async <T>(run: () => Promise<T>): Promise<T> => {
 };
 
 describe('WriteFile', () => {
-  it('carries a manual for the model', () => {
+  it('carries a manual for the LLM', () => {
     const writeFile = new WriteFile();
 
-    expect(writeFile.manual.name).toBe('write_file');
-    expect(writeFile.manual.summary).toContain('Writes');
-    expect(writeFile.manual.usage).not.toBe('');
-    expect(writeFile.manual.input.required).toEqual(['relativePath', 'content']);
-    expect(writeFile.manual.input.properties).toHaveProperty('relativePath');
-    expect(writeFile.manual.input.properties).toHaveProperty('content');
-    expect(writeFile.manual.output.oneOf).toHaveLength(2);
+    expect(writeFile.llmManual.name).toBe('write_file');
+    expect(writeFile.llmManual.usage).not.toBe('');
+    expect(writeFile.llmManual.input.required).toEqual(['relativePath', 'content']);
+    expect(writeFile.llmManual.input.properties).toHaveProperty('relativePath');
+    expect(writeFile.llmManual.input.properties).toHaveProperty('content');
+    expect(writeFile.llmManual.output.oneOf).toHaveLength(2);
   });
 
   it('writes the content to the file', async () => {

@@ -5,6 +5,7 @@ ptk_library(
     srcs = ["grep-files.ts"],
     test_srcs = ["grep-files.spec.ts"],
     deps = [
+        "//packages/patka-tool-llm-manual",
         "//packages/option",
         "//packages/patka-tool",
         "//packages/try",

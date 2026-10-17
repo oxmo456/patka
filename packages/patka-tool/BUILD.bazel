@@ -4,7 +4,6 @@ ptk_library(
     name = "patka-tool",
     srcs = [
         "patka-tool-json.ts",
-        "patka-tool-manual.ts",
         "patka-tool-protocol.ts",
         "patka-tool-relative-path.ts",
         "patka-tool.ts",
@@ -12,7 +11,6 @@ ptk_library(
         "report-incompetency.ts",
     ],
     test_srcs = [
-        "patka-tool-manual.spec.ts",
         "patka-tool-protocol.spec.ts",
         "patka-tool-relative-path.spec.ts",
         "patka-tools.spec.ts",
@@ -20,6 +18,7 @@ ptk_library(
     deps = [
         "//packages/json",
         "//packages/option",
+        "//packages/patka-tool-llm-manual",
         "//packages/try",
     ],
     npm_deps = [

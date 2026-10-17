@@ -5,6 +5,7 @@ ptk_library(
     srcs = ["report-incompetency.ts"],
     test_srcs = ["report-incompetency.spec.ts"],
     deps = [
+        "//packages/patka-tool-llm-manual",
         "//packages/option",
         "//packages/patka-tool",
         "//packages/try",

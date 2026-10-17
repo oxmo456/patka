@@ -5,6 +5,7 @@ ptk_library(
     srcs = ["git-status.ts"],
     test_srcs = ["git-status.spec.ts"],
     deps = [
+        "//packages/patka-tool-llm-manual",
         "//packages/option",
         "//packages/patka-tool",
         "//packages/try",

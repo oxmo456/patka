@@ -10,6 +10,7 @@ ptk_package(
     test_srcs = ["patka-prompt-directives.spec.ts"],
     visibility = ["//apps/patka:__subpackages__"],
     deps = [
+        "//packages/patka-tool-llm-manual",
         "//:node_modules/tsyringe",
         "//apps/patka/text",
         "//packages/patka-tool",

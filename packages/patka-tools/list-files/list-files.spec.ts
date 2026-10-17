@@ -23,15 +23,14 @@ const inADirectory = async <T>(run: () => Promise<T>): Promise<T> => {
 };
 
 describe('ListFiles', () => {
-  it('carries a manual for the model', () => {
+  it('carries a manual for the LLM', () => {
     const listFiles = new ListFiles();
 
-    expect(listFiles.manual.name).toBe('list_files');
-    expect(listFiles.manual.summary).toContain('Lists the files');
-    expect(listFiles.manual.usage).not.toBe('');
-    expect(listFiles.manual.input.required).toEqual(['relativePath']);
-    expect(listFiles.manual.input.properties).toHaveProperty('relativePath');
-    expect(listFiles.manual.output.oneOf).toHaveLength(2);
+    expect(listFiles.llmManual.name).toBe('list_files');
+    expect(listFiles.llmManual.usage).not.toBe('');
+    expect(listFiles.llmManual.input.required).toEqual(['relativePath']);
+    expect(listFiles.llmManual.input.properties).toHaveProperty('relativePath');
+    expect(listFiles.llmManual.output.oneOf).toHaveLength(2);
   });
 
   it('lists what the directory holds, in order', async () => {

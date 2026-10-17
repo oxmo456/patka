@@ -8,7 +8,7 @@ describe('ReportIncompetency', () => {
   it('carries the name the model must invoke', () => {
     const reportIncompetency = new ReportIncompetency();
 
-    expect(reportIncompetency.manual.name).toBe('report_incompetency');
+    expect(reportIncompetency.llmManual.name).toBe('report_incompetency');
   });
 
   it('gives an empty success as output', async () => {

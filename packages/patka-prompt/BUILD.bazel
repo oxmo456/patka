@@ -15,6 +15,7 @@ ptk_library(
     ],
     test_srcs = ["patka-prompt-markdown.spec.ts"],
     deps = [
+        "//packages/patka-tool-llm-manual",
         "//packages/patka-context",
         "//packages/patka-tool",
     ],

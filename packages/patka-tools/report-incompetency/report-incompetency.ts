@@ -1,17 +1,15 @@
 import {type Observable, of} from 'rxjs';
 import {none, type Option} from '../../option/option.ts';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
-import type {PatkaToolManual} from '../../patka-tool/patka-tool-manual.ts';
-import {
-  array,
-  input,
-  noOutput,
-  object,
-  patkaToolManual,
-  property,
-  string,
-} from '../../patka-tool/patka-tool-manual.ts';
 import {REPORT_INCOMPETENCY} from '../../patka-tool/report-incompetency.ts';
+import {array} from '../../patka-tool-llm-manual/array.ts';
+import {input} from '../../patka-tool-llm-manual/input.ts';
+import {noOutput} from '../../patka-tool-llm-manual/no-output.ts';
+import {object} from '../../patka-tool-llm-manual/object.ts';
+import type {PatkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
+import {patkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
+import {property} from '../../patka-tool-llm-manual/property.ts';
+import {string} from '../../patka-tool-llm-manual/string.ts';
 import {success, type Try} from '../../try/try.ts';
 
 export type ReportIncompetencyInput = {
@@ -25,9 +23,8 @@ export type ReportIncompetencyInput = {
 };
 
 export class ReportIncompetency implements PatkaTool<ReportIncompetencyInput, string> {
-  readonly manual: PatkaToolManual = patkaToolManual(
+  readonly llmManual: PatkaToolLLMManual = patkaToolLLMManual(
     REPORT_INCOMPETENCY,
-    'Tells whoever asked that you have no tool for the job.',
     'Use it only when the request needs a tool that is not in this list.',
     input(
       property(

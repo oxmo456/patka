@@ -4,7 +4,7 @@ import type {PatkaPromptDirective} from '../../../packages/patka-prompt/patka-pr
 import type {PatkaPromptEnvironment} from '../../../packages/patka-prompt/patka-prompt-environment.ts';
 import {ToolsPromptDirective} from '../../../packages/patka-prompt/tools-prompt-directive.ts';
 import {WorkingDirectoryPromptDirective} from '../../../packages/patka-prompt/working-directory-prompt-directive.ts';
-import type {PatkaToolManual} from '../../../packages/patka-tool/patka-tool-manual.ts';
+import type {PatkaToolLLMManual} from '../../../packages/patka-tool-llm-manual/patka-tool-llm-manual.ts';
 import {createTextFromPatkaTextKey} from '../text/patka-text.ts';
 
 export function createPatkaPromptDirective(): PatkaPromptDirective<PatkaPromptEnvironment> {
@@ -86,13 +86,12 @@ export function createPatkaPromptDirective(): PatkaPromptDirective<PatkaPromptEn
         [
           new ToolsPromptDirective({
             introduction: createTextFromPatkaTextKey('prompt.tools.introduction'),
-            tool: (patkaToolManual: PatkaToolManual) =>
+            tool: (patkaToolLLMManual: PatkaToolLLMManual) =>
               createTextFromPatkaTextKey('prompt.tools.tool', {
-                name: patkaToolManual.name,
-                summary: patkaToolManual.summary,
-                usage: patkaToolManual.usage,
-                input: JSON.stringify(patkaToolManual.input),
-                output: JSON.stringify(patkaToolManual.output),
+                name: patkaToolLLMManual.name,
+                usage: patkaToolLLMManual.usage,
+                input: JSON.stringify(patkaToolLLMManual.input),
+                output: JSON.stringify(patkaToolLLMManual.output),
               }),
             protocol: [
               createTextFromPatkaTextKey('prompt.tools.protocol.singleLine'),

@@ -21,15 +21,14 @@ const withAFile = async <T>(content: string, run: () => Promise<T>): Promise<T> 
 };
 
 describe('ReadFile', () => {
-  it('carries a manual for the model', () => {
+  it('carries a manual for the LLM', () => {
     const readFile = new ReadFile();
 
-    expect(readFile.manual.name).toBe('read_file');
-    expect(readFile.manual.summary).toContain('Reads');
-    expect(readFile.manual.usage).not.toBe('');
-    expect(readFile.manual.input.required).toEqual(['relativePath']);
-    expect(readFile.manual.input.properties).toHaveProperty('relativePath');
-    expect(readFile.manual.output.oneOf).toHaveLength(2);
+    expect(readFile.llmManual.name).toBe('read_file');
+    expect(readFile.llmManual.usage).not.toBe('');
+    expect(readFile.llmManual.input.required).toEqual(['relativePath']);
+    expect(readFile.llmManual.input.properties).toHaveProperty('relativePath');
+    expect(readFile.llmManual.output.oneOf).toHaveLength(2);
   });
 
   it('emits what the file holds', async () => {

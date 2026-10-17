@@ -2,16 +2,14 @@ import {readdir} from 'node:fs/promises';
 import {catchError, defer, from, map, type Observable, of} from 'rxjs';
 import {type Option, some} from '../../option/option.ts';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
-import type {PatkaToolManual} from '../../patka-tool/patka-tool-manual.ts';
-import {
-  array,
-  input,
-  output,
-  patkaToolManual,
-  property,
-  string,
-} from '../../patka-tool/patka-tool-manual.ts';
 import {assertRelativePathInsideTheWorkingDirectory} from '../../patka-tool/patka-tool-relative-path.ts';
+import {array} from '../../patka-tool-llm-manual/array.ts';
+import {input} from '../../patka-tool-llm-manual/input.ts';
+import {output} from '../../patka-tool-llm-manual/output.ts';
+import type {PatkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
+import {patkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
+import {property} from '../../patka-tool-llm-manual/property.ts';
+import {string} from '../../patka-tool-llm-manual/string.ts';
 import {failure, success, type Try} from '../../try/try.ts';
 
 export type ListFilesInput = {
@@ -19,9 +17,8 @@ export type ListFilesInput = {
 };
 
 export class ListFiles implements PatkaTool<ListFilesInput, ReadonlyArray<string>> {
-  readonly manual: PatkaToolManual = patkaToolManual(
+  readonly llmManual: PatkaToolLLMManual = patkaToolLLMManual(
     'list_files',
-    'Lists the files and directories directly under a path.',
     'Use it to discover what a directory holds before reading any file.',
     input(
       property(
