@@ -2,8 +2,8 @@ import {tmpdir} from 'node:os';
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
 import {$} from 'zx';
-import {some} from '../../../../packages/option/option.ts';
-import {success} from '../../../../packages/try/try.ts';
+import {some} from '../../option/option.ts';
+import {success} from '../../try/try.ts';
 import {GrepFiles} from './grep-files.ts';
 
 vi.mock('zx', () => ({$: vi.fn()}));

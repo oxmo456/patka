@@ -3,14 +3,12 @@ load("//tools:ptk_package.bzl", "ptk_package")
 ptk_package(
     name = "tools",
     srcs = [
-        "patka-tool-relative-path.ts",
         "patka-tool.token.ts",
         "patka-tools-factory.ts",
     ],
-    test_srcs = ["patka-tool-relative-path.spec.ts"],
+    test_srcs = [],
     visibility = ["//apps/patka:__subpackages__"],
     deps = [
-        "//:node_modules/@types/node",
         "//:node_modules/tsyringe",
         "//packages/patka-agent/tools",
         "//packages/json",

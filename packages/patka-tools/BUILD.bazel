@@ -1,0 +1,7 @@
+load("//tools:ptk_library.bzl", "ptk_library")
+
+ptk_library(
+    name = "patka-tools",
+    srcs = ["patka-tool-relative-path.ts"],
+    test_srcs = ["patka-tool-relative-path.spec.ts"],
+)

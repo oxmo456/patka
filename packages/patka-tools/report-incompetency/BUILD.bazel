@@ -1,0 +1,15 @@
+load("//tools:ptk_library.bzl", "ptk_library")
+
+ptk_library(
+    name = "report-incompetency",
+    srcs = ["report-incompetency.ts"],
+    test_srcs = ["report-incompetency.spec.ts"],
+    deps = [
+        "//packages/option",
+        "//packages/patka-agent/tools",
+        "//packages/try",
+    ],
+    npm_deps = [
+        "//:node_modules/rxjs",
+    ],
+)

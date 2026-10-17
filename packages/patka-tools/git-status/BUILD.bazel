@@ -1,0 +1,17 @@
+load("//tools:ptk_library.bzl", "ptk_library")
+
+ptk_library(
+    name = "git-status",
+    srcs = ["git-status.ts"],
+    test_srcs = ["git-status.spec.ts"],
+    deps = [
+        "//packages/option",
+        "//packages/patka-agent/tools",
+        "//packages/try",
+    ],
+    npm_deps = [
+        "//:node_modules/@types/fs-extra",
+        "//:node_modules/rxjs",
+        "//:node_modules/zx",
+    ],
+)

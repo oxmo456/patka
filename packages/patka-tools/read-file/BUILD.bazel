@@ -1,0 +1,16 @@
+load("//tools:ptk_library.bzl", "ptk_library")
+
+ptk_library(
+    name = "read-file",
+    srcs = ["read-file.ts"],
+    test_srcs = ["read-file.spec.ts"],
+    deps = [
+        "//packages/option",
+        "//packages/patka-agent/tools",
+        "//packages/patka-tools",
+        "//packages/try",
+    ],
+    npm_deps = [
+        "//:node_modules/rxjs",
+    ],
+)

@@ -1,0 +1,18 @@
+load("//tools:ptk_library.bzl", "ptk_library")
+
+ptk_library(
+    name = "git-diff",
+    srcs = ["git-diff.ts"],
+    test_srcs = ["git-diff.spec.ts"],
+    deps = [
+        "//packages/option",
+        "//packages/patka-agent/tools",
+        "//packages/patka-tools",
+        "//packages/try",
+    ],
+    npm_deps = [
+        "//:node_modules/@types/fs-extra",
+        "//:node_modules/rxjs",
+        "//:node_modules/zx",
+    ],
+)
