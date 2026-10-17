@@ -3,13 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "scripts": {
-    "start": "bazel run //apps/patka:patka",
-    "check": "tsc -p apps/patka --noEmit",
-    "test": "bazel test //...",
-    "format": "bazel run //:format",
-    "lint": "bazel run //:lint"
-  },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.124.0",
     "ajv": "^8.20.0",
