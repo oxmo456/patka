@@ -2,6 +2,15 @@ import {type Observable, of} from 'rxjs';
 import {none, type Option} from '../../option/option.ts';
 import type {PatkaTool} from '../../patka-agent/tools/patka-tool.ts';
 import type {PatkaToolManual} from '../../patka-agent/tools/patka-tool-manual.ts';
+import {
+  array,
+  input,
+  noOutput,
+  object,
+  patkaToolManual,
+  property,
+  string,
+} from '../../patka-agent/tools/patka-tool-manual-dsl.ts';
 import {REPORT_INCOMPETENCY} from '../../patka-agent/tools/report-incompetency.ts';
 import {success, type Try} from '../../try/try.ts';
 
@@ -16,67 +25,31 @@ export type ReportIncompetencyInput = {
 };
 
 export class ReportIncompetency implements PatkaTool<ReportIncompetencyInput, string> {
-  readonly manual: PatkaToolManual = {
-    name: REPORT_INCOMPETENCY,
-    summary: 'Tells whoever asked that you have no tool for the job.',
-    usage: 'Use it only when the request needs a tool that is not in this list.',
-    input: {
-      type: 'object',
-      properties: {
-        model: {
-          type: 'object',
-          description: 'Yourself, as you know it.',
-          properties: {
-            name: {type: 'string', description: 'Your model name.'},
-            version: {type: 'string', description: 'Your model version.'},
-          },
-          required: ['name', 'version'],
-        },
-        request: {
-          type: 'string',
-          description: 'What was asked of you, and by whom.',
-        },
-        rationale: {
-          type: 'string',
-          description: 'Why the request needs a tool, and why no tool in this list can do it.',
-        },
-        toolSuggestion: {
-          type: 'array',
-          items: {type: 'string'},
-          description: 'The names of the tools that you need and do not have.',
-        },
-      },
-      required: ['model', 'request', 'rationale', 'toolSuggestion'],
-    },
-    output: {
-      oneOf: [
-        {
-          type: 'object',
-          description: 'The report was sent. It has no output.',
-          properties: {
-            type: {const: 'success'},
-            value: {
-              type: 'object',
-              properties: {
-                type: {const: 'none'},
-              },
-              required: ['type'],
-            },
-          },
-          required: ['type', 'value'],
-        },
-        {
-          type: 'object',
-          description: 'The tool failed.',
-          properties: {
-            type: {const: 'failure'},
-            error: {type: 'string', description: 'Why the tool failed.'},
-          },
-          required: ['type', 'error'],
-        },
-      ],
-    },
-  };
+  readonly manual: PatkaToolManual = patkaToolManual(
+    REPORT_INCOMPETENCY,
+    'Tells whoever asked that you have no tool for the job.',
+    'Use it only when the request needs a tool that is not in this list.',
+    input(
+      property(
+        'model',
+        object(
+          'Yourself, as you know it.',
+          property('name', string('Your model name.')),
+          property('version', string('Your model version.')),
+        ),
+      ),
+      property('request', string('What was asked of you, and by whom.')),
+      property(
+        'rationale',
+        string('Why the request needs a tool, and why no tool in this list can do it.'),
+      ),
+      property(
+        'toolSuggestion',
+        array('The names of the tools that you need and do not have.', string()),
+      ),
+    ),
+    noOutput('The report was sent. It has no output.'),
+  );
 
   invoke(): Observable<Try<Option<string>>> {
     return of(success(none));
