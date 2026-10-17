@@ -1,4 +1,4 @@
-import type {JsonObject, JsonObjectSchema, JsonSchema} from '../../json/json.ts';
+import type {JsonObject, JsonObjectSchema, JsonSchema} from '../json/json.ts';
 
 export type PatkaToolManual = {
   readonly name: string;

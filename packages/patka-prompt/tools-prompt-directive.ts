@@ -1,4 +1,4 @@
-import type {PatkaToolManual} from '../patka-agent/tools/patka-tool-manual.ts';
+import type {PatkaToolManual} from '../patka-tool/patka-tool-manual.ts';
 import type {PatkaPromptDirective} from './patka-prompt-directive.ts';
 import type {PatkaPromptEnvironment} from './patka-prompt-environment.ts';
 

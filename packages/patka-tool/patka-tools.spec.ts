@@ -1,8 +1,8 @@
 import {firstValueFrom, of, throwError} from 'rxjs';
 import {describe, expect, it, type Mock, vi} from 'vitest';
-import type {JsonObject, JsonValue} from '../../json/json.ts';
-import {some} from '../../option/option.ts';
-import {success} from '../../try/try.ts';
+import type {JsonObject, JsonValue} from '../json/json.ts';
+import {some} from '../option/option.ts';
+import {success} from '../try/try.ts';
 import type {PatkaTool} from './patka-tool.ts';
 import {PatkaTools} from './patka-tools.ts';
 

@@ -1,7 +1,7 @@
 import {randomUUID} from 'node:crypto';
 import {describe, expect, it} from 'vitest';
 import {none, some} from '../../../packages/option/option.ts';
-import type {PatkaContextEntry} from '../../../packages/patka-agent/context/patka-context-entry.ts';
+import type {PatkaContextEntry} from '../../../packages/patka-context/patka-context-entry.ts';
 import {success} from '../../../packages/try/try.ts';
 import {PatkaContext} from './patka-context.ts';
 

@@ -1,8 +1,8 @@
 import {spawn} from 'node:child_process';
 import {map, Observable, type Subscriber} from 'rxjs';
-import type {InferenceClient} from '../../../packages/patka-agent/inference/inference-client.ts';
-import type {InferenceClientInput} from '../../../packages/patka-agent/inference/inference-client-input.ts';
-import type {InferenceClientResponse} from '../../../packages/patka-agent/inference/inference-client-response.ts';
+import type {InferenceClient} from '../../../packages/patka-inference/inference-client.ts';
+import type {InferenceClientInput} from '../../../packages/patka-inference/inference-client-input.ts';
+import type {InferenceClientResponse} from '../../../packages/patka-inference/inference-client-response.ts';
 import {createTextFromPatkaTextKey} from '../text/patka-text.ts';
 
 const SYSTEM_PROMPT = createTextFromPatkaTextKey('inference.claude.systemPrompt');

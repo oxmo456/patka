@@ -3,9 +3,9 @@ import {match} from 'ts-pattern';
 import {inject, injectable} from 'tsyringe';
 import type {Disposable} from '../../../packages/disposable/disposable.ts';
 import type {JsonObject} from '../../../packages/json/json.ts';
-import type {PatkaContextEntry} from '../../../packages/patka-agent/context/patka-context-entry.ts';
-import {createJsonFromToolTry} from '../../../packages/patka-agent/tools/patka-tool-json.ts';
+import type {PatkaContextEntry} from '../../../packages/patka-context/patka-context-entry.ts';
 import {PatkaLogger} from '../../../packages/patka-logger/patka-logger.ts';
+import {createJsonFromToolTry} from '../../../packages/patka-tool/patka-tool-json.ts';
 import {PatkaContext} from './patka-context.ts';
 
 const toDetails = (patkaContextEntry: PatkaContextEntry): JsonObject =>

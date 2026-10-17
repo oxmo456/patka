@@ -1,13 +1,12 @@
 load("//tools:ptk_library.bzl", "ptk_library")
 
 ptk_library(
-    name = "git-diff",
-    srcs = ["git-diff.ts"],
-    test_srcs = ["git-diff.spec.ts"],
+    name = "grep-files",
+    srcs = ["grep-files.ts"],
+    test_srcs = ["grep-files.spec.ts"],
     deps = [
         "//packages/option",
-        "//packages/patka-agent/tools",
-        "//packages/patka-tools",
+        "//packages/patka-tool",
         "//packages/try",
     ],
     npm_deps = [

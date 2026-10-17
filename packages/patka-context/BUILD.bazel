@@ -1,13 +1,13 @@
 load("//tools:ptk_library.bzl", "ptk_library")
 
 ptk_library(
-    name = "context",
+    name = "patka-context",
     srcs = [
         "patka-context-entry-id.ts",
         "patka-context-entry.ts",
     ],
     deps = [
-        "//packages/patka-agent/inference",
+        "//packages/patka-inference",
         "//packages/json",
         "//packages/option",
         "//packages/patka-utterance",

@@ -1,13 +1,12 @@
 load("//tools:ptk_library.bzl", "ptk_library")
 
 ptk_library(
-    name = "write-file",
-    srcs = ["write-file.ts"],
-    test_srcs = ["write-file.spec.ts"],
+    name = "read-file",
+    srcs = ["read-file.ts"],
+    test_srcs = ["read-file.spec.ts"],
     deps = [
         "//packages/option",
-        "//packages/patka-agent/tools",
-        "//packages/patka-tools",
+        "//packages/patka-tool",
         "//packages/try",
     ],
     npm_deps = [

@@ -1,5 +1,5 @@
-import type {JsonObject} from '../../json/json.ts';
-import {attempt, failure, type Try} from '../../try/try.ts';
+import type {JsonObject} from '../json/json.ts';
+import {attempt, failure, type Try} from '../try/try.ts';
 
 const INVOCATION = /\$\$\$invoke\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*,\s*(\{[\s\S]*\})\s*\)/;
 

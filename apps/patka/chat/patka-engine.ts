@@ -9,9 +9,9 @@ import type {
   PatkaInferenceClientResponse,
   PatkaUserNotification,
   PatkaUserUtterance,
-} from '../../../packages/patka-agent/context/patka-context-entry.ts';
-import type {InferenceUsage} from '../../../packages/patka-agent/inference/inference-usage.ts';
-import {PatkaToolProtocol} from '../../../packages/patka-agent/tools/patka-tool-protocol.ts';
+} from '../../../packages/patka-context/patka-context-entry.ts';
+import type {InferenceUsage} from '../../../packages/patka-inference/inference-usage.ts';
+import {PatkaToolProtocol} from '../../../packages/patka-tool/patka-tool-protocol.ts';
 import {AGENT_NAME} from '../agent/agent-name.token.ts';
 import {PatkaContext} from '../context/patka-context.ts';
 import {PatkaChat} from './patka-chat.ts';

@@ -16,6 +16,6 @@ ptk_package(
         "//apps/patka/prompt",
         "//apps/patka/text",
         "//packages/patka-agent",
-        "//packages/patka-agent/tools",
+        "//packages/patka-tool",
     ],
 )

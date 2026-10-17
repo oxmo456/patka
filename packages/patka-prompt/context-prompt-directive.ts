@@ -1,6 +1,6 @@
 import {match} from 'ts-pattern';
-import type {PatkaContextEntry} from '../patka-agent/context/patka-context-entry.ts';
-import {createJsonFromToolTry} from '../patka-agent/tools/patka-tool-json.ts';
+import type {PatkaContextEntry} from '../patka-context/patka-context-entry.ts';
+import {createJsonFromToolTry} from '../patka-tool/patka-tool-json.ts';
 import type {PatkaPromptDirective} from './patka-prompt-directive.ts';
 import type {PatkaPromptEnvironment} from './patka-prompt-environment.ts';
 

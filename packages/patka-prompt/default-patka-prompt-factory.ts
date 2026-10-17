@@ -1,5 +1,5 @@
-import type {PatkaContextEntry} from '../patka-agent/context/patka-context-entry.ts';
-import type {PatkaTools} from '../patka-agent/tools/patka-tools.ts';
+import type {PatkaContextEntry} from '../patka-context/patka-context-entry.ts';
+import type {PatkaTools} from '../patka-tool/patka-tools.ts';
 import type {PatkaPromptDirective} from './patka-prompt-directive.ts';
 import type {PatkaPromptEnvironment} from './patka-prompt-environment.ts';
 import type {PatkaPromptFactory} from './patka-prompt-factory.ts';

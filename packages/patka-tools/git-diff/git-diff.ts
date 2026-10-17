@@ -1,17 +1,17 @@
 import {catchError, defer, from, map, type Observable, of} from 'rxjs';
 import {$} from 'zx';
 import {type Option, some} from '../../option/option.ts';
-import type {PatkaTool} from '../../patka-agent/tools/patka-tool.ts';
-import type {PatkaToolManual} from '../../patka-agent/tools/patka-tool-manual.ts';
+import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
+import type {PatkaToolManual} from '../../patka-tool/patka-tool-manual.ts';
 import {
   input,
   output,
   patkaToolManual,
   property,
   string,
-} from '../../patka-agent/tools/patka-tool-manual.ts';
+} from '../../patka-tool/patka-tool-manual.ts';
+import {assertRelativePathInsideTheWorkingDirectory} from '../../patka-tool/patka-tool-relative-path.ts';
 import {failure, success, type Try} from '../../try/try.ts';
-import {assertRelativePathInsideTheWorkingDirectory} from '../patka-tool-relative-path.ts';
 
 export type GitDiffInput = {
   readonly relativePath: string;

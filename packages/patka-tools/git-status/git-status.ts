@@ -1,9 +1,9 @@
 import {catchError, defer, from, map, type Observable, of} from 'rxjs';
 import {$} from 'zx';
 import {type Option, some} from '../../option/option.ts';
-import type {PatkaTool} from '../../patka-agent/tools/patka-tool.ts';
-import type {PatkaToolManual} from '../../patka-agent/tools/patka-tool-manual.ts';
-import {input, output, patkaToolManual, string} from '../../patka-agent/tools/patka-tool-manual.ts';
+import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
+import type {PatkaToolManual} from '../../patka-tool/patka-tool-manual.ts';
+import {input, output, patkaToolManual, string} from '../../patka-tool/patka-tool-manual.ts';
 import {failure, success, type Try} from '../../try/try.ts';
 
 export class GitStatus implements PatkaTool<Record<string, never>, string> {

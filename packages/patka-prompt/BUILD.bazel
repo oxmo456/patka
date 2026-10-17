@@ -15,8 +15,8 @@ ptk_library(
     ],
     test_srcs = ["patka-prompt-markdown.spec.ts"],
     deps = [
-        "//packages/patka-agent/context",
-        "//packages/patka-agent/tools",
+        "//packages/patka-context",
+        "//packages/patka-tool",
     ],
     npm_deps = ["//:node_modules/ts-pattern"],
 )

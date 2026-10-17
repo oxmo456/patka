@@ -1,10 +1,10 @@
-import type {PatkaToolManual} from '../../../packages/patka-agent/tools/patka-tool-manual.ts';
 import {ContextPromptDirective} from '../../../packages/patka-prompt/context-prompt-directive.ts';
 import {DefaultPatkaPromptDirective} from '../../../packages/patka-prompt/default-patka-prompt-directive.ts';
 import type {PatkaPromptDirective} from '../../../packages/patka-prompt/patka-prompt-directive.ts';
 import type {PatkaPromptEnvironment} from '../../../packages/patka-prompt/patka-prompt-environment.ts';
 import {ToolsPromptDirective} from '../../../packages/patka-prompt/tools-prompt-directive.ts';
 import {WorkingDirectoryPromptDirective} from '../../../packages/patka-prompt/working-directory-prompt-directive.ts';
+import type {PatkaToolManual} from '../../../packages/patka-tool/patka-tool-manual.ts';
 import {createTextFromPatkaTextKey} from '../text/patka-text.ts';
 
 export function createPatkaPromptDirective(): PatkaPromptDirective<PatkaPromptEnvironment> {

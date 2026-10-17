@@ -1,8 +1,8 @@
 import type {Ollama} from 'ollama';
 import {defer, from, map, type Observable} from 'rxjs';
-import type {InferenceClient} from '../../../packages/patka-agent/inference/inference-client.ts';
-import type {InferenceClientInput} from '../../../packages/patka-agent/inference/inference-client-input.ts';
-import type {InferenceClientResponse} from '../../../packages/patka-agent/inference/inference-client-response.ts';
+import type {InferenceClient} from '../../../packages/patka-inference/inference-client.ts';
+import type {InferenceClientInput} from '../../../packages/patka-inference/inference-client-input.ts';
+import type {InferenceClientResponse} from '../../../packages/patka-inference/inference-client-response.ts';
 
 export class OllamaInferenceClient implements InferenceClient {
   private readonly model: string;

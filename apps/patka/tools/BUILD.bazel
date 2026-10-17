@@ -10,7 +10,7 @@ ptk_package(
     visibility = ["//apps/patka:__subpackages__"],
     deps = [
         "//:node_modules/tsyringe",
-        "//packages/patka-agent/tools",
+        "//packages/patka-tool",
         "//packages/json",
     ],
 )

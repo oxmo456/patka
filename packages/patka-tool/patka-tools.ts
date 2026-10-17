@@ -1,8 +1,8 @@
 import {Ajv} from 'ajv';
 import {catchError, defer, type Observable, of} from 'rxjs';
-import type {JsonObject, JsonValue} from '../../json/json.ts';
-import type {Option} from '../../option/option.ts';
-import {failure, type Try} from '../../try/try.ts';
+import type {JsonObject, JsonValue} from '../json/json.ts';
+import type {Option} from '../option/option.ts';
+import {failure, type Try} from '../try/try.ts';
 import type {PatkaTool} from './patka-tool.ts';
 import type {PatkaToolManual} from './patka-tool-manual.ts';
 

@@ -1,7 +1,7 @@
 import {type Observable, of} from 'rxjs';
 import {none, type Option} from '../../option/option.ts';
-import type {PatkaTool} from '../../patka-agent/tools/patka-tool.ts';
-import type {PatkaToolManual} from '../../patka-agent/tools/patka-tool-manual.ts';
+import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
+import type {PatkaToolManual} from '../../patka-tool/patka-tool-manual.ts';
 import {
   array,
   input,
@@ -10,8 +10,8 @@ import {
   patkaToolManual,
   property,
   string,
-} from '../../patka-agent/tools/patka-tool-manual.ts';
-import {REPORT_INCOMPETENCY} from '../../patka-agent/tools/report-incompetency.ts';
+} from '../../patka-tool/patka-tool-manual.ts';
+import {REPORT_INCOMPETENCY} from '../../patka-tool/report-incompetency.ts';
 import {success, type Try} from '../../try/try.ts';
 
 export type ReportIncompetencyInput = {

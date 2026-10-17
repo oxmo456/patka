@@ -1,6 +1,6 @@
 import type {Observable} from 'rxjs';
 import type {InjectionToken} from 'tsyringe';
-import type {PatkaContextEntry} from '../../../packages/patka-agent/context/patka-context-entry.ts';
+import type {PatkaContextEntry} from '../../../packages/patka-context/patka-context-entry.ts';
 
 export const PATKA_CONTEXT_ENTRIES: InjectionToken<Observable<PatkaContextEntry>> =
   Symbol('PatkaContextEntries');

@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import {Ollama} from 'ollama';
 import {match} from 'ts-pattern';
-import type {InferenceClient} from '../../../packages/patka-agent/inference/inference-client.ts';
+import type {InferenceClient} from '../../../packages/patka-inference/inference-client.ts';
 import {AnthropicInferenceClient} from './anthropic-inference-client.ts';
 import {ClaudeInferenceClient} from './claude-inference-client.ts';
 import {OllamaInferenceClient} from './ollama-inference-client.ts';

@@ -1,7 +1,7 @@
 load("//tools:ptk_library.bzl", "ptk_library")
 
 ptk_library(
-    name = "inference",
+    name = "patka-inference",
     srcs = [
         "inference-client-input.ts",
         "inference-client-response.ts",

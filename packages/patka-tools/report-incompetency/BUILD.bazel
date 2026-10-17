@@ -6,7 +6,7 @@ ptk_library(
     test_srcs = ["report-incompetency.spec.ts"],
     deps = [
         "//packages/option",
-        "//packages/patka-agent/tools",
+        "//packages/patka-tool",
         "//packages/try",
     ],
     npm_deps = [

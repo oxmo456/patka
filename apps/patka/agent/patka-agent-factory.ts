@@ -1,6 +1,6 @@
 import type {DependencyContainer} from 'tsyringe';
 import {PatkaAgent} from '../../../packages/patka-agent/patka-agent.ts';
-import {PatkaTools} from '../../../packages/patka-agent/tools/patka-tools.ts';
+import {PatkaTools} from '../../../packages/patka-tool/patka-tools.ts';
 import {PATKA_CONTEXT_ENTRIES} from '../context/patka-context-entries.token.ts';
 import {INFERENCE_CLIENT} from '../inference/inference-client.token.ts';
 import {PATKA_PROMPT_FACTORY} from '../prompt/patka-prompt-factory.token.ts';
