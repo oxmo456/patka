@@ -10,8 +10,8 @@ export type PatkaToolLLMManual = {
 export function patkaToolLLMManual(
   name: string,
   usage: string,
-  jsonObjectSchema: JsonObjectSchema,
-  jsonSchema: JsonSchema,
+  input: JsonObjectSchema,
+  output: JsonSchema,
 ): PatkaToolLLMManual {
-  return {name, usage, input: jsonObjectSchema, output: jsonSchema};
+  return {name, usage, input, output};
 }
