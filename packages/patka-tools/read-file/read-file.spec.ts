@@ -26,9 +26,9 @@ describe('ReadFile', () => {
 
     expect(readFile.llmManual.name).toBe('read_file');
     expect(readFile.llmManual.usage).not.toBe('');
-    expect(readFile.llmManual.input.required).toEqual(['relativePath']);
-    expect(readFile.llmManual.input.properties).toHaveProperty('relativePath');
-    expect(readFile.llmManual.output.type).toBe('string');
+    expect(readFile.llmManual.input).toMatchObject({required: ['relativePath']});
+    expect(readFile.llmManual.input).toHaveProperty('properties.relativePath');
+    expect(readFile.llmManual.output).toMatchObject({type: 'string'});
   });
 
   it('emits what the file holds', async () => {

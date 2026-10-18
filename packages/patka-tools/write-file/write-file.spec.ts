@@ -25,10 +25,10 @@ describe('WriteFile', () => {
 
     expect(writeFile.llmManual.name).toBe('write_file');
     expect(writeFile.llmManual.usage).not.toBe('');
-    expect(writeFile.llmManual.input.required).toEqual(['relativePath', 'content']);
-    expect(writeFile.llmManual.input.properties).toHaveProperty('relativePath');
-    expect(writeFile.llmManual.input.properties).toHaveProperty('content');
-    expect(writeFile.llmManual.output.type).toBe('string');
+    expect(writeFile.llmManual.input).toMatchObject({required: ['relativePath', 'content']});
+    expect(writeFile.llmManual.input).toHaveProperty('properties.relativePath');
+    expect(writeFile.llmManual.input).toHaveProperty('properties.content');
+    expect(writeFile.llmManual.output).toMatchObject({type: 'string'});
   });
 
   it('writes the content to the file', async () => {

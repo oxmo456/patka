@@ -28,9 +28,9 @@ describe('ListFiles', () => {
 
     expect(listFiles.llmManual.name).toBe('list_files');
     expect(listFiles.llmManual.usage).not.toBe('');
-    expect(listFiles.llmManual.input.required).toEqual(['relativePath']);
-    expect(listFiles.llmManual.input.properties).toHaveProperty('relativePath');
-    expect(listFiles.llmManual.output.type).toBe('array');
+    expect(listFiles.llmManual.input).toMatchObject({required: ['relativePath']});
+    expect(listFiles.llmManual.input).toHaveProperty('properties.relativePath');
+    expect(listFiles.llmManual.output).toMatchObject({type: 'array'});
   });
 
   it('lists what the directory holds, in order', async () => {
