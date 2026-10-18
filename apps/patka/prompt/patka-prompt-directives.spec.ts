@@ -218,14 +218,14 @@ User: what is my name?`,
     expect(prompt).toContain('ask the user a question instead');
   });
 
-  it('gives the model the success and failure form of each tool output', () => {
+  it('gives the model the failure form of a tool output once, in the protocol', () => {
     const prompt = new DefaultPatkaPromptFactory(
       new PatkaTools([new ReadFile()]),
       '/home/user',
       createPatkaPromptDirective(),
     ).create([]);
 
-    expect(prompt).toContain('"type":{"const":"failure"}');
+    expect(prompt).toContain('{"type":"failure","error":"<why the tool failed>"}');
   });
 
   it('shows the success output a tool gave back', () => {

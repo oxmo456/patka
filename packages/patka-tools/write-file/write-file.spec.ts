@@ -28,7 +28,7 @@ describe('WriteFile', () => {
     expect(writeFile.llmManual.input.required).toEqual(['relativePath', 'content']);
     expect(writeFile.llmManual.input.properties).toHaveProperty('relativePath');
     expect(writeFile.llmManual.input.properties).toHaveProperty('content');
-    expect(writeFile.llmManual.output.oneOf).toHaveLength(2);
+    expect(writeFile.llmManual.output.type).toBe('string');
   });
 
   it('writes the content to the file', async () => {

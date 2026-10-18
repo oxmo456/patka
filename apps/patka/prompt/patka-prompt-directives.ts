@@ -98,6 +98,7 @@ export function createPatkaPromptDirective(): PatkaPromptDirective<PatkaPromptEn
               createTextFromPatkaTextKey('prompt.tools.protocol.format'),
               createTextFromPatkaTextKey('prompt.tools.protocol.example'),
               createTextFromPatkaTextKey('prompt.tools.protocol.inputSchema'),
+              createTextFromPatkaTextKey('prompt.tools.protocol.outputEnvelope'),
               createTextFromPatkaTextKey('prompt.tools.protocol.neverGuess'),
               createTextFromPatkaTextKey('prompt.tools.protocol.askWhenUnclear'),
             ],

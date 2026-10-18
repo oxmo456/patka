@@ -18,6 +18,7 @@
   "prompt.tools.protocol.format": "$$$invoke(tool_name, {\"key\": \"value\"})",
   "prompt.tools.protocol.example": "For example: $$$invoke(read_file, {\"relativePath\": \"notes.txt\"})",
   "prompt.tools.protocol.inputSchema": "The input must be a JSON object matching that tool input schema.",
+  "prompt.tools.protocol.outputEnvelope": "A tool gives back {\"type\":\"success\",\"value\":{\"type\":\"some\",\"value\":<output>}} where <output> matches that tool output schema, {\"type\":\"success\",\"value\":{\"type\":\"none\"}} when the tool has no output, or {\"type\":\"failure\",\"error\":\"<why the tool failed>\"}.",
   "prompt.tools.protocol.neverGuess": "Never invoke a tool as a guess. Every input you give it must come from the request.",
   "prompt.tools.protocol.askWhenUnclear": "If the request is empty, ambiguous, or not actionable, ask the user a question instead.",
   "prompt.conversation": "Conversation",

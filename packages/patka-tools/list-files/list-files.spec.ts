@@ -30,7 +30,7 @@ describe('ListFiles', () => {
     expect(listFiles.llmManual.usage).not.toBe('');
     expect(listFiles.llmManual.input.required).toEqual(['relativePath']);
     expect(listFiles.llmManual.input.properties).toHaveProperty('relativePath');
-    expect(listFiles.llmManual.output.oneOf).toHaveLength(2);
+    expect(listFiles.llmManual.output.type).toBe('array');
   });
 
   it('lists what the directory holds, in order', async () => {

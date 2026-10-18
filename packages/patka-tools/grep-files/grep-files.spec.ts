@@ -21,10 +21,10 @@ describe('GrepFiles', () => {
     expect(grepFiles.llmManual.input.required).toEqual(['pattern', 'relativePath']);
   });
 
-  it('describes the two shapes of its output', () => {
+  it('describes its output as text', () => {
     const grepFiles = new GrepFiles();
 
-    expect(grepFiles.llmManual.output.oneOf).toHaveLength(2);
+    expect(grepFiles.llmManual.output.type).toBe('string');
   });
 
   it('runs git grep on the whole working directory when the path is "./"', async () => {
