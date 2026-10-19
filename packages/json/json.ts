@@ -3,3 +3,5 @@ export type JsonValue = string | number | boolean | null | ReadonlyArray<JsonVal
 export type JsonObject = {
   readonly [key: string]: JsonValue;
 };
+
+export type JsonValueTypeName = 'string' | 'number' | 'boolean' | 'array';

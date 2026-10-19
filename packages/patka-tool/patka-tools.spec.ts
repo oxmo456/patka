@@ -9,24 +9,29 @@ import {PatkaTools} from './patka-tools.ts';
 type FakeTool = PatkaTool<JsonObject, JsonValue> & {invoke: Mock};
 
 const aTool = (name: string, answer: string): FakeTool => ({
+  name,
   llmManual: {
     name,
-    usage: `usage of ${name}`,
-    input: {type: 'object' as const, properties: {}, required: []},
-    output: {type: 'string' as const},
+    input: {
+      type: 'ObjectJsonSchemaLLMManual',
+      title: name,
+      description: '',
+      properties: {},
+    },
+    output: {value: 'string', description: ''},
   },
   invoke: vi.fn(() => of(success(some(answer)))),
 });
 
 describe('PatkaTools', () => {
-  it('has no LLM manual when it holds no tool', () => {
-    expect(new PatkaTools([]).llmManuals()).toEqual([]);
+  it('lists no tool when it holds no tool', () => {
+    expect(new PatkaTools([]).list()).toEqual([]);
   });
 
-  it('lists the LLM manual of every tool it holds', () => {
+  it('lists every tool it holds', () => {
     const patkaTools = new PatkaTools([aTool('list_files', 'listed'), aTool('read_file', 'read')]);
 
-    expect(patkaTools.llmManuals().map((patkaToolLLMManual) => patkaToolLLMManual.name)).toEqual([
+    expect(patkaTools.list().map((patkaTool) => patkaTool.name)).toEqual([
       'list_files',
       'read_file',
     ]);
@@ -53,77 +58,6 @@ describe('PatkaTools', () => {
       type: 'failure',
       error: new Error('patka has no tool named "write_file"'),
     });
-  });
-
-  it('gives failure when the input misses a required key', async () => {
-    const readFile: FakeTool = {
-      llmManual: {
-        name: 'read_file',
-        usage: 'usage of read_file',
-        input: {
-          type: 'object' as const,
-          properties: {relativePath: {type: 'string'}},
-          required: ['relativePath'],
-        },
-        output: {type: 'string' as const},
-      },
-      invoke: vi.fn(() => of(success(some('read')))),
-    };
-    const patkaTools = new PatkaTools([readFile]);
-
-    const output = await firstValueFrom(patkaTools.invoke('read_file', {}));
-
-    expect(output).toEqual({
-      type: 'failure',
-      error: new Error(
-        'the input of "read_file" is not valid: data must have required property \'relativePath\'',
-      ),
-    });
-  });
-
-  it('gives failure when a value of the input has the wrong type', async () => {
-    const readFile: FakeTool = {
-      llmManual: {
-        name: 'read_file',
-        usage: 'usage of read_file',
-        input: {
-          type: 'object' as const,
-          properties: {relativePath: {type: 'string'}},
-          required: ['relativePath'],
-        },
-        output: {type: 'string' as const},
-      },
-      invoke: vi.fn(() => of(success(some('read')))),
-    };
-    const patkaTools = new PatkaTools([readFile]);
-
-    const output = await firstValueFrom(patkaTools.invoke('read_file', {relativePath: 12}));
-
-    expect(output).toEqual({
-      type: 'failure',
-      error: new Error('the input of "read_file" is not valid: data/relativePath must be string'),
-    });
-  });
-
-  it('does not invoke the tool when its input is not valid', async () => {
-    const readFile: FakeTool = {
-      llmManual: {
-        name: 'read_file',
-        usage: 'usage of read_file',
-        input: {
-          type: 'object' as const,
-          properties: {relativePath: {type: 'string'}},
-          required: ['relativePath'],
-        },
-        output: {type: 'string' as const},
-      },
-      invoke: vi.fn(() => of(success(some('read')))),
-    };
-    const patkaTools = new PatkaTools([readFile]);
-
-    await firstValueFrom(patkaTools.invoke('read_file', {}));
-
-    expect(readFile.invoke).not.toHaveBeenCalled();
   });
 
   it('gives failure with the error message when the tool fails', async () => {

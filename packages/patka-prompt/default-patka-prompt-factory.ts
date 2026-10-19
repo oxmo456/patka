@@ -23,7 +23,7 @@ export class DefaultPatkaPromptFactory implements PatkaPromptFactory {
   create(patkaContextEntries: ReadonlyArray<PatkaContextEntry>): string {
     const patkaPromptEnvironment: PatkaPromptEnvironment = {
       workingDirectory: this.workingDirectory,
-      patkaToolLLMManuals: this.patkaTools.llmManuals(),
+      patkaTools: this.patkaTools.list(),
       patkaContextEntries,
     };
 

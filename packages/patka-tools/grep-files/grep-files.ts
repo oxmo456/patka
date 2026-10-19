@@ -3,8 +3,10 @@ import {$} from 'zx';
 import {type Option, some} from '../../option/option.ts';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
 import {assertRelativePathInsideTheWorkingDirectory} from '../../patka-tool/patka-tool-relative-path.ts';
+import {objectJsonSchemaLLMManual} from '../../patka-tool-llm-manual/object-json-schema-llm-manual.ts';
 import type {PatkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
 import {patkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
+import {propertyJsonSchemaLLMManual} from '../../patka-tool-llm-manual/property-json-schema-llm-manual.ts';
 import {failure, success, type Try} from '../../try/try.ts';
 
 export type GrepFilesInput = {
@@ -29,29 +31,30 @@ function createMatchesFromStdout(stdout: string): string {
 }
 
 export class GrepFiles implements PatkaTool<GrepFilesInput, string> {
-  readonly llmManual: PatkaToolLLMManual = patkaToolLLMManual(
-    'grep_files',
-    'Use it to find where a name or a text appears, before you read or change a file.',
-    {
-      type: 'object',
-      properties: {
-        pattern: {
-          type: 'string',
-          description:
-            'The text to search, as a basic regular expression (e.g. "PatkaTool" or "class .*Files").',
-        },
-        relativePath: {
-          type: 'string',
-          description:
-            'Relative path of the file or directory to search in, from the working directory (e.g. "./" for the whole working directory, or "src/utils"). Never an absolute path and never outside the working directory: such a path is refused.',
-        },
+  readonly name: string = 'grep_files';
+  readonly llmManual: PatkaToolLLMManual<GrepFilesInput, string> = patkaToolLLMManual<
+    GrepFilesInput,
+    string
+  >(
+    this.name,
+    objectJsonSchemaLLMManual<GrepFilesInput>(
+      this.name,
+      'Use it to find where a name or a text appears, before you read or change a file.',
+      {
+        pattern: propertyJsonSchemaLLMManual(
+          'string',
+          'The text to search, as a basic regular expression (e.g. "PatkaTool" or "class .*Files").',
+        ),
+        relativePath: propertyJsonSchemaLLMManual(
+          'string',
+          'Relative path of the file or directory to search in, from the working directory (e.g. "./" for the whole working directory, or "src/utils"). Never an absolute path and never outside the working directory: such a path is refused.',
+        ),
       },
-      required: ['pattern', 'relativePath'],
-    },
-    {
-      type: 'string',
-      description: `One line per match, as "path:line:text". Empty when no file matches. At most ${MAXIMUM_MATCHES} lines, then a last line tells how many matches are not shown.`,
-    },
+    ),
+    propertyJsonSchemaLLMManual(
+      'string',
+      `One line per match, as "path:line:text". Empty when no file matches. At most ${MAXIMUM_MATCHES} lines, then a last line tells how many matches are not shown.`,
+    ),
   );
 
   invoke(grepFilesInput: GrepFilesInput): Observable<Try<Option<string>>> {

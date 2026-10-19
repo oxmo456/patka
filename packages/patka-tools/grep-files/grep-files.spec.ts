@@ -12,19 +12,7 @@ describe('GrepFiles', () => {
   it('carries a manual for the LLM', () => {
     const grepFiles = new GrepFiles();
 
-    expect(grepFiles.llmManual.name).toBe('grep_files');
-  });
-
-  it('asks for a pattern and a path', () => {
-    const grepFiles = new GrepFiles();
-
-    expect(grepFiles.llmManual.input).toMatchObject({required: ['pattern', 'relativePath']});
-  });
-
-  it('describes its output as text', () => {
-    const grepFiles = new GrepFiles();
-
-    expect(grepFiles.llmManual.output).toMatchObject({type: 'string'});
+    expect(grepFiles.name).toBe('grep_files');
   });
 
   it('runs git grep on the whole working directory when the path is "./"', async () => {

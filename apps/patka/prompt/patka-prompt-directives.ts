@@ -1,10 +1,12 @@
+import type {JsonObject, JsonValue} from '../../../packages/json/json.ts';
 import {ContextPromptDirective} from '../../../packages/patka-prompt/context-prompt-directive.ts';
 import {DefaultPatkaPromptDirective} from '../../../packages/patka-prompt/default-patka-prompt-directive.ts';
 import type {PatkaPromptDirective} from '../../../packages/patka-prompt/patka-prompt-directive.ts';
 import type {PatkaPromptEnvironment} from '../../../packages/patka-prompt/patka-prompt-environment.ts';
 import {ToolsPromptDirective} from '../../../packages/patka-prompt/tools-prompt-directive.ts';
 import {WorkingDirectoryPromptDirective} from '../../../packages/patka-prompt/working-directory-prompt-directive.ts';
-import type {PatkaToolLLMManual} from '../../../packages/patka-tool-llm-manual/patka-tool-llm-manual.ts';
+import type {PatkaTool} from '../../../packages/patka-tool/patka-tool.ts';
+import {patkaToolLLMManualJsonSchema} from '../../../packages/patka-tool-llm-manual/patka-tool-llm-manual-json-schema.ts';
 import {createTextFromPatkaTextKey} from '../text/patka-text.ts';
 
 export function createPatkaPromptDirective(): PatkaPromptDirective<PatkaPromptEnvironment> {
@@ -86,13 +88,16 @@ export function createPatkaPromptDirective(): PatkaPromptDirective<PatkaPromptEn
         [
           new ToolsPromptDirective({
             introduction: createTextFromPatkaTextKey('prompt.tools.introduction'),
-            tool: (patkaToolLLMManual: PatkaToolLLMManual) =>
-              createTextFromPatkaTextKey('prompt.tools.tool', {
-                name: patkaToolLLMManual.name,
-                usage: patkaToolLLMManual.usage,
-                input: JSON.stringify(patkaToolLLMManual.input),
-                output: JSON.stringify(patkaToolLLMManual.output),
-              }),
+            tool: (patkaTool: PatkaTool<JsonObject, JsonValue>) => {
+              const jsonSchema = patkaToolLLMManualJsonSchema(patkaTool.llmManual);
+
+              return createTextFromPatkaTextKey('prompt.tools.tool', {
+                name: patkaTool.name,
+                usage: patkaTool.llmManual.input.description,
+                input: JSON.stringify(jsonSchema.input),
+                output: JSON.stringify(jsonSchema.output),
+              });
+            },
             protocol: [
               createTextFromPatkaTextKey('prompt.tools.protocol.singleLine'),
               createTextFromPatkaTextKey('prompt.tools.protocol.format'),

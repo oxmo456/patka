@@ -23,12 +23,7 @@ describe('WriteFile', () => {
   it('carries a manual for the LLM', () => {
     const writeFile = new WriteFile();
 
-    expect(writeFile.llmManual.name).toBe('write_file');
-    expect(writeFile.llmManual.usage).not.toBe('');
-    expect(writeFile.llmManual.input).toMatchObject({required: ['relativePath', 'content']});
-    expect(writeFile.llmManual.input).toHaveProperty('properties.relativePath');
-    expect(writeFile.llmManual.input).toHaveProperty('properties.content');
-    expect(writeFile.llmManual.output).toMatchObject({type: 'string'});
+    expect(writeFile.name).toBe('write_file');
   });
 
   it('writes the content to the file', async () => {

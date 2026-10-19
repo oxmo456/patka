@@ -1,10 +1,11 @@
-import type {PatkaToolLLMManual} from '../patka-tool-llm-manual/patka-tool-llm-manual.ts';
+import type {JsonObject, JsonValue} from '../json/json.ts';
+import type {PatkaTool} from '../patka-tool/patka-tool.ts';
 import type {PatkaPromptDirective} from './patka-prompt-directive.ts';
 import type {PatkaPromptEnvironment} from './patka-prompt-environment.ts';
 
 export type ToolsPromptText = {
   readonly introduction: string;
-  readonly tool: (patkaToolLLMManual: PatkaToolLLMManual) => string;
+  readonly tool: (patkaTool: PatkaTool<JsonObject, JsonValue>) => string;
   readonly protocol: ReadonlyArray<string>;
 };
 
@@ -19,12 +20,12 @@ export class ToolsPromptDirective implements PatkaPromptDirective<PatkaPromptEnv
   }
 
   render(patkaPromptEnvironment: PatkaPromptEnvironment): string {
-    return patkaPromptEnvironment.patkaToolLLMManuals.length === 0
+    return patkaPromptEnvironment.patkaTools.length === 0
       ? ''
       : [
           [
             this.toolsPromptText.introduction,
-            ...patkaPromptEnvironment.patkaToolLLMManuals.map(this.toolsPromptText.tool),
+            ...patkaPromptEnvironment.patkaTools.map(this.toolsPromptText.tool),
           ].join('\n'),
           this.toolsPromptText.protocol.join('\n'),
         ].join('\n\n');

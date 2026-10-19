@@ -5,7 +5,8 @@ import type {PatkaToolLLMManual} from '../patka-tool-llm-manual/patka-tool-llm-m
 import type {Try} from '../try/try.ts';
 
 export interface PatkaTool<InvocationInput extends JsonObject, InvocationOutput extends JsonValue> {
-  readonly llmManual: PatkaToolLLMManual;
+  readonly name: string;
+  readonly llmManual: PatkaToolLLMManual<InvocationInput, InvocationOutput>;
 
   invoke(input: InvocationInput): Observable<Try<Option<InvocationOutput>>>;
 }

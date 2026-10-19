@@ -22,7 +22,6 @@ ptk_library(
         "//packages/try",
     ],
     npm_deps = [
-        "//:node_modules/ajv",
         "//:node_modules/rxjs",
     ],
 )

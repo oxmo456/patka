@@ -14,11 +14,16 @@ import {success, type Try} from '../try/try.ts';
 import {PatkaAgent} from './patka-agent.ts';
 
 const aTool = (name: string, output: string): PatkaTool<{path: string}, string> => ({
+  name,
   llmManual: {
     name,
-    usage: `usage of ${name}`,
-    input: {type: 'object', properties: {}, required: []},
-    output: {type: 'string'},
+    input: {
+      type: 'ObjectJsonSchemaLLMManual',
+      title: name,
+      description: '',
+      properties: {},
+    },
+    output: {value: 'string', description: ''},
   },
   invoke: (): Observable<Try<Option<string>>> => of(success(some(output))),
 });

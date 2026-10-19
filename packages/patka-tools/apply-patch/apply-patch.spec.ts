@@ -9,7 +9,7 @@ import {ApplyPatch} from './apply-patch.ts';
 
 describe('ApplyPatch', () => {
   it('carries a manual for the LLM', () => {
-    expect(new ApplyPatch().llmManual.name).toBe('apply_patch');
+    expect(new ApplyPatch().name).toBe('apply_patch');
   });
 
   it('changes a file', async () => {

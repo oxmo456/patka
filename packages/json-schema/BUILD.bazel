@@ -1,0 +1,14 @@
+load("//tools:ptk_library.bzl", "ptk_library")
+
+ptk_library(
+    name = "json-schema",
+    srcs = [
+        "object.ts",
+        "property.ts",
+    ],
+    test_srcs = [
+        "object.spec.ts",
+        "property.spec.ts",
+    ],
+    deps = ["//packages/json"],
+)

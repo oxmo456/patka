@@ -9,7 +9,7 @@ import {GitStatus} from './git-status.ts';
 
 describe('GitStatus', () => {
   it('carries a manual for the LLM', () => {
-    expect(new GitStatus().llmManual.name).toBe('git_status');
+    expect(new GitStatus().name).toBe('git_status');
   });
 
   it('emits what git status prints in a repository', async () => {

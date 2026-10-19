@@ -2,6 +2,22 @@ load("//tools:ptk_library.bzl", "ptk_library")
 
 ptk_library(
     name = "patka-tool-llm-manual",
-    srcs = ["patka-tool-llm-manual.ts"],
-    test_srcs = ["patka-tool-llm-manual.spec.ts"],
+    srcs = [
+        "json-value-type-name-of.ts",
+        "object-json-schema-llm-manual.ts",
+        "patka-tool-llm-manual-json-schema.ts",
+        "patka-tool-llm-manual.ts",
+        "properties-json-schema-llm-manual.ts",
+        "property-json-schema-llm-manual.ts",
+    ],
+    test_srcs = [
+        "object-json-schema-llm-manual.spec.ts",
+        "patka-tool-llm-manual-json-schema.spec.ts",
+        "patka-tool-llm-manual.spec.ts",
+        "property-json-schema-llm-manual.spec.ts",
+    ],
+    deps = [
+        "//packages/json",
+        "//packages/json-schema",
+    ],
 )
