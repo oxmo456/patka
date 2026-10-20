@@ -13,6 +13,5 @@ ptk_library(
         "//packages/patka-utterance",
         "//packages/performance-timestamp",
         "//packages/timestamp",
-        "//packages/try",
     ],
 )

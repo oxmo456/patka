@@ -1,13 +1,11 @@
-import {catchError, defer, from, map, type Observable, of} from 'rxjs';
+import {defer, from, map, type Observable} from 'rxjs';
 import {$} from 'zx';
-import {type Option, some} from '../../option/option.ts';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
 import {assertRelativePathInsideTheWorkingDirectory} from '../../patka-tool/patka-tool-relative-path.ts';
 import {objectJsonSchemaLLMManual} from '../../patka-tool-llm-manual/object-json-schema-llm-manual.ts';
 import type {PatkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
 import {patkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
 import {propertyJsonSchemaLLMManual} from '../../patka-tool-llm-manual/property-json-schema-llm-manual.ts';
-import {failure, success, type Try} from '../../try/try.ts';
 
 export type GrepFilesInput = {
   readonly pattern: string;
@@ -57,7 +55,7 @@ export class GrepFiles implements PatkaTool<GrepFilesInput, string> {
     ),
   );
 
-  invoke(grepFilesInput: GrepFilesInput): Observable<Try<Option<string>>> {
+  invoke(grepFilesInput: GrepFilesInput): Observable<string> {
     return defer(() => {
       assertRelativePathInsideTheWorkingDirectory(grepFilesInput.relativePath);
 
@@ -72,16 +70,15 @@ export class GrepFiles implements PatkaTool<GrepFilesInput, string> {
     }).pipe(
       map((processOutput) => {
         if (processOutput.exitCode === 0) {
-          return success(some(createMatchesFromStdout(processOutput.stdout)));
+          return createMatchesFromStdout(processOutput.stdout);
         }
 
         if (processOutput.exitCode === 1) {
-          return success(some(''));
+          return '';
         }
 
-        return failure(new Error(`git grep failed: ${processOutput.stderr}`));
+        throw new Error(`git grep failed: ${processOutput.stderr}`);
       }),
-      catchError((error: Error) => of(failure(error))),
     );
   }
 }

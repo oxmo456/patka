@@ -52,10 +52,7 @@ describe('ApplyPatch', () => {
     try {
       const output = await firstValueFrom(new ApplyPatch().invoke({patch}));
 
-      expect(output).toEqual({
-        type: 'success',
-        value: {type: 'some', value: expect.stringContaining('Applied patch note.txt cleanly.')},
-      });
+      expect(output).toContain('Applied patch note.txt cleanly.');
     } finally {
       cd(before);
     }
@@ -78,13 +75,7 @@ describe('ApplyPatch', () => {
     try {
       const output = await firstValueFrom(new ApplyPatch().invoke({patch}));
 
-      expect(output).toEqual({
-        type: 'success',
-        value: {
-          type: 'some',
-          value: expect.stringContaining('warning: 1 line adds whitespace errors.'),
-        },
-      });
+      expect(output).toContain('warning: 1 line adds whitespace errors.');
     } finally {
       cd(before);
     }
@@ -146,7 +137,7 @@ describe('ApplyPatch', () => {
     expect(await readFile(join(path, 'note.txt'), 'utf8')).toBe('hello patka\n');
   });
 
-  it('gives failure with the error from git when the patch does not match the file', async () => {
+  it('fails with the error from git when the patch does not match the file', async () => {
     const path = await mkdtemp(join(tmpdir(), 'patka-patch-'));
     await writeFile(join(path, 'note.txt'), 'hello\n');
     const patch = [
@@ -161,14 +152,9 @@ describe('ApplyPatch', () => {
     cd(path);
 
     try {
-      const output = await firstValueFrom(new ApplyPatch().invoke({patch}));
-
-      expect(output).toEqual({
-        type: 'failure',
-        error: expect.objectContaining({
-          message: expect.stringContaining('error: patch failed: note.txt:1'),
-        }),
-      });
+      await expect(firstValueFrom(new ApplyPatch().invoke({patch}))).rejects.toThrow(
+        'error: patch failed: note.txt:1',
+      );
     } finally {
       cd(before);
     }

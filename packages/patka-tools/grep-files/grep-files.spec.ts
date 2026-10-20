@@ -2,8 +2,6 @@ import {tmpdir} from 'node:os';
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
 import {$} from 'zx';
-import {some} from '../../option/option.ts';
-import {success} from '../../try/try.ts';
 import {GrepFiles} from './grep-files.ts';
 
 vi.mock('zx', () => ({$: vi.fn()}));
@@ -72,7 +70,7 @@ describe('GrepFiles', () => {
       new GrepFiles().invoke({pattern: 'needle', relativePath: './'}),
     );
 
-    expect(matches).toEqual(success(some('first.ts:1:export const needle = 1;\n')));
+    expect(matches).toEqual('first.ts:1:export const needle = 1;\n');
   });
 
   it('gives an empty text when git finds no match', async () => {
@@ -85,7 +83,7 @@ describe('GrepFiles', () => {
       new GrepFiles().invoke({pattern: 'needle', relativePath: './'}),
     );
 
-    expect(matches).toEqual(success(some('')));
+    expect(matches).toEqual('');
   });
 
   it('tells how many matches it does not show after 200 lines', async () => {
@@ -101,11 +99,7 @@ describe('GrepFiles', () => {
     );
 
     expect(matches).toEqual(
-      success(
-        some(
-          `${'many.ts:1:needle\n'.repeat(200)}3 more matches not shown. Use a narrower pattern or path.\n`,
-        ),
-      ),
+      `${'many.ts:1:needle\n'.repeat(200)}3 more matches not shown. Use a narrower pattern or path.\n`,
     );
   });
 
@@ -117,32 +111,21 @@ describe('GrepFiles', () => {
       .mockReset()
       .mockReturnValue(template as never);
 
-    const matches = await firstValueFrom(
-      new GrepFiles().invoke({pattern: 'needle', relativePath: './'}),
-    );
-
-    expect(matches).toMatchObject({
-      type: 'failure',
-      error: {message: 'git grep failed: fatal: not a git repository'},
-    });
+    await expect(
+      firstValueFrom(new GrepFiles().invoke({pattern: 'needle', relativePath: './'})),
+    ).rejects.toThrow('git grep failed: fatal: not a git repository');
   });
 
   it('refuses an absolute path', async () => {
-    expect(
-      await firstValueFrom(new GrepFiles().invoke({pattern: 'needle', relativePath: tmpdir()})),
-    ).toMatchObject({
-      type: 'failure',
-      error: {message: expect.stringContaining('only accepts a relative path')},
-    });
+    await expect(
+      firstValueFrom(new GrepFiles().invoke({pattern: 'needle', relativePath: tmpdir()})),
+    ).rejects.toThrow('only accepts a relative path');
   });
 
   it('refuses a path outside the working directory', async () => {
-    expect(
-      await firstValueFrom(new GrepFiles().invoke({pattern: 'needle', relativePath: '../'})),
-    ).toMatchObject({
-      type: 'failure',
-      error: {message: expect.stringContaining('only accepts a path inside the working directory')},
-    });
+    await expect(
+      firstValueFrom(new GrepFiles().invoke({pattern: 'needle', relativePath: '../'})),
+    ).rejects.toThrow('only accepts a path inside the working directory');
   });
 
   it('does not run git until subscribed', () => {

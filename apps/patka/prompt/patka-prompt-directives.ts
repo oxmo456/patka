@@ -129,6 +129,9 @@ export function createPatkaPromptDirective(): PatkaPromptDirective<PatkaPromptEn
               createTextFromPatkaTextKey('prompt.conversation.agentUtterance', {content}),
             toolOutput: (output: string) =>
               createTextFromPatkaTextKey('prompt.conversation.toolOutput', {output}),
+            toolEmptyOutput: createTextFromPatkaTextKey('prompt.conversation.toolEmptyOutput'),
+            toolInvocationError: (message: string) =>
+              createTextFromPatkaTextKey('prompt.conversation.toolInvocationError', {message}),
           }),
         ],
       ),

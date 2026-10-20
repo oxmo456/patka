@@ -4,7 +4,6 @@ import type {InferenceUsage} from '../patka-inference/inference-usage.ts';
 import type {PatkaUtterance} from '../patka-utterance/patka-utterance.ts';
 import type {PerformanceTimestamp} from '../performance-timestamp/performance-timestamp.ts';
 import type {Timestamp} from '../timestamp/timestamp.ts';
-import type {Try} from '../try/try.ts';
 import type {PatkaContextEntryID} from './patka-context-entry-id.ts';
 
 export type PatkaUserUtterance = {
@@ -47,7 +46,28 @@ export type PatkaToolOutput = {
   readonly root: Option<PatkaContextEntryID>;
   readonly parent: Option<PatkaContextEntryID>;
   readonly name: string;
-  readonly output: Try<Option<JsonValue>>;
+  readonly output: JsonValue;
+};
+
+export type PatkaToolEmptyOutput = {
+  readonly type: 'PatkaToolEmptyOutput';
+  readonly id: PatkaContextEntryID;
+  readonly timestamp: Timestamp;
+  readonly performanceTimestamp: PerformanceTimestamp;
+  readonly root: Option<PatkaContextEntryID>;
+  readonly parent: Option<PatkaContextEntryID>;
+  readonly name: string;
+};
+
+export type PatkaToolInvocationError = {
+  readonly type: 'PatkaToolInvocationError';
+  readonly id: PatkaContextEntryID;
+  readonly timestamp: Timestamp;
+  readonly performanceTimestamp: PerformanceTimestamp;
+  readonly root: Option<PatkaContextEntryID>;
+  readonly parent: Option<PatkaContextEntryID>;
+  readonly name: string;
+  readonly error: Error;
 };
 
 export type PatkaAgentUtterance = {
@@ -85,6 +105,8 @@ export type PatkaContextEntry =
   | PatkaInferenceClientResponse
   | PatkaToolCall
   | PatkaToolOutput
+  | PatkaToolEmptyOutput
+  | PatkaToolInvocationError
   | PatkaAgentUtterance
   | PatkaUserNotification
   | PatkaError;

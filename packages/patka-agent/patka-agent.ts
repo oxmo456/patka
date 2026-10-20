@@ -1,5 +1,5 @@
 import {randomUUID} from 'node:crypto';
-import {catchError, concatMap, EMPTY, map, type Observable, of, scan} from 'rxjs';
+import {catchError, concatMap, defaultIfEmpty, EMPTY, map, type Observable, of, scan} from 'rxjs';
 import {match} from 'ts-pattern';
 import {type Option, some} from '../option/option.ts';
 import type {
@@ -8,7 +8,8 @@ import type {
   PatkaError,
   PatkaInferenceClientResponse,
   PatkaToolCall,
-  PatkaToolOutput,
+  PatkaToolEmptyOutput,
+  PatkaToolInvocationError,
   PatkaUserNotification,
 } from '../patka-context/patka-context-entry.ts';
 import type {PatkaContextEntryID} from '../patka-context/patka-context-entry-id.ts';
@@ -69,10 +70,16 @@ export class PatkaAgent {
       .with({type: 'PatkaUserUtterance'}, () =>
         this.generate(patkaContextEntries, lastPatkaContextEntry),
       )
-      .with({type: 'PatkaToolOutput', name: REPORT_INCOMPETENCY}, () =>
+      .with({type: 'PatkaToolEmptyOutput', name: REPORT_INCOMPETENCY}, () =>
         this.notifyMissingTools(lastPatkaContextEntry),
       )
       .with({type: 'PatkaToolOutput'}, () =>
+        this.generate(patkaContextEntries, lastPatkaContextEntry),
+      )
+      .with({type: 'PatkaToolEmptyOutput'}, () =>
+        this.generate(patkaContextEntries, lastPatkaContextEntry),
+      )
+      .with({type: 'PatkaToolInvocationError'}, () =>
         this.generate(patkaContextEntries, lastPatkaContextEntry),
       )
       .with({type: 'PatkaAgentUtterance'}, () =>
@@ -186,7 +193,7 @@ export class PatkaAgent {
   private useTool(patkaToolCall: PatkaToolCall): Observable<PatkaContextEntry> {
     return this.patkaTools.invoke(patkaToolCall.name, patkaToolCall.input).pipe(
       map(
-        (output): PatkaToolOutput => ({
+        (output): PatkaContextEntry => ({
           type: 'PatkaToolOutput',
           id: randomUUID(),
           timestamp: createTimestamp(),
@@ -196,6 +203,27 @@ export class PatkaAgent {
           name: patkaToolCall.name,
           output,
         }),
+      ),
+      defaultIfEmpty({
+        type: 'PatkaToolEmptyOutput',
+        id: randomUUID(),
+        timestamp: createTimestamp(),
+        performanceTimestamp: createPerformanceTimestamp(),
+        root: createRootFromParent(patkaToolCall),
+        parent: some(patkaToolCall.id),
+        name: patkaToolCall.name,
+      } satisfies PatkaToolEmptyOutput),
+      catchError((error: Error) =>
+        of({
+          type: 'PatkaToolInvocationError',
+          id: randomUUID(),
+          timestamp: createTimestamp(),
+          performanceTimestamp: createPerformanceTimestamp(),
+          root: createRootFromParent(patkaToolCall),
+          parent: some(patkaToolCall.id),
+          name: patkaToolCall.name,
+          error,
+        } satisfies PatkaToolInvocationError),
       ),
     );
   }

@@ -5,7 +5,6 @@ import type {Disposable} from '../../../packages/disposable/disposable.ts';
 import type {JsonObject} from '../../../packages/json/json.ts';
 import type {PatkaContextEntry} from '../../../packages/patka-context/patka-context-entry.ts';
 import {PatkaLogger} from '../../../packages/patka-logger/patka-logger.ts';
-import {createJsonFromToolTry} from '../../../packages/patka-tool/patka-tool-json.ts';
 import {PatkaContext} from './patka-context.ts';
 
 const toDetails = (patkaContextEntry: PatkaContextEntry): JsonObject =>
@@ -16,10 +15,9 @@ const toDetails = (patkaContextEntry: PatkaContextEntry): JsonObject =>
     .with({type: 'PatkaAgentUtterance'}, ({content}) => ({content}))
     .with({type: 'PatkaUserNotification'}, ({content}) => ({content}))
     .with({type: 'PatkaError'}, ({error}) => ({error: String(error)}))
-    .with({type: 'PatkaToolOutput'}, ({name, output}) => ({
-      name,
-      output: createJsonFromToolTry(output),
-    }))
+    .with({type: 'PatkaToolOutput'}, ({name, output}) => ({name, output}))
+    .with({type: 'PatkaToolEmptyOutput'}, ({name}) => ({name}))
+    .with({type: 'PatkaToolInvocationError'}, ({name, error}) => ({name, error: String(error)}))
     .exhaustive();
 
 @injectable()

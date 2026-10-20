@@ -3,8 +3,6 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it} from 'vitest';
-import {some} from '../../option/option.ts';
-import {success} from '../../try/try.ts';
 import {ListFiles} from './list-files.ts';
 
 const inADirectory = async <T>(run: () => Promise<T>): Promise<T> => {
@@ -34,20 +32,19 @@ describe('ListFiles', () => {
       firstValueFrom(new ListFiles().invoke({relativePath: '.'})),
     );
 
-    expect(listing).toEqual(success(some(['first.ts', 'nested/', 'second.ts'])));
+    expect(listing).toEqual(['first.ts', 'nested/', 'second.ts']);
   });
 
   it('refuses an absolute path', async () => {
-    expect(await firstValueFrom(new ListFiles().invoke({relativePath: tmpdir()}))).toMatchObject({
-      type: 'failure',
-      error: {message: expect.stringContaining('only accepts a relative path')},
-    });
+    await expect(firstValueFrom(new ListFiles().invoke({relativePath: tmpdir()}))).rejects.toThrow(
+      'only accepts a relative path',
+    );
   });
 
   it('fails when the directory does not exist', async () => {
-    expect(
-      await firstValueFrom(new ListFiles().invoke({relativePath: 'patka-does-not-exist'})),
-    ).toMatchObject({type: 'failure'});
+    await expect(
+      firstValueFrom(new ListFiles().invoke({relativePath: 'patka-does-not-exist'})),
+    ).rejects.toThrow();
   });
 
   it('does not touch the disk until subscribed', () => {

@@ -1,12 +1,10 @@
-import {catchError, defer, type Observable, of} from 'rxjs';
+import {defer, type Observable} from 'rxjs';
 import {$} from 'zx';
-import {type Option, some} from '../../option/option.ts';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
 import {objectJsonSchemaLLMManual} from '../../patka-tool-llm-manual/object-json-schema-llm-manual.ts';
 import type {PatkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
 import {patkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
 import {propertyJsonSchemaLLMManual} from '../../patka-tool-llm-manual/property-json-schema-llm-manual.ts';
-import {failure, success, type Try} from '../../try/try.ts';
 
 export type ApplyPatchInput = {
   readonly patch: string;
@@ -35,16 +33,18 @@ export class ApplyPatch implements PatkaTool<ApplyPatchInput, string> {
     ),
   );
 
-  invoke(applyPatchInput: ApplyPatchInput): Observable<Try<Option<string>>> {
+  invoke(applyPatchInput: ApplyPatchInput): Observable<string> {
     return defer(async () => {
       const processOutput = await $({
         input: applyPatchInput.patch,
         nothrow: true,
       })`git apply --recount --verbose`;
 
-      return processOutput.exitCode === 0
-        ? success(some(processOutput.stdall))
-        : failure(new Error(processOutput.stdall));
-    }).pipe(catchError((error: Error) => of(failure(error))));
+      if (processOutput.exitCode !== 0) {
+        throw new Error(processOutput.stdall);
+      }
+
+      return processOutput.stdall;
+    });
   }
 }

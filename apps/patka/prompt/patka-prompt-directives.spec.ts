@@ -6,7 +6,6 @@ import {DefaultPatkaPromptFactory} from '../../../packages/patka-prompt/default-
 import {PatkaTools} from '../../../packages/patka-tool/patka-tools.ts';
 import {ListFiles} from '../../../packages/patka-tools/list-files/list-files.ts';
 import {ReadFile} from '../../../packages/patka-tools/read-file/read-file.ts';
-import {failure, success} from '../../../packages/try/try.ts';
 import {createPatkaPromptDirective} from './patka-prompt-directives.ts';
 
 const said = (content: string): PatkaContextEntry => ({
@@ -218,14 +217,14 @@ User: what is my name?`,
     expect(prompt).toContain('ask the user a question instead');
   });
 
-  it('gives the model the failure form of a tool output once, in the protocol', () => {
+  it('tells the model the failure form of a tool output in the protocol', () => {
     const prompt = new DefaultPatkaPromptFactory(
       new PatkaTools([new ReadFile()]),
       '/home/user',
       createPatkaPromptDirective(),
     ).create([]);
 
-    expect(prompt).toContain('{"type":"failure","error":"<why the tool failed>"}');
+    expect(prompt).toContain('"Tool failure: <why the tool failed>"');
   });
 
   it('shows the success output a tool gave back', () => {
@@ -237,7 +236,7 @@ User: what is my name?`,
       parent: none,
       id: randomUUID(),
       name: 'read_file',
-      output: success(some('hello')),
+      output: 'hello',
     };
 
     const prompt = new DefaultPatkaPromptFactory(
@@ -246,21 +245,39 @@ User: what is my name?`,
       createPatkaPromptDirective(),
     ).create([patkaToolResult]);
 
-    expect(prompt).toContain(
-      'Tool output: {"type":"success","value":{"type":"some","value":"hello"}}',
-    );
+    expect(prompt).toContain('Tool output: "hello"');
   });
 
-  it('shows the failure output a tool gave back', () => {
+  it('shows that a tool gave back no output', () => {
+    const patkaToolEmptyOutput: PatkaContextEntry = {
+      type: 'PatkaToolEmptyOutput',
+      timestamp: 0,
+      performanceTimestamp: 0,
+      root: some(randomUUID()),
+      parent: none,
+      id: randomUUID(),
+      name: 'report_incompetency',
+    };
+
+    const prompt = new DefaultPatkaPromptFactory(
+      new PatkaTools([]),
+      '/home/user',
+      createPatkaPromptDirective(),
+    ).create([patkaToolEmptyOutput]);
+
+    expect(prompt).toContain('Tool output: none');
+  });
+
+  it('shows why a tool failed', () => {
     const patkaToolResult: PatkaContextEntry = {
-      type: 'PatkaToolOutput',
+      type: 'PatkaToolInvocationError',
       timestamp: 0,
       performanceTimestamp: 0,
       root: some(randomUUID()),
       parent: none,
       id: randomUUID(),
       name: 'read_file',
-      output: failure(new Error('file not found')),
+      error: new Error('file not found'),
     };
 
     const prompt = new DefaultPatkaPromptFactory(
@@ -269,6 +286,6 @@ User: what is my name?`,
       createPatkaPromptDirective(),
     ).create([patkaToolResult]);
 
-    expect(prompt).toContain('Tool output: {"type":"failure","error":"file not found"}');
+    expect(prompt).toContain('Tool failure: file not found');
   });
 });

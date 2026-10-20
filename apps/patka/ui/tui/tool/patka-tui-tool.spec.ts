@@ -1,4 +1,4 @@
-import {firstValueFrom, of} from 'rxjs';
+import {firstValueFrom, lastValueFrom, of, toArray} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
 import type {PatkaUI} from '../../patka-ui.ts';
 import {PatkaTUITool, type PatkaTUIToolInput} from './patka-tui-tool.ts';
@@ -25,7 +25,9 @@ describe('PatkaTUITool', () => {
       hideLogs: vi.fn(),
     };
 
-    await firstValueFrom(new PatkaTUITool(patkaUI).invoke({command: 'show_logs'}));
+    await lastValueFrom(new PatkaTUITool(patkaUI).invoke({command: 'show_logs'}), {
+      defaultValue: undefined,
+    });
 
     expect(patkaUI.showLogs).toHaveBeenCalledTimes(1);
   });
@@ -39,12 +41,14 @@ describe('PatkaTUITool', () => {
       hideLogs: vi.fn(),
     };
 
-    await firstValueFrom(new PatkaTUITool(patkaUI).invoke({command: 'hide_logs'}));
+    await lastValueFrom(new PatkaTUITool(patkaUI).invoke({command: 'hide_logs'}), {
+      defaultValue: undefined,
+    });
 
     expect(patkaUI.hideLogs).toHaveBeenCalledTimes(1);
   });
 
-  it('emits a success on the show_logs command', async () => {
+  it('completes without output on the show_logs command', async () => {
     const patkaUI: PatkaUI = {
       userInputs: of(),
       updateChat: vi.fn(),
@@ -53,10 +57,11 @@ describe('PatkaTUITool', () => {
       hideLogs: vi.fn(),
     };
 
-    expect(await firstValueFrom(new PatkaTUITool(patkaUI).invoke({command: 'show_logs'}))).toEqual({
-      type: 'success',
-      value: {type: 'some', value: 'The log panel is visible.'},
-    });
+    const outputs = await firstValueFrom(
+      new PatkaTUITool(patkaUI).invoke({command: 'show_logs'}).pipe(toArray()),
+    );
+
+    expect(outputs).toEqual([]);
   });
 
   it('fails on an unknown command', async () => {
@@ -68,11 +73,11 @@ describe('PatkaTUITool', () => {
       hideLogs: vi.fn(),
     };
 
-    expect(
-      await firstValueFrom(
+    await expect(
+      firstValueFrom(
         new PatkaTUITool(patkaUI).invoke({command: 'dance'} as unknown as PatkaTUIToolInput),
       ),
-    ).toMatchObject({type: 'failure'});
+    ).rejects.toThrow('Unknown command: dance');
   });
 
   it('does not touch the UI until subscribed', () => {

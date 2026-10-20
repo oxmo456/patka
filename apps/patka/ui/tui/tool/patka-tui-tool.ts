@@ -1,13 +1,11 @@
-import {defer, type Observable, of} from 'rxjs';
+import {defer, EMPTY, type Observable} from 'rxjs';
 import {match} from 'ts-pattern';
 import {inject, injectable} from 'tsyringe';
-import {type Option, some} from '../../../../../packages/option/option.ts';
 import type {PatkaTool} from '../../../../../packages/patka-tool/patka-tool.ts';
 import {objectJsonSchemaLLMManual} from '../../../../../packages/patka-tool-llm-manual/object-json-schema-llm-manual.ts';
 import type {PatkaToolLLMManual} from '../../../../../packages/patka-tool-llm-manual/patka-tool-llm-manual.ts';
 import {patkaToolLLMManual} from '../../../../../packages/patka-tool-llm-manual/patka-tool-llm-manual.ts';
 import {propertyJsonSchemaLLMManual} from '../../../../../packages/patka-tool-llm-manual/property-json-schema-llm-manual.ts';
-import {failure, success, type Try} from '../../../../../packages/try/try.ts';
 import {PATKA_UI} from '../../patka-ui.token.ts';
 import type {PatkaUI} from '../../patka-ui.ts';
 
@@ -33,7 +31,7 @@ export class PatkaTUITool implements PatkaTool<PatkaTUIToolInput, string> {
         ),
       },
     ),
-    propertyJsonSchemaLLMManual('string', 'What the UI did.'),
+    propertyJsonSchemaLLMManual('string', 'It has no output.'),
   );
   private readonly patkaUI: PatkaUI;
 
@@ -41,22 +39,20 @@ export class PatkaTUITool implements PatkaTool<PatkaTUIToolInput, string> {
     this.patkaUI = patkaUI;
   }
 
-  invoke(patkaTUIToolInput: PatkaTUIToolInput): Observable<Try<Option<string>>> {
+  invoke(patkaTUIToolInput: PatkaTUIToolInput): Observable<string> {
     return defer(() =>
-      of(
-        match(patkaTUIToolInput.command)
-          .with('show_logs', (): Try<Option<string>> => {
-            this.patkaUI.showLogs();
-            return success(some('The log panel is visible.'));
-          })
-          .with('hide_logs', (): Try<Option<string>> => {
-            this.patkaUI.hideLogs();
-            return success(some('The log panel is hidden.'));
-          })
-          .otherwise(
-            (command): Try<Option<string>> => failure(new Error(`Unknown command: ${command}`)),
-          ),
-      ),
+      match(patkaTUIToolInput.command)
+        .with('show_logs', (): Observable<string> => {
+          this.patkaUI.showLogs();
+          return EMPTY;
+        })
+        .with('hide_logs', (): Observable<string> => {
+          this.patkaUI.hideLogs();
+          return EMPTY;
+        })
+        .otherwise((command): Observable<string> => {
+          throw new Error(`Unknown command: ${command}`);
+        }),
     );
   }
 }

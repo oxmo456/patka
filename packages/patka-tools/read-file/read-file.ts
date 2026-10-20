@@ -1,13 +1,11 @@
 import {readFile} from 'node:fs/promises';
-import {catchError, defer, from, map, type Observable, of} from 'rxjs';
-import {type Option, some} from '../../option/option.ts';
+import {defer, from, type Observable} from 'rxjs';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
 import {assertRelativePathInsideTheWorkingDirectory} from '../../patka-tool/patka-tool-relative-path.ts';
 import {objectJsonSchemaLLMManual} from '../../patka-tool-llm-manual/object-json-schema-llm-manual.ts';
 import type {PatkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
 import {patkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
 import {propertyJsonSchemaLLMManual} from '../../patka-tool-llm-manual/property-json-schema-llm-manual.ts';
-import {failure, success, type Try} from '../../try/try.ts';
 
 export type ReadFileInput = {
   readonly relativePath: string;
@@ -33,13 +31,11 @@ export class ReadFile implements PatkaTool<ReadFileInput, string> {
     propertyJsonSchemaLLMManual('string', 'The whole contents of the file, as text.'),
   );
 
-  invoke(readFileInput: ReadFileInput): Observable<Try<Option<string>>> {
+  invoke(readFileInput: ReadFileInput): Observable<string> {
     return defer(() => {
       assertRelativePathInsideTheWorkingDirectory(readFileInput.relativePath);
 
-      return from(readFile(readFileInput.relativePath, 'utf8')).pipe(
-        map((value) => success(some(value))),
-      );
-    }).pipe(catchError((error: Error) => of(failure(error))));
+      return from(readFile(readFileInput.relativePath, 'utf8'));
+    });
   }
 }

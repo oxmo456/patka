@@ -3,7 +3,6 @@ load("//tools:ptk_library.bzl", "ptk_library")
 ptk_library(
     name = "patka-tool",
     srcs = [
-        "patka-tool-json.ts",
         "patka-tool-protocol.ts",
         "patka-tool-relative-path.ts",
         "patka-tool.ts",
@@ -17,7 +16,6 @@ ptk_library(
     ],
     deps = [
         "//packages/json",
-        "//packages/option",
         "//packages/patka-tool-llm-manual",
         "//packages/try",
     ],

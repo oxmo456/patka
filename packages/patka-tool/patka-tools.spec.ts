@@ -1,8 +1,6 @@
-import {firstValueFrom, of, throwError} from 'rxjs';
+import {firstValueFrom, of} from 'rxjs';
 import {describe, expect, it, type Mock, vi} from 'vitest';
 import type {JsonObject, JsonValue} from '../json/json.ts';
-import {some} from '../option/option.ts';
-import {success} from '../try/try.ts';
 import type {PatkaTool} from './patka-tool.ts';
 import {PatkaTools} from './patka-tools.ts';
 
@@ -20,7 +18,7 @@ const aTool = (name: string, answer: string): FakeTool => ({
     },
     output: {value: 'string', description: ''},
   },
-  invoke: vi.fn(() => of(success(some(answer)))),
+  invoke: vi.fn(() => of(answer)),
 });
 
 describe('PatkaTools', () => {
@@ -37,39 +35,38 @@ describe('PatkaTools', () => {
     ]);
   });
 
-  it('invokes the tool that carries that name', async () => {
-    const listFiles = aTool('list_files', 'listed');
-    const readFile = aTool('read_file', 'read');
-    const patkaTools = new PatkaTools([listFiles, readFile]);
+  it('emits the output of the tool that carries that name', async () => {
+    const patkaTools = new PatkaTools([aTool('list_files', 'listed'), aTool('read_file', 'read')]);
 
     const output = await firstValueFrom(patkaTools.invoke('read_file', {relativePath: 'note.txt'}));
 
-    expect(output).toEqual(success(some('read')));
+    expect(output).toBe('read');
+  });
+
+  it('gives the input to the tool that carries that name', async () => {
+    const readFile = aTool('read_file', 'read');
+    const patkaTools = new PatkaTools([aTool('list_files', 'listed'), readFile]);
+
+    await firstValueFrom(patkaTools.invoke('read_file', {relativePath: 'note.txt'}));
+
     expect(readFile.invoke).toHaveBeenCalledWith({relativePath: 'note.txt'});
+  });
+
+  it('does not invoke the tools that carry another name', async () => {
+    const listFiles = aTool('list_files', 'listed');
+    const patkaTools = new PatkaTools([listFiles, aTool('read_file', 'read')]);
+
+    await firstValueFrom(patkaTools.invoke('read_file', {relativePath: 'note.txt'}));
+
     expect(listFiles.invoke).not.toHaveBeenCalled();
   });
 
-  it('gives failure when no tool carries that name', async () => {
+  it('fails when no tool carries that name', async () => {
     const patkaTools = new PatkaTools([aTool('list_files', 'listed')]);
 
-    const output = await firstValueFrom(patkaTools.invoke('write_file', {}));
-
-    expect(output).toEqual({
-      type: 'failure',
-      error: new Error('patka has no tool named "write_file"'),
-    });
-  });
-
-  it('gives failure with the error message when the tool fails', async () => {
-    const readFile: FakeTool = {
-      ...aTool('read_file', 'read'),
-      invoke: vi.fn(() => throwError(() => new Error('file not found'))),
-    };
-    const patkaTools = new PatkaTools([readFile]);
-
-    const output = await firstValueFrom(patkaTools.invoke('read_file', {relativePath: 'note.txt'}));
-
-    expect(output).toEqual({type: 'failure', error: new Error('file not found')});
+    await expect(firstValueFrom(patkaTools.invoke('write_file', {}))).rejects.toThrow(
+      'patka has no tool named "write_file"',
+    );
   });
 
   it('does not invoke anything until subscribed', () => {

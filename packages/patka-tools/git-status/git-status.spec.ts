@@ -21,10 +21,7 @@ describe('GitStatus', () => {
     try {
       const output = await firstValueFrom(new GitStatus().invoke());
 
-      expect(output).toEqual({
-        type: 'success',
-        value: {type: 'some', value: expect.stringContaining('No commits yet')},
-      });
+      expect(output).toContain('No commits yet');
     } finally {
       cd(before);
     }
@@ -36,7 +33,7 @@ describe('GitStatus', () => {
     cd(path);
 
     try {
-      expect(await firstValueFrom(new GitStatus().invoke())).toMatchObject({type: 'failure'});
+      await expect(firstValueFrom(new GitStatus().invoke())).rejects.toThrow();
     } finally {
       cd(before);
     }

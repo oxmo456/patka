@@ -3,8 +3,6 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it} from 'vitest';
-import {some} from '../../option/option.ts';
-import {success} from '../../try/try.ts';
 import {ReadFile} from './read-file.ts';
 
 const withAFile = async <T>(content: string, run: () => Promise<T>): Promise<T> => {
@@ -32,22 +30,19 @@ describe('ReadFile', () => {
       firstValueFrom(new ReadFile().invoke({relativePath: 'note.txt'})),
     );
 
-    expect(content).toEqual(success(some('hello patka')));
+    expect(content).toEqual('hello patka');
   });
 
   it('refuses an absolute path', async () => {
-    expect(
-      await firstValueFrom(new ReadFile().invoke({relativePath: join(tmpdir(), 'note.txt')})),
-    ).toMatchObject({
-      type: 'failure',
-      error: {message: expect.stringContaining('only accepts a relative path')},
-    });
+    await expect(
+      firstValueFrom(new ReadFile().invoke({relativePath: join(tmpdir(), 'note.txt')})),
+    ).rejects.toThrow('only accepts a relative path');
   });
 
   it('fails when the file does not exist', async () => {
-    expect(
-      await firstValueFrom(new ReadFile().invoke({relativePath: 'patka-missing.txt'})),
-    ).toMatchObject({type: 'failure'});
+    await expect(
+      firstValueFrom(new ReadFile().invoke({relativePath: 'patka-missing.txt'})),
+    ).rejects.toThrow();
   });
 
   it('does not touch the disk until subscribed', () => {

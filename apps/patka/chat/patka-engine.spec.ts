@@ -1,7 +1,6 @@
 import {randomUUID} from 'node:crypto';
 import {describe, expect, it} from 'vitest';
 import {none, some} from '../../../packages/option/option.ts';
-import {success} from '../../../packages/try/try.ts';
 import {PatkaContext} from '../context/patka-context.ts';
 import type {PatkaChatEntry} from './patka-chat-entry.ts';
 import {PatkaEngine} from './patka-engine.ts';
@@ -228,7 +227,7 @@ describe('PatkaEngine', () => {
         parent: none,
         id: randomUUID(),
         name: 'read_file',
-        output: success(some('hello')),
+        output: 'hello',
       });
 
       expect(patkaChatEntries).toEqual([]);

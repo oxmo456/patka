@@ -1,12 +1,10 @@
-import {type Observable, of} from 'rxjs';
-import {none, type Option} from '../../option/option.ts';
+import {EMPTY, type Observable} from 'rxjs';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
 import {REPORT_INCOMPETENCY} from '../../patka-tool/report-incompetency.ts';
 import {objectJsonSchemaLLMManual} from '../../patka-tool-llm-manual/object-json-schema-llm-manual.ts';
 import type {PatkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
 import {patkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
 import {propertyJsonSchemaLLMManual} from '../../patka-tool-llm-manual/property-json-schema-llm-manual.ts';
-import {success, type Try} from '../../try/try.ts';
 
 export type ReportIncompetencyInput = {
   readonly modelName: string;
@@ -43,7 +41,7 @@ export class ReportIncompetency implements PatkaTool<ReportIncompetencyInput, st
     propertyJsonSchemaLLMManual('string', 'The report was sent. It has no output.'),
   );
 
-  invoke(): Observable<Try<Option<string>>> {
-    return of(success(none));
+  invoke(): Observable<string> {
+    return EMPTY;
   }
 }

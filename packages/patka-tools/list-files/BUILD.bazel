@@ -6,9 +6,7 @@ ptk_library(
     test_srcs = ["list-files.spec.ts"],
     deps = [
         "//packages/patka-tool-llm-manual",
-        "//packages/option",
         "//packages/patka-tool",
-        "//packages/try",
     ],
     npm_deps = [
         "//:node_modules/rxjs",

@@ -1,7 +1,5 @@
-import {firstValueFrom} from 'rxjs';
+import {firstValueFrom, toArray} from 'rxjs';
 import {describe, expect, it} from 'vitest';
-import {none} from '../../option/option.ts';
-import {success} from '../../try/try.ts';
 import {ReportIncompetency} from './report-incompetency.ts';
 
 describe('ReportIncompetency', () => {
@@ -11,11 +9,11 @@ describe('ReportIncompetency', () => {
     expect(reportIncompetency.name).toBe('report_incompetency');
   });
 
-  it('gives an empty success as output', async () => {
+  it('completes without output', async () => {
     const reportIncompetency = new ReportIncompetency();
 
-    const output = await firstValueFrom(reportIncompetency.invoke());
+    const outputs = await firstValueFrom(reportIncompetency.invoke().pipe(toArray()));
 
-    expect(output).toEqual(success(none));
+    expect(outputs).toEqual([]);
   });
 });

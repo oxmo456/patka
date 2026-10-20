@@ -1,6 +1,5 @@
 import {match} from 'ts-pattern';
 import type {PatkaContextEntry} from '../patka-context/patka-context-entry.ts';
-import {createJsonFromToolTry} from '../patka-tool/patka-tool-json.ts';
 import type {PatkaPromptDirective} from './patka-prompt-directive.ts';
 import type {PatkaPromptEnvironment} from './patka-prompt-environment.ts';
 
@@ -9,6 +8,8 @@ export type ContextPromptText = {
   readonly inferenceClientResponse: (content: string) => string;
   readonly agentUtterance: (content: string) => string;
   readonly toolOutput: (output: string) => string;
+  readonly toolEmptyOutput: string;
+  readonly toolInvocationError: (message: string) => string;
 };
 
 export class ContextPromptDirective implements PatkaPromptDirective<PatkaPromptEnvironment> {
@@ -42,7 +43,11 @@ export class ContextPromptDirective implements PatkaPromptDirective<PatkaPromptE
       .with({type: 'PatkaUserNotification'}, () => [])
       .with({type: 'PatkaError'}, () => [])
       .with({type: 'PatkaToolOutput'}, ({output}) => [
-        this.contextPromptText.toolOutput(JSON.stringify(createJsonFromToolTry(output))),
+        this.contextPromptText.toolOutput(JSON.stringify(output)),
+      ])
+      .with({type: 'PatkaToolEmptyOutput'}, () => [this.contextPromptText.toolEmptyOutput])
+      .with({type: 'PatkaToolInvocationError'}, ({error}) => [
+        this.contextPromptText.toolInvocationError(error.message),
       ])
       .exhaustive();
   }
