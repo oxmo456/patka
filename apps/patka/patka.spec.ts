@@ -34,6 +34,9 @@ const aPatkaUI = (): PatkaUI => ({
   updateLogs: vi.fn(),
   showLogs: vi.fn(),
   hideLogs: vi.fn(),
+  updateLastPrompt: vi.fn(),
+  showLastPrompt: vi.fn(),
+  hideLastPrompt: vi.fn(),
 });
 
 describe('Patka', () => {
@@ -100,6 +103,9 @@ describe('Patka', () => {
         updateLogs: vi.fn(),
         showLogs: vi.fn(),
         hideLogs: vi.fn(),
+        updateLastPrompt: vi.fn(),
+        showLastPrompt: vi.fn(),
+        hideLastPrompt: vi.fn(),
       },
     });
     child.register(PATKA_CONTEXT_ENTRIES, {
@@ -121,6 +127,56 @@ describe('Patka', () => {
     ]);
   });
 
+  it('gives the UI the prompt sent to the model', () => {
+    const userInputs = new Subject<PatkaUserInput>();
+    const updateLastPrompt = vi.fn();
+    const child = container.createChildContainer();
+    child.register(WORKING_DIRECTORY, {useValue: '/home/user'});
+    child.register(PATKA_PROMPT_DIRECTIVE, {
+      useValue: createPatkaPromptDirective(),
+    });
+    child.register(PATKA_PROMPT_FACTORY, {
+      useFactory: (dependencyContainer: DependencyContainer) =>
+        new DefaultPatkaPromptFactory(
+          dependencyContainer.resolve(PatkaTools),
+          dependencyContainer.resolve(WORKING_DIRECTORY),
+          dependencyContainer.resolve(PATKA_PROMPT_DIRECTIVE),
+        ),
+    });
+    child.register(AGENT_NAME, {useValue: 'ROOT'});
+    child.registerSingleton(PatkaLogger);
+    child.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
+    child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
+    child.register(BLESSED, {useValue: {} as unknown as Blessed});
+    child.register(INFERENCE_CLIENT, {
+      useValue: {generate: () => of({content: 'Paris', usage: {inputTokens: 0, outputTokens: 0}})},
+    });
+    child.register(PATKA_TOOL, {useClass: ListFiles});
+    child.register(PATKA_TOOL, {useClass: ReadFile});
+    child.register(PATKA_UI, {
+      useValue: {
+        userInputs,
+        updateChat: vi.fn(),
+        updateLogs: vi.fn(),
+        showLogs: vi.fn(),
+        hideLogs: vi.fn(),
+        updateLastPrompt,
+        showLastPrompt: vi.fn(),
+        hideLastPrompt: vi.fn(),
+      },
+    });
+    child.register(PATKA_CONTEXT_ENTRIES, {
+      useFactory: (dependencyContainer: DependencyContainer) =>
+        dependencyContainer.resolve(PatkaContext).entries,
+    });
+    child.resolve(Patka);
+
+    userInputs.next({content: 'capital of France?', timestamp: new Date(), id: randomUUID()});
+
+    expect(updateLastPrompt).toHaveBeenCalledWith(
+      expect.stringContaining('User: capital of France?'),
+    );
+  });
   it('gives the answer what the user said as root', () => {
     const userInputs = new Subject<PatkaUserInput>();
     const child = container.createChildContainer();
@@ -153,6 +209,9 @@ describe('Patka', () => {
         updateLogs: vi.fn(),
         showLogs: vi.fn(),
         hideLogs: vi.fn(),
+        updateLastPrompt: vi.fn(),
+        showLastPrompt: vi.fn(),
+        hideLastPrompt: vi.fn(),
       },
     });
     child.register(PATKA_CONTEXT_ENTRIES, {
@@ -202,6 +261,9 @@ describe('Patka', () => {
         updateLogs: vi.fn(),
         showLogs: vi.fn(),
         hideLogs: vi.fn(),
+        updateLastPrompt: vi.fn(),
+        showLastPrompt: vi.fn(),
+        hideLastPrompt: vi.fn(),
       },
     });
     child.register(PATKA_CONTEXT_ENTRIES, {

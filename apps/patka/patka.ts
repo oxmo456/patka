@@ -1,5 +1,6 @@
 import {randomUUID} from 'node:crypto';
 import {
+  filter,
   map,
   merge,
   type Observable,
@@ -12,7 +13,10 @@ import {inject, injectable} from 'tsyringe';
 import type {Disposable} from '../../packages/disposable/disposable.ts';
 import {none, type Option, some} from '../../packages/option/option.ts';
 import {PatkaAgent} from '../../packages/patka-agent/patka-agent.ts';
-import type {PatkaContextEntry} from '../../packages/patka-context/patka-context-entry.ts';
+import type {
+  PatkaContextEntry,
+  PatkaInferenceClientRequest,
+} from '../../packages/patka-context/patka-context-entry.ts';
 import {PatkaLogger} from '../../packages/patka-logger/patka-logger.ts';
 import {createPerformanceTimestamp} from '../../packages/performance-timestamp/performance-timestamp.ts';
 import {createTimestamp} from '../../packages/timestamp/timestamp.ts';
@@ -30,6 +34,7 @@ export class Patka implements Disposable {
   private readonly appendToContext: Subscription;
   private readonly updateChat: Subscription;
   private readonly updateLogs: Subscription;
+  private readonly updateLastPrompt: Subscription;
   private readonly patkaContext: PatkaContext;
   private readonly patkaAgent: PatkaAgent;
   private readonly patkaContextLogger: PatkaContextLogger;
@@ -65,6 +70,16 @@ export class Patka implements Disposable {
         scan((logs: ReadonlyArray<string>, log: string) => [...logs, log].slice(-KEPT_LOGS), []),
       )
       .subscribe((logs) => this.patkaUI.updateLogs(logs));
+    this.updateLastPrompt = this.patkaContext.entries
+      .pipe(
+        filter(
+          (patkaContextEntry): patkaContextEntry is PatkaInferenceClientRequest =>
+            patkaContextEntry.type === 'PatkaInferenceClientRequest',
+        ),
+      )
+      .subscribe((patkaInferenceClientRequest) =>
+        this.patkaUI.updateLastPrompt(patkaInferenceClientRequest.prompt),
+      );
   }
 
   dispose(): void {
@@ -73,6 +88,7 @@ export class Patka implements Disposable {
     this.appendToContext.unsubscribe();
     this.updateChat.unsubscribe();
     this.updateLogs.unsubscribe();
+    this.updateLastPrompt.unsubscribe();
   }
 
   private userEntries(): Observable<PatkaContextEntry> {

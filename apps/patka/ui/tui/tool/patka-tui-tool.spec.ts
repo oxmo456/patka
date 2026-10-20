@@ -11,6 +11,9 @@ describe('PatkaTUITool', () => {
       updateLogs: vi.fn(),
       showLogs: vi.fn(),
       hideLogs: vi.fn(),
+      updateLastPrompt: vi.fn(),
+      showLastPrompt: vi.fn(),
+      hideLastPrompt: vi.fn(),
     };
 
     expect(new PatkaTUITool(patkaUI).name).toBe('patka_tui');
@@ -23,6 +26,9 @@ describe('PatkaTUITool', () => {
       updateLogs: vi.fn(),
       showLogs: vi.fn(),
       hideLogs: vi.fn(),
+      updateLastPrompt: vi.fn(),
+      showLastPrompt: vi.fn(),
+      hideLastPrompt: vi.fn(),
     };
 
     await lastValueFrom(new PatkaTUITool(patkaUI).invoke({command: 'show_logs'}), {
@@ -39,6 +45,9 @@ describe('PatkaTUITool', () => {
       updateLogs: vi.fn(),
       showLogs: vi.fn(),
       hideLogs: vi.fn(),
+      updateLastPrompt: vi.fn(),
+      showLastPrompt: vi.fn(),
+      hideLastPrompt: vi.fn(),
     };
 
     await lastValueFrom(new PatkaTUITool(patkaUI).invoke({command: 'hide_logs'}), {
@@ -48,6 +57,44 @@ describe('PatkaTUITool', () => {
     expect(patkaUI.hideLogs).toHaveBeenCalledTimes(1);
   });
 
+  it('shows the last prompt panel on the show_last_prompt command', async () => {
+    const patkaUI: PatkaUI = {
+      userInputs: of(),
+      updateChat: vi.fn(),
+      updateLogs: vi.fn(),
+      showLogs: vi.fn(),
+      hideLogs: vi.fn(),
+      updateLastPrompt: vi.fn(),
+      showLastPrompt: vi.fn(),
+      hideLastPrompt: vi.fn(),
+    };
+
+    await lastValueFrom(new PatkaTUITool(patkaUI).invoke({command: 'show_last_prompt'}), {
+      defaultValue: undefined,
+    });
+
+    expect(patkaUI.showLastPrompt).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides the last prompt panel on the hide_last_prompt command', async () => {
+    const patkaUI: PatkaUI = {
+      userInputs: of(),
+      updateChat: vi.fn(),
+      updateLogs: vi.fn(),
+      showLogs: vi.fn(),
+      hideLogs: vi.fn(),
+      updateLastPrompt: vi.fn(),
+      showLastPrompt: vi.fn(),
+      hideLastPrompt: vi.fn(),
+    };
+
+    await lastValueFrom(new PatkaTUITool(patkaUI).invoke({command: 'hide_last_prompt'}), {
+      defaultValue: undefined,
+    });
+
+    expect(patkaUI.hideLastPrompt).toHaveBeenCalledTimes(1);
+  });
+
   it('completes without output on the show_logs command', async () => {
     const patkaUI: PatkaUI = {
       userInputs: of(),
@@ -55,6 +102,9 @@ describe('PatkaTUITool', () => {
       updateLogs: vi.fn(),
       showLogs: vi.fn(),
       hideLogs: vi.fn(),
+      updateLastPrompt: vi.fn(),
+      showLastPrompt: vi.fn(),
+      hideLastPrompt: vi.fn(),
     };
 
     const outputs = await firstValueFrom(
@@ -71,6 +121,9 @@ describe('PatkaTUITool', () => {
       updateLogs: vi.fn(),
       showLogs: vi.fn(),
       hideLogs: vi.fn(),
+      updateLastPrompt: vi.fn(),
+      showLastPrompt: vi.fn(),
+      hideLastPrompt: vi.fn(),
     };
 
     await expect(
@@ -87,6 +140,9 @@ describe('PatkaTUITool', () => {
       updateLogs: vi.fn(),
       showLogs: vi.fn(),
       hideLogs: vi.fn(),
+      updateLastPrompt: vi.fn(),
+      showLastPrompt: vi.fn(),
+      hideLastPrompt: vi.fn(),
     };
 
     new PatkaTUITool(patkaUI).invoke({command: 'show_logs'});

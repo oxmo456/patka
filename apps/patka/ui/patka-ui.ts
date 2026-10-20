@@ -9,7 +9,13 @@ export interface PatkaUI {
 
   updateLogs(logs: ReadonlyArray<string>): void;
 
+  updateLastPrompt(prompt: string): void;
+
   showLogs(): void;
 
   hideLogs(): void;
+
+  showLastPrompt(): void;
+
+  hideLastPrompt(): void;
 }

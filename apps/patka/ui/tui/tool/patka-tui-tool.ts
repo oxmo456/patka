@@ -10,7 +10,7 @@ import {PATKA_UI} from '../../patka-ui.token.ts';
 import type {PatkaUI} from '../../patka-ui.ts';
 
 export type PatkaTUIToolInput = {
-  readonly command: 'show_logs' | 'hide_logs';
+  readonly command: 'show_logs' | 'hide_logs' | 'show_last_prompt' | 'hide_last_prompt';
 };
 
 @injectable()
@@ -27,7 +27,7 @@ export class PatkaTUITool implements PatkaTool<PatkaTUIToolInput, string> {
       {
         command: propertyJsonSchemaLLMManual(
           'string',
-          'One of: "show_logs" to show the log panel, "hide_logs" to hide the log panel.',
+          'One of: "show_logs" to show the log panel, "hide_logs" to hide the log panel, "show_last_prompt" to show the panel of the last prompt sent to the model, "hide_last_prompt" to hide it.',
         ),
       },
     ),
@@ -48,6 +48,14 @@ export class PatkaTUITool implements PatkaTool<PatkaTUIToolInput, string> {
         })
         .with('hide_logs', (): Observable<string> => {
           this.patkaUI.hideLogs();
+          return EMPTY;
+        })
+        .with('show_last_prompt', (): Observable<string> => {
+          this.patkaUI.showLastPrompt();
+          return EMPTY;
+        })
+        .with('hide_last_prompt', (): Observable<string> => {
+          this.patkaUI.hideLastPrompt();
           return EMPTY;
         })
         .otherwise((command): Observable<string> => {
