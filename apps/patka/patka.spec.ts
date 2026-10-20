@@ -116,6 +116,7 @@ describe('Patka', () => {
 
     expect(received.map((patkaContextEntry) => patkaContextEntry.type)).toEqual([
       'PatkaUserUtterance',
+      'PatkaInferenceClientRequest',
       'PatkaInferenceClientResponse',
     ]);
   });

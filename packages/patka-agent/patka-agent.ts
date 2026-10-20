@@ -1,11 +1,22 @@
 import {randomUUID} from 'node:crypto';
-import {catchError, concatMap, defaultIfEmpty, EMPTY, map, type Observable, of, scan} from 'rxjs';
+import {
+  catchError,
+  concat,
+  concatMap,
+  defaultIfEmpty,
+  EMPTY,
+  map,
+  type Observable,
+  of,
+  scan,
+} from 'rxjs';
 import {match} from 'ts-pattern';
 import {type Option, some} from '../option/option.ts';
 import type {
   PatkaAgentUtterance,
   PatkaContextEntry,
   PatkaError,
+  PatkaInferenceClientRequest,
   PatkaInferenceClientResponse,
   PatkaToolCall,
   PatkaToolEmptyOutput,
@@ -85,6 +96,7 @@ export class PatkaAgent {
       .with({type: 'PatkaAgentUtterance'}, () =>
         this.generate(patkaContextEntries, lastPatkaContextEntry),
       )
+      .with({type: 'PatkaInferenceClientRequest'}, () => EMPTY)
       .with({type: 'PatkaInferenceClientResponse'}, (patkaInferenceClientResponse) =>
         this.processInferenceClientResponse(patkaInferenceClientResponse),
       )
@@ -124,32 +136,43 @@ export class PatkaAgent {
     patkaContextEntries: ReadonlyArray<PatkaContextEntry>,
     parent: PatkaContextEntry,
   ): Observable<PatkaContextEntry> {
-    const prompt = this.patkaPromptFactory.create(patkaContextEntries);
+    const patkaInferenceClientRequest: PatkaInferenceClientRequest = {
+      type: 'PatkaInferenceClientRequest',
+      id: randomUUID(),
+      timestamp: createTimestamp(),
+      performanceTimestamp: createPerformanceTimestamp(),
+      root: createRootFromParent(parent),
+      parent: some(parent.id),
+      prompt: this.patkaPromptFactory.create(patkaContextEntries),
+    };
 
-    return this.inferenceClient.generate({prompt}).pipe(
-      map(
-        (inferenceClientResponse): PatkaInferenceClientResponse => ({
-          type: 'PatkaInferenceClientResponse',
-          id: randomUUID(),
-          timestamp: createTimestamp(),
-          performanceTimestamp: createPerformanceTimestamp(),
-          root: createRootFromParent(parent),
-          parent: some(parent.id),
-          content: inferenceClientResponse.content,
-          usage: inferenceClientResponse.usage,
-        }),
-      ),
-      catchError(
-        (error: unknown): Observable<PatkaError> =>
-          of({
-            type: 'PatkaError',
+    return concat(
+      of(patkaInferenceClientRequest),
+      this.inferenceClient.generate({prompt: patkaInferenceClientRequest.prompt}).pipe(
+        map(
+          (inferenceClientResponse): PatkaInferenceClientResponse => ({
+            type: 'PatkaInferenceClientResponse',
             id: randomUUID(),
             timestamp: createTimestamp(),
             performanceTimestamp: createPerformanceTimestamp(),
-            root: createRootFromParent(parent),
-            parent: some(parent.id),
-            error,
+            root: createRootFromParent(patkaInferenceClientRequest),
+            parent: some(patkaInferenceClientRequest.id),
+            content: inferenceClientResponse.content,
+            usage: inferenceClientResponse.usage,
           }),
+        ),
+        catchError(
+          (error: unknown): Observable<PatkaError> =>
+            of({
+              type: 'PatkaError',
+              id: randomUUID(),
+              timestamp: createTimestamp(),
+              performanceTimestamp: createPerformanceTimestamp(),
+              root: createRootFromParent(patkaInferenceClientRequest),
+              parent: some(patkaInferenceClientRequest.id),
+              error,
+            }),
+        ),
       ),
     );
   }

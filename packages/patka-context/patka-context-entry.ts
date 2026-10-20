@@ -16,6 +16,16 @@ export type PatkaUserUtterance = {
   readonly utterance: PatkaUtterance;
 };
 
+export type PatkaInferenceClientRequest = {
+  readonly type: 'PatkaInferenceClientRequest';
+  readonly id: PatkaContextEntryID;
+  readonly timestamp: Timestamp;
+  readonly performanceTimestamp: PerformanceTimestamp;
+  readonly root: Option<PatkaContextEntryID>;
+  readonly parent: Option<PatkaContextEntryID>;
+  readonly prompt: string;
+};
+
 export type PatkaInferenceClientResponse = {
   readonly type: 'PatkaInferenceClientResponse';
   readonly id: PatkaContextEntryID;
@@ -102,6 +112,7 @@ export type PatkaError = {
 
 export type PatkaContextEntry =
   | PatkaUserUtterance
+  | PatkaInferenceClientRequest
   | PatkaInferenceClientResponse
   | PatkaToolCall
   | PatkaToolOutput

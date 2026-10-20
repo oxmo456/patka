@@ -98,8 +98,56 @@ describe('PatkaAgent', () => {
       patkaContextEntries.next(said('hello'));
 
       expect(received.map((patkaContextEntry) => patkaContextEntry.type)).toEqual([
+        'PatkaInferenceClientRequest',
         'PatkaInferenceClientResponse',
       ]);
+    });
+
+    it('gives the prompt it sends in the inference client request', () => {
+      const patkaContextEntries = new Subject<PatkaContextEntry>();
+      const patkaAgent = new PatkaAgent(
+        'patka',
+        new PatkaTools([]),
+        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        patkaContextEntries,
+        {create: () => 'the prompt'},
+        {
+          missingTools: 'missing tools',
+          error: (message: string) => `error: ${message}`,
+          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
+        },
+      );
+      const received: Array<PatkaContextEntry> = [];
+      patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
+
+      patkaContextEntries.next(said('hello'));
+
+      expect(received[0]).toMatchObject({
+        type: 'PatkaInferenceClientRequest',
+        prompt: 'the prompt',
+      });
+    });
+
+    it('gives the request as the parent of the response', () => {
+      const patkaContextEntries = new Subject<PatkaContextEntry>();
+      const patkaAgent = new PatkaAgent(
+        'patka',
+        new PatkaTools([]),
+        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        patkaContextEntries,
+        {create: () => 'the prompt'},
+        {
+          missingTools: 'missing tools',
+          error: (message: string) => `error: ${message}`,
+          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
+        },
+      );
+      const received: Array<PatkaContextEntry> = [];
+      patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
+
+      patkaContextEntries.next(said('hello'));
+
+      expect(received[1].parent).toEqual(some(received[0].id));
     });
 
     it('prompts the engine with the prompt the factory creates', () => {
@@ -145,17 +193,15 @@ describe('PatkaAgent', () => {
 
       patkaContextEntries.next(said('hello'));
 
-      expect(received).toEqual([
-        {
-          type: 'PatkaError',
-          timestamp: expect.any(Number),
-          performanceTimestamp: expect.any(Number),
-          root: expect.anything(),
-          parent: expect.anything(),
-          id: expect.any(String),
-          error: new Error('400 invalid_request_error'),
-        },
-      ]);
+      expect(received[1]).toEqual({
+        type: 'PatkaError',
+        timestamp: expect.any(Number),
+        performanceTimestamp: expect.any(Number),
+        root: expect.anything(),
+        parent: expect.anything(),
+        id: expect.any(String),
+        error: new Error('400 invalid_request_error'),
+      });
     });
 
     it('turns a tool invocation into a tool call', () => {

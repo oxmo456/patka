@@ -33,6 +33,7 @@ export class ContextPromptDirective implements PatkaPromptDirective<PatkaPromptE
       .with({type: 'PatkaUserUtterance'}, ({utterance}) => [
         this.contextPromptText.userUtterance(utterance.content),
       ])
+      .with({type: 'PatkaInferenceClientRequest'}, () => [])
       .with({type: 'PatkaInferenceClientResponse'}, ({content}) => [
         this.contextPromptText.inferenceClientResponse(content),
       ])

@@ -146,6 +146,7 @@ function createChatEntryFromContextEntries(
 ): Observable<PatkaChatEntry> {
   return match(patkaContextEntries[patkaContextEntries.length - 1])
     .with({type: 'PatkaUserUtterance'}, createChatEntryFromUserUtterance)
+    .with({type: 'PatkaInferenceClientRequest'}, () => EMPTY)
     .with({type: 'PatkaInferenceClientResponse'}, (patkaInferenceClientResponse) =>
       createChatEntryFromInferenceClientResponse(
         patkaInferenceClientResponse,
