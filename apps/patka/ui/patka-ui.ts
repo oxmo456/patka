@@ -8,4 +8,8 @@ export interface PatkaUI {
   updateChat(patkaChatEntries: ReadonlyArray<PatkaChatEntry>): void;
 
   updateLogs(logs: ReadonlyArray<string>): void;
+
+  showLogs(): void;
+
+  hideLogs(): void;
 }

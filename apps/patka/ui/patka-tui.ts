@@ -132,6 +132,8 @@ export class PatkaTUI implements PatkaUI {
   private readonly screen: Widgets.Screen;
   private readonly conversation: Widgets.BoxElement;
   private readonly logs: Widgets.BoxElement;
+  private readonly separator: Widgets.LineElement;
+  private readonly chatColumn: ReadonlyArray<Widgets.BlessedElement>;
   private patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
   private logLines: ReadonlyArray<string> = [];
 
@@ -166,7 +168,7 @@ export class PatkaTUI implements PatkaUI {
         bg: SOLARIZED.base03,
       },
     });
-    const separator = blessed.line({
+    this.separator = blessed.line({
       orientation: 'vertical',
       top: 0,
       left: CHAT_WIDTH,
@@ -199,6 +201,8 @@ export class PatkaTUI implements PatkaUI {
       style: {fg: SOLARIZED.base02, bg: SOLARIZED.base03},
     });
 
+    this.chatColumn = [this.conversation, promptInput, lineAboveInput, lineBelowInput];
+
     promptInput.on('submit', (prompt: string) => {
       this._userInputs.next({content: prompt, timestamp: new Date(), id: randomUUID()});
       promptInput.clearValue();
@@ -207,7 +211,7 @@ export class PatkaTUI implements PatkaUI {
     });
 
     this.screen.append(this.conversation);
-    this.screen.append(separator);
+    this.screen.append(this.separator);
     this.screen.append(this.logs);
     this.screen.append(promptInput);
     this.screen.append(lineAboveInput);
@@ -232,6 +236,29 @@ export class PatkaTUI implements PatkaUI {
     this.logLines = logs;
     this.drawLogs();
     this.screen.render();
+  }
+
+  showLogs(): void {
+    this.resizeChatColumn(CHAT_WIDTH);
+    this.separator.show();
+    this.logs.show();
+    this.drawChat();
+    this.drawLogs();
+    this.screen.render();
+  }
+
+  hideLogs(): void {
+    this.resizeChatColumn('100%');
+    this.separator.hide();
+    this.logs.hide();
+    this.drawChat();
+    this.screen.render();
+  }
+
+  private resizeChatColumn(width: string): void {
+    for (const element of this.chatColumn) {
+      element.width = width;
+    }
   }
 
   private drawChat(): void {

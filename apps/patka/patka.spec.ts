@@ -32,6 +32,8 @@ const aPatkaUI = (): PatkaUI => ({
   userInputs: of(),
   updateChat: vi.fn(),
   updateLogs: vi.fn(),
+  showLogs: vi.fn(),
+  hideLogs: vi.fn(),
 });
 
 describe('Patka', () => {
@@ -92,7 +94,13 @@ describe('Patka', () => {
     child.register(PATKA_TOOL, {useClass: ListFiles});
     child.register(PATKA_TOOL, {useClass: ReadFile});
     child.register(PATKA_UI, {
-      useValue: {userInputs, updateChat: vi.fn(), updateLogs: vi.fn()},
+      useValue: {
+        userInputs,
+        updateChat: vi.fn(),
+        updateLogs: vi.fn(),
+        showLogs: vi.fn(),
+        hideLogs: vi.fn(),
+      },
     });
     child.register(PATKA_CONTEXT_ENTRIES, {
       useFactory: (dependencyContainer: DependencyContainer) =>
@@ -138,7 +146,13 @@ describe('Patka', () => {
     child.register(PATKA_TOOL, {useClass: ListFiles});
     child.register(PATKA_TOOL, {useClass: ReadFile});
     child.register(PATKA_UI, {
-      useValue: {userInputs, updateChat: vi.fn(), updateLogs: vi.fn()},
+      useValue: {
+        userInputs,
+        updateChat: vi.fn(),
+        updateLogs: vi.fn(),
+        showLogs: vi.fn(),
+        hideLogs: vi.fn(),
+      },
     });
     child.register(PATKA_CONTEXT_ENTRIES, {
       useFactory: (dependencyContainer: DependencyContainer) =>
@@ -181,7 +195,13 @@ describe('Patka', () => {
     child.register(PATKA_TOOL, {useClass: ListFiles});
     child.register(PATKA_TOOL, {useClass: ReadFile});
     child.register(PATKA_UI, {
-      useValue: {userInputs, updateChat: vi.fn(), updateLogs: vi.fn()},
+      useValue: {
+        userInputs,
+        updateChat: vi.fn(),
+        updateLogs: vi.fn(),
+        showLogs: vi.fn(),
+        hideLogs: vi.fn(),
+      },
     });
     child.register(PATKA_CONTEXT_ENTRIES, {
       useFactory: (dependencyContainer: DependencyContainer) =>

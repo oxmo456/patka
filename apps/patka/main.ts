@@ -1,7 +1,7 @@
 import {PatkaLogger} from '../../packages/patka-logger/patka-logger.ts';
 import 'reflect-metadata';
 import blessed from 'blessed';
-import {container, type DependencyContainer} from 'tsyringe';
+import {container, type DependencyContainer, Lifecycle} from 'tsyringe';
 import {$} from 'zx';
 import {PatkaAgent} from '../../packages/patka-agent/patka-agent.ts';
 import {DefaultPatkaPromptFactory} from '../../packages/patka-prompt/default-patka-prompt-factory.ts';
@@ -34,6 +34,7 @@ import {createPatkaToolsFromDependencyContainer} from './tools/patka-tools-facto
 import {BLESSED} from './ui/blessed.token.ts';
 import {PatkaTUI} from './ui/patka-tui.ts';
 import {PATKA_UI} from './ui/patka-ui.token.ts';
+import {PatkaTUITool} from './ui/tool/patka-tui-tool.ts';
 
 // zx must never write to the terminal: blessed owns the screen.
 $.quiet = true;
@@ -69,7 +70,8 @@ container.register(PATKA_TOOL, {useClass: ApplyPatch});
 container.register(PATKA_TOOL, {useClass: ReadFile});
 container.register(PATKA_TOOL, {useClass: WriteFile});
 container.register(PATKA_TOOL, {useClass: ReportIncompetency});
-container.register(PATKA_UI, {useClass: PatkaTUI});
+container.register(PATKA_TOOL, {useClass: PatkaTUITool});
+container.register(PATKA_UI, {useClass: PatkaTUI}, {lifecycle: Lifecycle.Singleton});
 container.register(PATKA_CONTEXT_ENTRIES, {
   useFactory: (dependencyContainer: DependencyContainer) =>
     dependencyContainer.resolve(PatkaContext).entries,

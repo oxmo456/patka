@@ -29,6 +29,7 @@ ptk_app(
         "//apps/patka/text",
         "//apps/patka/tools",
         "//apps/patka/ui",
+        "//apps/patka/ui/tool",
         "//packages/patka-agent",
         "//packages/patka-context",
         "//packages/patka-inference",
