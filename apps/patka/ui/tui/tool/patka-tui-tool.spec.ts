@@ -1,6 +1,6 @@
 import {firstValueFrom, of} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
-import type {PatkaUI} from '../patka-ui.ts';
+import type {PatkaUI} from '../../patka-ui.ts';
 import {PatkaTUITool, type PatkaTUIToolInput} from './patka-tui-tool.ts';
 
 describe('PatkaTUITool', () => {

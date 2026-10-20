@@ -22,11 +22,11 @@ import {createPatkaPromptDirective} from './prompt/patka-prompt-directives.ts';
 import {PATKA_PROMPT_FACTORY} from './prompt/patka-prompt-factory.token.ts';
 import {PATKA_TOOL} from './tools/patka-tool.token.ts';
 import {createPatkaToolsFromDependencyContainer} from './tools/patka-tools-factory.ts';
-import {BLESSED} from './ui/blessed.token.ts';
-import type {Blessed} from './ui/patka-tui.ts';
 import {PATKA_UI} from './ui/patka-ui.token.ts';
 import type {PatkaUI} from './ui/patka-ui.ts';
 import type {PatkaUserInput} from './ui/patka-user-input.ts';
+import {BLESSED} from './ui/tui/blessed.token.ts';
+import type {Blessed} from './ui/tui/patka-tui.ts';
 
 const aPatkaUI = (): PatkaUI => ({
   userInputs: of(),

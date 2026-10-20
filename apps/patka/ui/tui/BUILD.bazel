@@ -1,0 +1,24 @@
+load("//tools:ptk_package.bzl", "ptk_package")
+
+ptk_package(
+    name = "tui",
+    srcs = [
+        "blessed.token.ts",
+        "patka-markdown.ts",
+        "patka-tui.ts",
+        "solarized.ts",
+    ],
+    test_srcs = ["patka-markdown.spec.ts"],
+    visibility = ["//apps/patka:__subpackages__"],
+    deps = [
+        "//:node_modules/@types/blessed",
+        "//:node_modules/@types/node",
+        "//:node_modules/blessed",
+        "//:node_modules/rxjs",
+        "//:node_modules/ts-pattern",
+        "//:node_modules/tsyringe",
+        "//apps/patka/chat",
+        "//apps/patka/ui",
+        "//packages/try",
+    ],
+)

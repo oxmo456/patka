@@ -1,15 +1,15 @@
 import {defer, type Observable, of} from 'rxjs';
 import {match} from 'ts-pattern';
 import {inject, injectable} from 'tsyringe';
-import {type Option, some} from '../../../../packages/option/option.ts';
-import type {PatkaTool} from '../../../../packages/patka-tool/patka-tool.ts';
-import {objectJsonSchemaLLMManual} from '../../../../packages/patka-tool-llm-manual/object-json-schema-llm-manual.ts';
-import type {PatkaToolLLMManual} from '../../../../packages/patka-tool-llm-manual/patka-tool-llm-manual.ts';
-import {patkaToolLLMManual} from '../../../../packages/patka-tool-llm-manual/patka-tool-llm-manual.ts';
-import {propertyJsonSchemaLLMManual} from '../../../../packages/patka-tool-llm-manual/property-json-schema-llm-manual.ts';
-import {failure, success, type Try} from '../../../../packages/try/try.ts';
-import {PATKA_UI} from '../patka-ui.token.ts';
-import type {PatkaUI} from '../patka-ui.ts';
+import {type Option, some} from '../../../../../packages/option/option.ts';
+import type {PatkaTool} from '../../../../../packages/patka-tool/patka-tool.ts';
+import {objectJsonSchemaLLMManual} from '../../../../../packages/patka-tool-llm-manual/object-json-schema-llm-manual.ts';
+import type {PatkaToolLLMManual} from '../../../../../packages/patka-tool-llm-manual/patka-tool-llm-manual.ts';
+import {patkaToolLLMManual} from '../../../../../packages/patka-tool-llm-manual/patka-tool-llm-manual.ts';
+import {propertyJsonSchemaLLMManual} from '../../../../../packages/patka-tool-llm-manual/property-json-schema-llm-manual.ts';
+import {failure, success, type Try} from '../../../../../packages/try/try.ts';
+import {PATKA_UI} from '../../patka-ui.token.ts';
+import type {PatkaUI} from '../../patka-ui.ts';
 
 export type PatkaTUIToolInput = {
   readonly command: 'show_logs' | 'hide_logs';

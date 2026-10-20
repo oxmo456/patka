@@ -10,6 +10,7 @@ ptk_package(
         "//:node_modules/ts-pattern",
         "//:node_modules/tsyringe",
         "//apps/patka/ui",
+        "//apps/patka/ui/tui",
         "//packages/option",
         "//packages/patka-tool",
         "//packages/patka-tool-llm-manual",

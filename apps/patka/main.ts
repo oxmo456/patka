@@ -31,10 +31,10 @@ import {createPatkaPromptDirective} from './prompt/patka-prompt-directives.ts';
 import {PATKA_PROMPT_FACTORY} from './prompt/patka-prompt-factory.token.ts';
 import {PATKA_TOOL} from './tools/patka-tool.token.ts';
 import {createPatkaToolsFromDependencyContainer} from './tools/patka-tools-factory.ts';
-import {BLESSED} from './ui/blessed.token.ts';
-import {PatkaTUI} from './ui/patka-tui.ts';
 import {PATKA_UI} from './ui/patka-ui.token.ts';
-import {PatkaTUITool} from './ui/tool/patka-tui-tool.ts';
+import {BLESSED} from './ui/tui/blessed.token.ts';
+import {PatkaTUI} from './ui/tui/patka-tui.ts';
+import {PatkaTUITool} from './ui/tui/tool/patka-tui-tool.ts';
 
 // zx must never write to the terminal: blessed owns the screen.
 $.quiet = true;
