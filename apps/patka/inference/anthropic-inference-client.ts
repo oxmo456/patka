@@ -93,9 +93,7 @@ export class AnthropicInferenceClient implements InferenceClient {
     this.anthropic = anthropic;
   }
 
-  generate(
-    inferenceClientChatInput: InferenceClientChatInput,
-  ): Observable<InferenceClientResponse> {
+  chat(inferenceClientChatInput: InferenceClientChatInput): Observable<InferenceClientResponse> {
     return defer(() =>
       from(
         this.anthropic.messages.create({

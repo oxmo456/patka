@@ -16,7 +16,7 @@ describe('AnthropicInferenceClient', () => {
     const anthropicInferenceClient = new AnthropicInferenceClient('claude-opus-5', anthropic);
 
     const response = await firstValueFrom(
-      anthropicInferenceClient.generate({
+      anthropicInferenceClient.chat({
         system: 'be brief',
         messages: [{role: 'user', content: 'hello'}],
         tools: [],
@@ -34,7 +34,7 @@ describe('AnthropicInferenceClient', () => {
     const anthropicInferenceClient = new AnthropicInferenceClient('claude-opus-5', anthropic);
 
     const response = await firstValueFrom(
-      anthropicInferenceClient.generate({
+      anthropicInferenceClient.chat({
         system: 'be brief',
         messages: [{role: 'user', content: 'hello'}],
         tools: [],
@@ -56,7 +56,7 @@ describe('AnthropicInferenceClient', () => {
     const anthropicInferenceClient = new AnthropicInferenceClient('claude-opus-5', anthropic);
 
     const response = await firstValueFrom(
-      anthropicInferenceClient.generate({
+      anthropicInferenceClient.chat({
         system: 'be brief',
         messages: [{role: 'user', content: 'hello'}],
         tools: [],
@@ -77,7 +77,7 @@ describe('AnthropicInferenceClient', () => {
     );
 
     await firstValueFrom(
-      anthropicInferenceClient.generate({
+      anthropicInferenceClient.chat({
         system: 'be brief',
         messages: [{role: 'user', content: 'hello'}],
         tools: [],
@@ -104,7 +104,7 @@ describe('AnthropicInferenceClient', () => {
     );
 
     await firstValueFrom(
-      anthropicInferenceClient.generate({
+      anthropicInferenceClient.chat({
         system: 'be brief',
         messages: [
           {
@@ -147,7 +147,7 @@ describe('AnthropicInferenceClient', () => {
     );
 
     await firstValueFrom(
-      anthropicInferenceClient.generate({
+      anthropicInferenceClient.chat({
         system: 'be brief',
         messages: [
           {
@@ -192,7 +192,7 @@ describe('AnthropicInferenceClient', () => {
     );
 
     await firstValueFrom(
-      anthropicInferenceClient.generate({
+      anthropicInferenceClient.chat({
         system: 'be brief',
         messages: [{role: 'user', content: 'hello'}],
         tools: [{name: 'read_file', description: 'Reads a file.', inputSchema: {type: 'object'}}],
@@ -216,7 +216,7 @@ describe('AnthropicInferenceClient', () => {
     const anthropicInferenceClient = new AnthropicInferenceClient('claude-opus-5', anthropic);
 
     const response = await firstValueFrom(
-      anthropicInferenceClient.generate({
+      anthropicInferenceClient.chat({
         system: 'be brief',
         messages: [{role: 'user', content: 'read note.txt'}],
         tools: [],
@@ -234,7 +234,7 @@ describe('AnthropicInferenceClient', () => {
     const anthropicInferenceClient = new AnthropicInferenceClient('claude-opus-5', anthropic);
 
     const response = await firstValueFrom(
-      anthropicInferenceClient.generate({
+      anthropicInferenceClient.chat({
         system: 'be brief',
         messages: [{role: 'user', content: 'hello'}],
         tools: [],
@@ -254,7 +254,7 @@ describe('AnthropicInferenceClient', () => {
       anAnthropic(create),
     );
 
-    anthropicInferenceClient.generate({
+    anthropicInferenceClient.chat({
       system: 'be brief',
       messages: [{role: 'user', content: 'hello'}],
       tools: [],

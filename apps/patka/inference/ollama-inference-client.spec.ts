@@ -12,7 +12,7 @@ describe('OllamaInferenceClient', () => {
     const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
 
     const response = await firstValueFrom(
-      ollamaInferenceClient.generate({
+      ollamaInferenceClient.chat({
         system: 'be brief',
         messages: [{role: 'user', content: 'hello'}],
         tools: [],
@@ -31,7 +31,7 @@ describe('OllamaInferenceClient', () => {
     const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
 
     const response = await firstValueFrom(
-      ollamaInferenceClient.generate({
+      ollamaInferenceClient.chat({
         system: 'be brief',
         messages: [{role: 'user', content: 'hide the logs'}],
         tools: [],
@@ -52,7 +52,7 @@ describe('OllamaInferenceClient', () => {
     const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
 
     const response = await firstValueFrom(
-      ollamaInferenceClient.generate({
+      ollamaInferenceClient.chat({
         system: 'be brief',
         messages: [{role: 'user', content: 'hello'}],
         tools: [],
@@ -69,7 +69,7 @@ describe('OllamaInferenceClient', () => {
     const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
 
     const response = await firstValueFrom(
-      ollamaInferenceClient.generate({
+      ollamaInferenceClient.chat({
         system: 'be brief',
         messages: [{role: 'user', content: 'hello'}],
         tools: [],
@@ -86,7 +86,7 @@ describe('OllamaInferenceClient', () => {
     const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
 
     await firstValueFrom(
-      ollamaInferenceClient.generate({
+      ollamaInferenceClient.chat({
         system: 'be brief',
         messages: [{role: 'user', content: 'hello'}],
         tools: [],
@@ -103,7 +103,7 @@ describe('OllamaInferenceClient', () => {
     const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
 
     await firstValueFrom(
-      ollamaInferenceClient.generate({
+      ollamaInferenceClient.chat({
         system: 'be brief',
         messages: [{role: 'user', content: 'hello'}],
         tools: [],
@@ -127,7 +127,7 @@ describe('OllamaInferenceClient', () => {
     const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
 
     await firstValueFrom(
-      ollamaInferenceClient.generate({
+      ollamaInferenceClient.chat({
         system: 'be brief',
         messages: [
           {
@@ -161,7 +161,7 @@ describe('OllamaInferenceClient', () => {
     const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
 
     await firstValueFrom(
-      ollamaInferenceClient.generate({
+      ollamaInferenceClient.chat({
         system: 'be brief',
         messages: [
           {
@@ -193,7 +193,7 @@ describe('OllamaInferenceClient', () => {
     const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
 
     await firstValueFrom(
-      ollamaInferenceClient.generate({
+      ollamaInferenceClient.chat({
         system: 'be brief',
         messages: [{role: 'user', content: 'hello'}],
         tools: [{name: 'read_file', description: 'Reads a file.', inputSchema: {type: 'object'}}],
@@ -229,7 +229,7 @@ describe('OllamaInferenceClient', () => {
     const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
 
     const response = await firstValueFrom(
-      ollamaInferenceClient.generate({
+      ollamaInferenceClient.chat({
         system: 'be brief',
         messages: [{role: 'user', content: 'read note.txt'}],
         tools: [],
@@ -246,7 +246,7 @@ describe('OllamaInferenceClient', () => {
     const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
 
     const response = await firstValueFrom(
-      ollamaInferenceClient.generate({
+      ollamaInferenceClient.chat({
         system: 'be brief',
         messages: [{role: 'user', content: 'hello'}],
         tools: [],
@@ -262,7 +262,7 @@ describe('OllamaInferenceClient', () => {
     } as unknown as Ollama;
     const ollamaInferenceClient = new OllamaInferenceClient('llama3', ollama);
 
-    ollamaInferenceClient.generate({
+    ollamaInferenceClient.chat({
       system: 'be brief',
       messages: [{role: 'user', content: 'hello'}],
       tools: [],

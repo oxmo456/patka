@@ -80,9 +80,7 @@ export class OllamaInferenceClient implements InferenceClient {
     this.ollama = ollama;
   }
 
-  generate(
-    inferenceClientChatInput: InferenceClientChatInput,
-  ): Observable<InferenceClientResponse> {
+  chat(inferenceClientChatInput: InferenceClientChatInput): Observable<InferenceClientResponse> {
     return defer(() =>
       from(
         this.ollama.chat({

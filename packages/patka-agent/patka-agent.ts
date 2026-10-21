@@ -142,7 +142,7 @@ export class PatkaAgent {
 
     return concat(
       of(patkaInferenceClientRequest),
-      this.inferenceClient.generate(patkaInferenceClientRequest.input).pipe(
+      this.inferenceClient.chat(patkaInferenceClientRequest.input).pipe(
         map(
           (inferenceClientResponse): PatkaInferenceClientResponse => ({
             type: 'PatkaInferenceClientResponse',

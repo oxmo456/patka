@@ -56,7 +56,7 @@ describe('Patka', () => {
     child.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
     child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
-    child.register(INFERENCE_CLIENT, {useValue: {generate: vi.fn()}});
+    child.register(INFERENCE_CLIENT, {useValue: {chat: vi.fn()}});
     child.register(PATKA_TOOL, {useClass: ListFiles});
     child.register(PATKA_TOOL, {useClass: ReadFile});
     child.register(PATKA_UI, {useValue: aPatkaUI()});
@@ -88,7 +88,7 @@ describe('Patka', () => {
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {
       useValue: {
-        generate: () =>
+        chat: () =>
           of({content: 'Paris', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
       },
     });
@@ -146,7 +146,7 @@ describe('Patka', () => {
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {
       useValue: {
-        generate: () =>
+        chat: () =>
           of({content: 'Paris', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
       },
     });
@@ -196,7 +196,7 @@ describe('Patka', () => {
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {
       useValue: {
-        generate: () =>
+        chat: () =>
           of({content: 'Paris', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
       },
     });
@@ -249,7 +249,7 @@ describe('Patka', () => {
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {
       useValue: {
-        generate: () =>
+        chat: () =>
           of({content: 'Paris', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
       },
     });
