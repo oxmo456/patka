@@ -7,6 +7,7 @@ ptk_library(
     deps = [
         "//packages/patka-tool-llm-manual",
         "//packages/patka-tool",
+        "//packages/relative-path",
     ],
     npm_deps = [
         "//:node_modules/@types/fs-extra",
