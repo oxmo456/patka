@@ -3,10 +3,17 @@ load("//tools:ptk_library.bzl", "ptk_library")
 ptk_library(
     name = "patka-inference",
     srcs = [
-        "inference-client-input.ts",
+        "inference-client-chat-input.ts",
         "inference-client-response.ts",
         "inference-client.ts",
+        "inference-message.ts",
+        "inference-tool-call.ts",
+        "inference-tool.ts",
         "inference-usage.ts",
+    ],
+    deps = [
+        "//packages/json",
+        "//packages/option",
     ],
     npm_deps = ["//:node_modules/rxjs"],
 )

@@ -11,9 +11,9 @@ describe('PatkaTUITool', () => {
       updateLogs: vi.fn(),
       showLogs: vi.fn(),
       hideLogs: vi.fn(),
-      updateLastPrompt: vi.fn(),
-      showLastPrompt: vi.fn(),
-      hideLastPrompt: vi.fn(),
+      updateInferenceClientChat: vi.fn(),
+      showInferenceClientChat: vi.fn(),
+      hideInferenceClientChat: vi.fn(),
     };
 
     expect(new PatkaTUITool(patkaUI).name).toBe('patka_tui');
@@ -26,9 +26,9 @@ describe('PatkaTUITool', () => {
       updateLogs: vi.fn(),
       showLogs: vi.fn(),
       hideLogs: vi.fn(),
-      updateLastPrompt: vi.fn(),
-      showLastPrompt: vi.fn(),
-      hideLastPrompt: vi.fn(),
+      updateInferenceClientChat: vi.fn(),
+      showInferenceClientChat: vi.fn(),
+      hideInferenceClientChat: vi.fn(),
     };
 
     await lastValueFrom(new PatkaTUITool(patkaUI).invoke({command: 'show_logs'}), {
@@ -45,9 +45,9 @@ describe('PatkaTUITool', () => {
       updateLogs: vi.fn(),
       showLogs: vi.fn(),
       hideLogs: vi.fn(),
-      updateLastPrompt: vi.fn(),
-      showLastPrompt: vi.fn(),
-      hideLastPrompt: vi.fn(),
+      updateInferenceClientChat: vi.fn(),
+      showInferenceClientChat: vi.fn(),
+      hideInferenceClientChat: vi.fn(),
     };
 
     await lastValueFrom(new PatkaTUITool(patkaUI).invoke({command: 'hide_logs'}), {
@@ -57,42 +57,42 @@ describe('PatkaTUITool', () => {
     expect(patkaUI.hideLogs).toHaveBeenCalledTimes(1);
   });
 
-  it('shows the last prompt panel on the show_last_prompt command', async () => {
+  it('shows the inference client chat panel on the show_inference_client_chat command', async () => {
     const patkaUI: PatkaUI = {
       userInputs: of(),
       updateChat: vi.fn(),
       updateLogs: vi.fn(),
       showLogs: vi.fn(),
       hideLogs: vi.fn(),
-      updateLastPrompt: vi.fn(),
-      showLastPrompt: vi.fn(),
-      hideLastPrompt: vi.fn(),
+      updateInferenceClientChat: vi.fn(),
+      showInferenceClientChat: vi.fn(),
+      hideInferenceClientChat: vi.fn(),
     };
 
-    await lastValueFrom(new PatkaTUITool(patkaUI).invoke({command: 'show_last_prompt'}), {
+    await lastValueFrom(new PatkaTUITool(patkaUI).invoke({command: 'show_inference_client_chat'}), {
       defaultValue: undefined,
     });
 
-    expect(patkaUI.showLastPrompt).toHaveBeenCalledTimes(1);
+    expect(patkaUI.showInferenceClientChat).toHaveBeenCalledTimes(1);
   });
 
-  it('hides the last prompt panel on the hide_last_prompt command', async () => {
+  it('hides the inference client chat panel on the hide_inference_client_chat command', async () => {
     const patkaUI: PatkaUI = {
       userInputs: of(),
       updateChat: vi.fn(),
       updateLogs: vi.fn(),
       showLogs: vi.fn(),
       hideLogs: vi.fn(),
-      updateLastPrompt: vi.fn(),
-      showLastPrompt: vi.fn(),
-      hideLastPrompt: vi.fn(),
+      updateInferenceClientChat: vi.fn(),
+      showInferenceClientChat: vi.fn(),
+      hideInferenceClientChat: vi.fn(),
     };
 
-    await lastValueFrom(new PatkaTUITool(patkaUI).invoke({command: 'hide_last_prompt'}), {
+    await lastValueFrom(new PatkaTUITool(patkaUI).invoke({command: 'hide_inference_client_chat'}), {
       defaultValue: undefined,
     });
 
-    expect(patkaUI.hideLastPrompt).toHaveBeenCalledTimes(1);
+    expect(patkaUI.hideInferenceClientChat).toHaveBeenCalledTimes(1);
   });
 
   it('completes without output on the show_logs command', async () => {
@@ -102,9 +102,9 @@ describe('PatkaTUITool', () => {
       updateLogs: vi.fn(),
       showLogs: vi.fn(),
       hideLogs: vi.fn(),
-      updateLastPrompt: vi.fn(),
-      showLastPrompt: vi.fn(),
-      hideLastPrompt: vi.fn(),
+      updateInferenceClientChat: vi.fn(),
+      showInferenceClientChat: vi.fn(),
+      hideInferenceClientChat: vi.fn(),
     };
 
     const outputs = await firstValueFrom(
@@ -121,9 +121,9 @@ describe('PatkaTUITool', () => {
       updateLogs: vi.fn(),
       showLogs: vi.fn(),
       hideLogs: vi.fn(),
-      updateLastPrompt: vi.fn(),
-      showLastPrompt: vi.fn(),
-      hideLastPrompt: vi.fn(),
+      updateInferenceClientChat: vi.fn(),
+      showInferenceClientChat: vi.fn(),
+      hideInferenceClientChat: vi.fn(),
     };
 
     await expect(
@@ -140,9 +140,9 @@ describe('PatkaTUITool', () => {
       updateLogs: vi.fn(),
       showLogs: vi.fn(),
       hideLogs: vi.fn(),
-      updateLastPrompt: vi.fn(),
-      showLastPrompt: vi.fn(),
-      hideLastPrompt: vi.fn(),
+      updateInferenceClientChat: vi.fn(),
+      showInferenceClientChat: vi.fn(),
+      hideInferenceClientChat: vi.fn(),
     };
 
     new PatkaTUITool(patkaUI).invoke({command: 'show_logs'});

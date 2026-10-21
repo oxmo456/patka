@@ -3,7 +3,6 @@ import {EMPTY, type Observable, of, Subject, throwError} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
 import {none, some} from '../option/option.ts';
 import type {
-  PatkaAgentUtterance,
   PatkaContextEntry,
   PatkaToolOutput,
   PatkaUserUtterance,
@@ -20,7 +19,7 @@ const aTool = (name: string, output: string): PatkaTool<{path: string}, string> 
       type: 'ObjectJsonSchemaLLMManual',
       title: name,
       description: '',
-      properties: {},
+      properties: {path: {value: 'string', description: ''}},
     },
     output: {value: 'string', description: ''},
   },
@@ -42,13 +41,15 @@ describe('PatkaAgent', () => {
     const patkaAgent = new PatkaAgent(
       'patka',
       new PatkaTools([]),
-      {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+      {
+        generate: () =>
+          of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+      },
       new Subject<PatkaContextEntry>(),
-      {create: () => 'prompt'},
+      {create: () => ({system: 'prompt', messages: [], tools: []})},
       {
         missingTools: 'missing tools',
         error: (message: string) => `error: ${message}`,
-        unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
       },
     );
 
@@ -58,18 +59,17 @@ describe('PatkaAgent', () => {
   describe('output', () => {
     it('says nothing until an entry reaches the agent', () => {
       const generate = vi.fn(() =>
-        of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}}),
+        of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
       );
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
         {generate},
         new Subject<PatkaContextEntry>(),
-        {create: () => 'prompt'},
+        {create: () => ({system: 'prompt', messages: [], tools: []})},
         {
           missingTools: 'missing tools',
           error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
         },
       );
 
@@ -83,13 +83,15 @@ describe('PatkaAgent', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        {
+          generate: () =>
+            of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+        },
         patkaContextEntries,
-        {create: () => 'prompt'},
+        {create: () => ({system: 'prompt', messages: [], tools: []})},
         {
           missingTools: 'missing tools',
           error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
         },
       );
       const received: Array<PatkaContextEntry> = [];
@@ -108,13 +110,15 @@ describe('PatkaAgent', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        {
+          generate: () =>
+            of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+        },
         patkaContextEntries,
-        {create: () => 'the prompt'},
+        {create: () => ({system: 'the prompt', messages: [], tools: []})},
         {
           missingTools: 'missing tools',
           error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
         },
       );
       const received: Array<PatkaContextEntry> = [];
@@ -124,7 +128,7 @@ describe('PatkaAgent', () => {
 
       expect(received[0]).toMatchObject({
         type: 'PatkaInferenceClientRequest',
-        prompt: 'the prompt',
+        input: {system: 'the prompt', messages: [], tools: []},
       });
     });
 
@@ -133,13 +137,15 @@ describe('PatkaAgent', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        {
+          generate: () =>
+            of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+        },
         patkaContextEntries,
-        {create: () => 'the prompt'},
+        {create: () => ({system: 'the prompt', messages: [], tools: []})},
         {
           missingTools: 'missing tools',
           error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
         },
       );
       const received: Array<PatkaContextEntry> = [];
@@ -153,25 +159,24 @@ describe('PatkaAgent', () => {
     it('prompts the engine with the prompt the factory creates', () => {
       const patkaContextEntries = new Subject<PatkaContextEntry>();
       const generate = vi.fn(() =>
-        of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}}),
+        of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
       );
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
         {generate},
         patkaContextEntries,
-        {create: () => 'the prompt'},
+        {create: () => ({system: 'the prompt', messages: [], tools: []})},
         {
           missingTools: 'missing tools',
           error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
         },
       );
       patkaAgent.output.subscribe();
 
       patkaContextEntries.next(said('hello'));
 
-      expect(generate).toHaveBeenCalledWith({prompt: 'the prompt'});
+      expect(generate).toHaveBeenCalledWith({system: 'the prompt', messages: [], tools: []});
     });
 
     it('tells the user when the inference client fails', () => {
@@ -181,11 +186,10 @@ describe('PatkaAgent', () => {
         new PatkaTools([]),
         {generate: () => throwError(() => new Error('400 invalid_request_error'))},
         patkaContextEntries,
-        {create: () => 'prompt'},
+        {create: () => ({system: 'prompt', messages: [], tools: []})},
         {
           missingTools: 'missing tools',
           error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
         },
       );
       const received: Array<PatkaContextEntry> = [];
@@ -204,18 +208,20 @@ describe('PatkaAgent', () => {
       });
     });
 
-    it('turns a tool invocation into a tool call', () => {
+    it('turns a response that calls a tool into a tool call', () => {
       const patkaContextEntries = new Subject<PatkaContextEntry>();
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([aTool('read_file', 'hello')]),
-        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        {
+          generate: () =>
+            of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+        },
         patkaContextEntries,
-        {create: () => 'prompt'},
+        {create: () => ({system: 'prompt', messages: [], tools: []})},
         {
           missingTools: 'missing tools',
           error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
         },
       );
       const received: Array<PatkaContextEntry> = [];
@@ -229,7 +235,8 @@ describe('PatkaAgent', () => {
         parent: none,
         id: randomUUID(),
         usage: {inputTokens: 0, outputTokens: 0},
-        content: '$$$invoke(read_file, {"path": "a"})',
+        content: '',
+        toolCall: some({name: 'read_file', input: {path: 'a'}}),
       });
 
       expect(received.map((patkaContextEntry) => patkaContextEntry.type)).toEqual([
@@ -237,18 +244,88 @@ describe('PatkaAgent', () => {
       ]);
     });
 
+    it('gives the tool call the name and the input the model asked for', () => {
+      const patkaContextEntries = new Subject<PatkaContextEntry>();
+      const patkaAgent = new PatkaAgent(
+        'patka',
+        new PatkaTools([aTool('read_file', 'hello')]),
+        {
+          generate: () =>
+            of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+        },
+        patkaContextEntries,
+        {create: () => ({system: 'prompt', messages: [], tools: []})},
+        {
+          missingTools: 'missing tools',
+          error: (message: string) => `error: ${message}`,
+        },
+      );
+      const received: Array<PatkaContextEntry> = [];
+      patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
+
+      patkaContextEntries.next({
+        type: 'PatkaInferenceClientResponse',
+        timestamp: 0,
+        performanceTimestamp: 0,
+        root: some(randomUUID()),
+        parent: none,
+        id: randomUUID(),
+        usage: {inputTokens: 0, outputTokens: 0},
+        content: '',
+        toolCall: some({name: 'read_file', input: {path: 'a'}}),
+      });
+
+      expect(received[0]).toMatchObject({name: 'read_file', input: {path: 'a'}});
+    });
+
+    it('says nothing after a response that calls no tool', () => {
+      const patkaContextEntries = new Subject<PatkaContextEntry>();
+      const patkaAgent = new PatkaAgent(
+        'patka',
+        new PatkaTools([aTool('read_file', 'hello')]),
+        {
+          generate: () =>
+            of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+        },
+        patkaContextEntries,
+        {create: () => ({system: 'prompt', messages: [], tools: []})},
+        {
+          missingTools: 'missing tools',
+          error: (message: string) => `error: ${message}`,
+        },
+      );
+      const received: Array<PatkaContextEntry> = [];
+      patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
+
+      patkaContextEntries.next({
+        type: 'PatkaInferenceClientResponse',
+        timestamp: 0,
+        performanceTimestamp: 0,
+        root: some(randomUUID()),
+        parent: none,
+        id: randomUUID(),
+        usage: {inputTokens: 0, outputTokens: 0},
+        content: 'world',
+        toolCall: none,
+      });
+
+      expect(received).toEqual([]);
+    });
+
     it('gives a tool output the id of its tool call as parent id', () => {
       const patkaContextEntries = new Subject<PatkaContextEntry>();
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([aTool('read_file', 'hello')]),
-        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        {
+          generate: () =>
+            of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+        },
         patkaContextEntries,
-        {create: () => 'prompt'},
+        {create: () => ({system: 'prompt', messages: [], tools: []})},
         {
           missingTools: 'missing tools',
           error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
         },
       );
       const received: Array<PatkaContextEntry> = [];
@@ -274,13 +351,15 @@ describe('PatkaAgent', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        {
+          generate: () =>
+            of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+        },
         patkaContextEntries,
-        {create: () => 'prompt'},
+        {create: () => ({system: 'prompt', messages: [], tools: []})},
         {
           missingTools: 'missing tools',
           error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
         },
       );
       const received: Array<PatkaContextEntry> = [];
@@ -305,13 +384,15 @@ describe('PatkaAgent', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([aTool('read_file', 'hello')]),
-        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        {
+          generate: () =>
+            of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+        },
         patkaContextEntries,
-        {create: () => 'prompt'},
+        {create: () => ({system: 'prompt', messages: [], tools: []})},
         {
           missingTools: 'missing tools',
           error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
         },
       );
       const received: Array<PatkaContextEntry> = [];
@@ -340,82 +421,20 @@ describe('PatkaAgent', () => {
       expect(received[0]).toMatchObject({root: some(patkaUserUtterance.id)});
     });
 
-    it('tells the model when its tool invocation cannot be read', () => {
-      const patkaContextEntries = new Subject<PatkaContextEntry>();
-      const patkaAgent = new PatkaAgent(
-        'patka',
-        new PatkaTools([aTool('read_file', 'hello')]),
-        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
-        patkaContextEntries,
-        {create: () => 'prompt'},
-        {
-          missingTools: 'missing tools',
-          error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
-        },
-      );
-      const received: Array<PatkaContextEntry> = [];
-      patkaAgent.output.subscribe((patkaContextEntry) => received.push(patkaContextEntry));
-
-      patkaContextEntries.next({
-        type: 'PatkaInferenceClientResponse',
-        timestamp: 0,
-        performanceTimestamp: 0,
-        root: none,
-        parent: none,
-        id: randomUUID(),
-        usage: {inputTokens: 0, outputTokens: 0},
-        content: '$$$invoke(read_file, {"a": 1}) $$$invoke(read_file, {"b": 2})',
-      });
-
-      expect(received.map((patkaContextEntry) => patkaContextEntry.type)).toEqual([
-        'PatkaAgentUtterance',
-      ]);
-    });
-
-    it('gives the factory what the agent said', () => {
-      const patkaContextEntries = new Subject<PatkaContextEntry>();
-      const create = vi.fn(() => 'prompt');
-      const patkaAgent = new PatkaAgent(
-        'patka',
-        new PatkaTools([]),
-        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
-        patkaContextEntries,
-        {create},
-        {
-          missingTools: 'missing tools',
-          error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
-        },
-      );
-      patkaAgent.output.subscribe();
-      const patkaAgentUtterance: PatkaAgentUtterance = {
-        type: 'PatkaAgentUtterance',
-        timestamp: 0,
-        performanceTimestamp: 0,
-        root: none,
-        parent: none,
-        id: randomUUID(),
-        content: 'Patka could not read your tool invocation',
-      };
-
-      patkaContextEntries.next(patkaAgentUtterance);
-
-      expect(create).toHaveBeenCalledWith([patkaAgentUtterance]);
-    });
-
     it('runs the tool a tool call names', () => {
       const patkaContextEntries = new Subject<PatkaContextEntry>();
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([aTool('read_file', 'hello')]),
-        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        {
+          generate: () =>
+            of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+        },
         patkaContextEntries,
-        {create: () => 'prompt'},
+        {create: () => ({system: 'prompt', messages: [], tools: []})},
         {
           missingTools: 'missing tools',
           error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
         },
       );
       const received: Array<PatkaContextEntry> = [];
@@ -442,13 +461,15 @@ describe('PatkaAgent', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        {
+          generate: () =>
+            of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+        },
         patkaContextEntries,
-        {create: () => 'prompt'},
+        {create: () => ({system: 'prompt', messages: [], tools: []})},
         {
           missingTools: 'missing tools',
           error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
         },
       );
       const received: Array<PatkaContextEntry> = [];
@@ -482,7 +503,7 @@ describe('PatkaAgent', () => {
             type: 'ObjectJsonSchemaLLMManual',
             title: 'read_file',
             description: '',
-            properties: {},
+            properties: {path: {value: 'string', description: ''}},
           },
           output: {value: 'string', description: ''},
         },
@@ -492,13 +513,15 @@ describe('PatkaAgent', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([readFile]),
-        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        {
+          generate: () =>
+            of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+        },
         patkaContextEntries,
-        {create: () => 'prompt'},
+        {create: () => ({system: 'prompt', messages: [], tools: []})},
         {
           missingTools: 'missing tools',
           error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
         },
       );
       const received: Array<PatkaContextEntry> = [];
@@ -532,7 +555,7 @@ describe('PatkaAgent', () => {
             type: 'ObjectJsonSchemaLLMManual',
             title: 'read_file',
             description: '',
-            properties: {},
+            properties: {path: {value: 'string', description: ''}},
           },
           output: {value: 'string', description: ''},
         },
@@ -542,13 +565,15 @@ describe('PatkaAgent', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([readFile]),
-        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        {
+          generate: () =>
+            of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+        },
         patkaContextEntries,
-        {create: () => 'prompt'},
+        {create: () => ({system: 'prompt', messages: [], tools: []})},
         {
           missingTools: 'missing tools',
           error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
         },
       );
       const received: Array<PatkaContextEntry> = [];
@@ -571,18 +596,17 @@ describe('PatkaAgent', () => {
     it('does not ask the model after an incompetency report', () => {
       const patkaContextEntries = new Subject<PatkaContextEntry>();
       const generate = vi.fn(() =>
-        of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}}),
+        of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
       );
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
         {generate},
         patkaContextEntries,
-        {create: () => 'prompt'},
+        {create: () => ({system: 'prompt', messages: [], tools: []})},
         {
           missingTools: 'missing tools',
           error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
         },
       );
       patkaAgent.output.subscribe();
@@ -605,13 +629,15 @@ describe('PatkaAgent', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        {
+          generate: () =>
+            of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+        },
         patkaContextEntries,
-        {create: () => 'prompt'},
+        {create: () => ({system: 'prompt', messages: [], tools: []})},
         {
           missingTools: 'missing tools',
           error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
         },
       );
       const received: Array<PatkaContextEntry> = [];
@@ -637,13 +663,15 @@ describe('PatkaAgent', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        {
+          generate: () =>
+            of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+        },
         patkaContextEntries,
-        {create: () => 'prompt'},
+        {create: () => ({system: 'prompt', messages: [], tools: []})},
         {
           missingTools: 'missing tools',
           error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
         },
       );
       const received: Array<PatkaContextEntry> = [];
@@ -668,13 +696,15 @@ describe('PatkaAgent', () => {
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        {
+          generate: () =>
+            of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+        },
         patkaContextEntries,
-        {create: () => 'prompt'},
+        {create: () => ({system: 'prompt', messages: [], tools: []})},
         {
           missingTools: 'missing tools',
           error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
         },
       );
       const received: Array<PatkaContextEntry> = [];
@@ -700,17 +730,19 @@ describe('PatkaAgent', () => {
 
     it('gives the factory the tool output', () => {
       const patkaContextEntries = new Subject<PatkaContextEntry>();
-      const create = vi.fn(() => 'prompt');
+      const create = vi.fn(() => ({system: 'prompt', messages: [], tools: []}));
       const patkaAgent = new PatkaAgent(
         'patka',
         new PatkaTools([]),
-        {generate: () => of({content: 'world', usage: {inputTokens: 0, outputTokens: 0}})},
+        {
+          generate: () =>
+            of({content: 'world', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+        },
         patkaContextEntries,
         {create},
         {
           missingTools: 'missing tools',
           error: (message: string) => `error: ${message}`,
-          unreadableToolInvocation: (message: string) => `unreadable: ${message}`,
         },
       );
       patkaAgent.output.subscribe();

@@ -4,7 +4,7 @@ import blessed from 'blessed';
 import {container, type DependencyContainer, Lifecycle} from 'tsyringe';
 import {$} from 'zx';
 import {PatkaAgent} from '../../packages/patka-agent/patka-agent.ts';
-import {DefaultPatkaPromptFactory} from '../../packages/patka-prompt/default-patka-prompt-factory.ts';
+import {DefaultInferenceClientChatInputFactory} from '../../packages/patka-prompt/default-inference-client-chat-input-factory.ts';
 import {PatkaTools} from '../../packages/patka-tool/patka-tools.ts';
 import {ApplyPatch} from '../../packages/patka-tools/apply-patch/apply-patch.ts';
 import {GitDiff} from '../../packages/patka-tools/git-diff/git-diff.ts';
@@ -26,9 +26,8 @@ import {
   extractOllamaModel,
 } from './inference/patka-inference.ts';
 import {Patka} from './patka.ts';
-import {PATKA_PROMPT_DIRECTIVE} from './prompt/patka-prompt-directive.token.ts';
-import {createPatkaPromptDirective} from './prompt/patka-prompt-directives.ts';
-import {PATKA_PROMPT_FACTORY} from './prompt/patka-prompt-factory.token.ts';
+import {INFERENCE_CLIENT_CHAT_INPUT_FACTORY} from './prompt/inference-client-chat-input-factory.token.ts';
+import {createTextFromPatkaTextKey} from './text/patka-text.ts';
 import {PATKA_TOOL} from './tools/patka-tool.token.ts';
 import {createPatkaToolsFromDependencyContainer} from './tools/patka-tools-factory.ts';
 import {PATKA_UI} from './ui/patka-ui.token.ts';
@@ -40,15 +39,13 @@ import {PatkaTUITool} from './ui/tui/tool/patka-tui-tool.ts';
 $.quiet = true;
 
 container.register(WORKING_DIRECTORY, {useValue: process.cwd()});
-container.register(PATKA_PROMPT_DIRECTIVE, {
-  useValue: createPatkaPromptDirective(),
-});
-container.register(PATKA_PROMPT_FACTORY, {
+container.register(INFERENCE_CLIENT_CHAT_INPUT_FACTORY, {
   useFactory: (dependencyContainer: DependencyContainer) =>
-    new DefaultPatkaPromptFactory(
+    new DefaultInferenceClientChatInputFactory(
       dependencyContainer.resolve(PatkaTools),
-      dependencyContainer.resolve(WORKING_DIRECTORY),
-      dependencyContainer.resolve(PATKA_PROMPT_DIRECTIVE),
+      createTextFromPatkaTextKey('prompt.system', {
+        workingDirectory: dependencyContainer.resolve(WORKING_DIRECTORY),
+      }),
     ),
 });
 container.register(AGENT_NAME, {useValue: 'ROOT'});

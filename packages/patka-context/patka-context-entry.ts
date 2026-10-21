@@ -1,5 +1,7 @@
 import type {JsonObject, JsonValue} from '../json/json.ts';
 import type {Option} from '../option/option.ts';
+import type {InferenceClientChatInput} from '../patka-inference/inference-client-chat-input.ts';
+import type {InferenceToolCall} from '../patka-inference/inference-tool-call.ts';
 import type {InferenceUsage} from '../patka-inference/inference-usage.ts';
 import type {PatkaUtterance} from '../patka-utterance/patka-utterance.ts';
 import type {PerformanceTimestamp} from '../performance-timestamp/performance-timestamp.ts';
@@ -23,7 +25,7 @@ export type PatkaInferenceClientRequest = {
   readonly performanceTimestamp: PerformanceTimestamp;
   readonly root: Option<PatkaContextEntryID>;
   readonly parent: Option<PatkaContextEntryID>;
-  readonly prompt: string;
+  readonly input: InferenceClientChatInput;
 };
 
 export type PatkaInferenceClientResponse = {
@@ -34,6 +36,7 @@ export type PatkaInferenceClientResponse = {
   readonly root: Option<PatkaContextEntryID>;
   readonly parent: Option<PatkaContextEntryID>;
   readonly content: string;
+  readonly toolCall: Option<InferenceToolCall>;
   readonly usage: InferenceUsage;
 };
 
@@ -80,16 +83,6 @@ export type PatkaToolInvocationError = {
   readonly error: Error;
 };
 
-export type PatkaAgentUtterance = {
-  readonly type: 'PatkaAgentUtterance';
-  readonly id: PatkaContextEntryID;
-  readonly timestamp: Timestamp;
-  readonly performanceTimestamp: PerformanceTimestamp;
-  readonly root: Option<PatkaContextEntryID>;
-  readonly parent: Option<PatkaContextEntryID>;
-  readonly content: string;
-};
-
 export type PatkaUserNotification = {
   readonly type: 'PatkaUserNotification';
   readonly id: PatkaContextEntryID;
@@ -118,6 +111,5 @@ export type PatkaContextEntry =
   | PatkaToolOutput
   | PatkaToolEmptyOutput
   | PatkaToolInvocationError
-  | PatkaAgentUtterance
   | PatkaUserNotification
   | PatkaError;

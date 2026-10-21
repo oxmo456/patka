@@ -10,12 +10,14 @@ import {PatkaContext} from './patka-context.ts';
 const toDetails = (patkaContextEntry: PatkaContextEntry): JsonObject =>
   match(patkaContextEntry)
     .with({type: 'PatkaUserUtterance'}, ({utterance}) => ({content: utterance.content}))
-    .with({type: 'PatkaInferenceClientRequest'}, ({prompt}) => ({
-      prompt: prompt.slice(0, 256),
+    .with({type: 'PatkaInferenceClientRequest'}, ({input}) => ({
+      input: JSON.stringify(input).slice(0, 256),
     }))
-    .with({type: 'PatkaInferenceClientResponse'}, ({content}) => ({content}))
+    .with({type: 'PatkaInferenceClientResponse'}, ({content, toolCall}) => ({
+      content,
+      toolCall: toolCall.type === 'some' ? toolCall.value : null,
+    }))
     .with({type: 'PatkaToolCall'}, ({name, input}) => ({name, input}))
-    .with({type: 'PatkaAgentUtterance'}, ({content}) => ({content}))
     .with({type: 'PatkaUserNotification'}, ({content}) => ({content}))
     .with({type: 'PatkaError'}, ({error}) => ({error: String(error)}))
     .with({type: 'PatkaToolOutput'}, ({name, output}) => ({name, output}))

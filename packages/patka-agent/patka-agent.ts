@@ -13,7 +13,6 @@ import {
 import {match} from 'ts-pattern';
 import {type Option, some} from '../option/option.ts';
 import type {
-  PatkaAgentUtterance,
   PatkaContextEntry,
   PatkaError,
   PatkaInferenceClientRequest,
@@ -25,8 +24,7 @@ import type {
 } from '../patka-context/patka-context-entry.ts';
 import type {PatkaContextEntryID} from '../patka-context/patka-context-entry-id.ts';
 import type {InferenceClient} from '../patka-inference/inference-client.ts';
-import type {PatkaPromptFactory} from '../patka-prompt/patka-prompt-factory.ts';
-import {PatkaToolProtocol} from '../patka-tool/patka-tool-protocol.ts';
+import type {InferenceClientChatInputFactory} from '../patka-prompt/inference-client-chat-input-factory.ts';
 import type {PatkaTools} from '../patka-tool/patka-tools.ts';
 import {REPORT_INCOMPETENCY} from '../patka-tool/report-incompetency.ts';
 import {createPerformanceTimestamp} from '../performance-timestamp/performance-timestamp.ts';
@@ -39,10 +37,9 @@ function createRootFromParent(parent: PatkaContextEntry): Option<PatkaContextEnt
 
 export class PatkaAgent {
   private readonly patkaTools: PatkaTools;
-  private readonly patkaPromptFactory: PatkaPromptFactory;
+  private readonly inferenceClientChatInputFactory: InferenceClientChatInputFactory;
   private readonly inferenceClient: InferenceClient;
   private readonly patkaAgentText: PatkaAgentText;
-  private readonly patkaToolProtocol = new PatkaToolProtocol();
 
   readonly name: string;
   readonly output: Observable<PatkaContextEntry>;
@@ -52,13 +49,13 @@ export class PatkaAgent {
     patkaTools: PatkaTools,
     inferenceClient: InferenceClient,
     input: Observable<PatkaContextEntry>,
-    patkaPromptFactory: PatkaPromptFactory,
+    inferenceClientChatInputFactory: InferenceClientChatInputFactory,
     patkaAgentText: PatkaAgentText,
   ) {
     this.name = name;
     this.patkaTools = patkaTools;
     this.inferenceClient = inferenceClient;
-    this.patkaPromptFactory = patkaPromptFactory;
+    this.inferenceClientChatInputFactory = inferenceClientChatInputFactory;
     this.patkaAgentText = patkaAgentText;
     this.output = input.pipe(
       scan(
@@ -91,9 +88,6 @@ export class PatkaAgent {
         this.generate(patkaContextEntries, lastPatkaContextEntry),
       )
       .with({type: 'PatkaToolInvocationError'}, () =>
-        this.generate(patkaContextEntries, lastPatkaContextEntry),
-      )
-      .with({type: 'PatkaAgentUtterance'}, () =>
         this.generate(patkaContextEntries, lastPatkaContextEntry),
       )
       .with({type: 'PatkaInferenceClientRequest'}, () => EMPTY)
@@ -143,12 +137,12 @@ export class PatkaAgent {
       performanceTimestamp: createPerformanceTimestamp(),
       root: createRootFromParent(parent),
       parent: some(parent.id),
-      prompt: this.patkaPromptFactory.create(patkaContextEntries),
+      input: this.inferenceClientChatInputFactory.create(patkaContextEntries),
     };
 
     return concat(
       of(patkaInferenceClientRequest),
-      this.inferenceClient.generate({prompt: patkaInferenceClientRequest.prompt}).pipe(
+      this.inferenceClient.generate(patkaInferenceClientRequest.input).pipe(
         map(
           (inferenceClientResponse): PatkaInferenceClientResponse => ({
             type: 'PatkaInferenceClientResponse',
@@ -158,6 +152,7 @@ export class PatkaAgent {
             root: createRootFromParent(patkaInferenceClientRequest),
             parent: some(patkaInferenceClientRequest.id),
             content: inferenceClientResponse.content,
+            toolCall: inferenceClientResponse.toolCall,
             usage: inferenceClientResponse.usage,
           }),
         ),
@@ -180,9 +175,9 @@ export class PatkaAgent {
   private processInferenceClientResponse(
     patkaInferenceClientResponse: PatkaInferenceClientResponse,
   ): Observable<PatkaContextEntry> {
-    return match(this.patkaToolProtocol.parse(patkaInferenceClientResponse.content))
+    return match(patkaInferenceClientResponse.toolCall)
       .with(
-        {type: 'success'},
+        {type: 'some'},
         ({value}): Observable<PatkaContextEntry> =>
           of({
             type: 'PatkaToolCall',
@@ -195,21 +190,7 @@ export class PatkaAgent {
             input: value.input,
           } satisfies PatkaToolCall),
       )
-      .with(
-        {type: 'failure'},
-        ({error}): Observable<PatkaContextEntry> =>
-          this.patkaToolProtocol.isAPatkaToolInvocation(patkaInferenceClientResponse.content)
-            ? of({
-                type: 'PatkaAgentUtterance',
-                id: randomUUID(),
-                timestamp: createTimestamp(),
-                performanceTimestamp: createPerformanceTimestamp(),
-                root: createRootFromParent(patkaInferenceClientResponse),
-                parent: some(patkaInferenceClientResponse.id),
-                content: this.patkaAgentText.unreadableToolInvocation(error.message),
-              } satisfies PatkaAgentUtterance)
-            : EMPTY,
-      )
+      .with({type: 'none'}, (): Observable<PatkaContextEntry> => EMPTY)
       .exhaustive();
   }
 

@@ -11,7 +11,6 @@ import type {
   PatkaUserUtterance,
 } from '../../../packages/patka-context/patka-context-entry.ts';
 import type {InferenceUsage} from '../../../packages/patka-inference/inference-usage.ts';
-import {PatkaToolProtocol} from '../../../packages/patka-tool/patka-tool-protocol.ts';
 import {AGENT_NAME} from '../agent/agent-name.token.ts';
 import {PatkaContext} from '../context/patka-context.ts';
 import {PatkaChat} from './patka-chat.ts';
@@ -19,8 +18,6 @@ import type {PatkaChatEntry} from './patka-chat-entry.ts';
 import type {PatkaChatEntryMetadata} from './patka-chat-entry-metadata.ts';
 
 const USER = 'you';
-
-const patkaToolProtocol = new PatkaToolProtocol();
 
 function extractDurationFromRoot(
   patkaContextEntry: PatkaContextEntry,
@@ -113,7 +110,7 @@ function createChatEntryFromInferenceClientResponse(
   patkaContextEntries: ReadonlyArray<PatkaContextEntry>,
   author: string,
 ): Observable<PatkaChatEntry> {
-  return patkaToolProtocol.isAPatkaToolInvocation(patkaInferenceClientResponse.content)
+  return patkaInferenceClientResponse.toolCall.type === 'some'
     ? EMPTY
     : of({
         id: patkaInferenceClientResponse.id,
@@ -158,7 +155,6 @@ function createChatEntryFromContextEntries(
     .with({type: 'PatkaToolOutput'}, () => EMPTY)
     .with({type: 'PatkaToolEmptyOutput'}, () => EMPTY)
     .with({type: 'PatkaToolInvocationError'}, () => EMPTY)
-    .with({type: 'PatkaAgentUtterance'}, () => EMPTY)
     .with({type: 'PatkaUserNotification'}, (patkaUserNotification) =>
       createChatEntryFromUserNotification(patkaUserNotification, patkaContextEntries, author),
     )

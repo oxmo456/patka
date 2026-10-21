@@ -6,10 +6,6 @@ describe('extractInferenceClientOption', () => {
     expect(extractInferenceClientOption(['node', 'main.js'])).toBe('ollama');
   });
 
-  it('uses claude when --claude is passed', () => {
-    expect(extractInferenceClientOption(['node', 'main.js', '--claude'])).toBe('claude');
-  });
-
   it('uses anthropic when --anthropic is passed', () => {
     expect(extractInferenceClientOption(['node', 'main.js', '--anthropic'])).toBe('anthropic');
   });

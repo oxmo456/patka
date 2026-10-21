@@ -22,7 +22,6 @@ ptk_package(
         "//apps/patka/context",
         "//packages/patka-context",
         "//packages/patka-inference",
-        "//packages/patka-tool",
         "//packages/disposable",
         "//packages/duration",
         "//packages/option",

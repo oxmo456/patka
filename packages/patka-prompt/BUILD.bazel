@@ -3,21 +3,25 @@ load("//tools:ptk_library.bzl", "ptk_library")
 ptk_library(
     name = "patka-prompt",
     srcs = [
-        "context-prompt-directive.ts",
-        "default-patka-prompt-directive.ts",
-        "default-patka-prompt-factory.ts",
-        "patka-prompt-directive.ts",
-        "patka-prompt-environment.ts",
-        "patka-prompt-factory.ts",
-        "patka-prompt-markdown.ts",
-        "tools-prompt-directive.ts",
-        "working-directory-prompt-directive.ts",
+        "default-inference-client-chat-input-factory.ts",
+        "inference-client-chat-input-factory.ts",
+        "inference-messages.ts",
+        "inference-tool.ts",
     ],
-    test_srcs = ["patka-prompt-markdown.spec.ts"],
+    test_srcs = [
+        "inference-messages.spec.ts",
+        "inference-tool.spec.ts",
+    ],
     deps = [
         "//packages/json",
+        "//packages/option",
         "//packages/patka-context",
+        "//packages/patka-inference",
         "//packages/patka-tool",
+        "//packages/patka-tool-llm-manual",
     ],
-    npm_deps = ["//:node_modules/ts-pattern"],
+    npm_deps = [
+        "//:node_modules/rxjs",
+        "//:node_modules/ts-pattern",
+    ],
 )

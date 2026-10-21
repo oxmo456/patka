@@ -2,11 +2,11 @@ import {randomUUID} from 'node:crypto';
 import {of, Subject} from 'rxjs';
 import {container, type DependencyContainer} from 'tsyringe';
 import {describe, expect, it, vi} from 'vitest';
-import {some} from '../../packages/option/option.ts';
+import {none, some} from '../../packages/option/option.ts';
 import {PatkaAgent} from '../../packages/patka-agent/patka-agent.ts';
 import type {PatkaContextEntry} from '../../packages/patka-context/patka-context-entry.ts';
 import {PatkaLogger} from '../../packages/patka-logger/patka-logger.ts';
-import {DefaultPatkaPromptFactory} from '../../packages/patka-prompt/default-patka-prompt-factory.ts';
+import {DefaultInferenceClientChatInputFactory} from '../../packages/patka-prompt/default-inference-client-chat-input-factory.ts';
 import {PatkaTools} from '../../packages/patka-tool/patka-tools.ts';
 import {ListFiles} from '../../packages/patka-tools/list-files/list-files.ts';
 import {ReadFile} from '../../packages/patka-tools/read-file/read-file.ts';
@@ -17,9 +17,8 @@ import {PatkaContext} from './context/patka-context.ts';
 import {PATKA_CONTEXT_ENTRIES} from './context/patka-context-entries.token.ts';
 import {INFERENCE_CLIENT} from './inference/inference-client.token.ts';
 import {Patka} from './patka.ts';
-import {PATKA_PROMPT_DIRECTIVE} from './prompt/patka-prompt-directive.token.ts';
-import {createPatkaPromptDirective} from './prompt/patka-prompt-directives.ts';
-import {PATKA_PROMPT_FACTORY} from './prompt/patka-prompt-factory.token.ts';
+import {INFERENCE_CLIENT_CHAT_INPUT_FACTORY} from './prompt/inference-client-chat-input-factory.token.ts';
+import {createTextFromPatkaTextKey} from './text/patka-text.ts';
 import {PATKA_TOOL} from './tools/patka-tool.token.ts';
 import {createPatkaToolsFromDependencyContainer} from './tools/patka-tools-factory.ts';
 import {PATKA_UI} from './ui/patka-ui.token.ts';
@@ -34,24 +33,22 @@ const aPatkaUI = (): PatkaUI => ({
   updateLogs: vi.fn(),
   showLogs: vi.fn(),
   hideLogs: vi.fn(),
-  updateLastPrompt: vi.fn(),
-  showLastPrompt: vi.fn(),
-  hideLastPrompt: vi.fn(),
+  updateInferenceClientChat: vi.fn(),
+  showInferenceClientChat: vi.fn(),
+  hideInferenceClientChat: vi.fn(),
 });
 
 describe('Patka', () => {
   it('resolves the whole graph from the container', () => {
     const child = container.createChildContainer();
     child.register(WORKING_DIRECTORY, {useValue: '/home/user'});
-    child.register(PATKA_PROMPT_DIRECTIVE, {
-      useValue: createPatkaPromptDirective(),
-    });
-    child.register(PATKA_PROMPT_FACTORY, {
+    child.register(INFERENCE_CLIENT_CHAT_INPUT_FACTORY, {
       useFactory: (dependencyContainer: DependencyContainer) =>
-        new DefaultPatkaPromptFactory(
+        new DefaultInferenceClientChatInputFactory(
           dependencyContainer.resolve(PatkaTools),
-          dependencyContainer.resolve(WORKING_DIRECTORY),
-          dependencyContainer.resolve(PATKA_PROMPT_DIRECTIVE),
+          createTextFromPatkaTextKey('prompt.system', {
+            workingDirectory: dependencyContainer.resolve(WORKING_DIRECTORY),
+          }),
         ),
     });
     child.register(AGENT_NAME, {useValue: 'ROOT'});
@@ -75,15 +72,13 @@ describe('Patka', () => {
     const userInputs = new Subject<PatkaUserInput>();
     const child = container.createChildContainer();
     child.register(WORKING_DIRECTORY, {useValue: '/home/user'});
-    child.register(PATKA_PROMPT_DIRECTIVE, {
-      useValue: createPatkaPromptDirective(),
-    });
-    child.register(PATKA_PROMPT_FACTORY, {
+    child.register(INFERENCE_CLIENT_CHAT_INPUT_FACTORY, {
       useFactory: (dependencyContainer: DependencyContainer) =>
-        new DefaultPatkaPromptFactory(
+        new DefaultInferenceClientChatInputFactory(
           dependencyContainer.resolve(PatkaTools),
-          dependencyContainer.resolve(WORKING_DIRECTORY),
-          dependencyContainer.resolve(PATKA_PROMPT_DIRECTIVE),
+          createTextFromPatkaTextKey('prompt.system', {
+            workingDirectory: dependencyContainer.resolve(WORKING_DIRECTORY),
+          }),
         ),
     });
     child.register(AGENT_NAME, {useValue: 'ROOT'});
@@ -92,7 +87,10 @@ describe('Patka', () => {
     child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {
-      useValue: {generate: () => of({content: 'Paris', usage: {inputTokens: 0, outputTokens: 0}})},
+      useValue: {
+        generate: () =>
+          of({content: 'Paris', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+      },
     });
     child.register(PATKA_TOOL, {useClass: ListFiles});
     child.register(PATKA_TOOL, {useClass: ReadFile});
@@ -103,9 +101,9 @@ describe('Patka', () => {
         updateLogs: vi.fn(),
         showLogs: vi.fn(),
         hideLogs: vi.fn(),
-        updateLastPrompt: vi.fn(),
-        showLastPrompt: vi.fn(),
-        hideLastPrompt: vi.fn(),
+        updateInferenceClientChat: vi.fn(),
+        showInferenceClientChat: vi.fn(),
+        hideInferenceClientChat: vi.fn(),
       },
     });
     child.register(PATKA_CONTEXT_ENTRIES, {
@@ -129,18 +127,16 @@ describe('Patka', () => {
 
   it('gives the UI the prompt sent to the model', () => {
     const userInputs = new Subject<PatkaUserInput>();
-    const updateLastPrompt = vi.fn();
+    const updateInferenceClientChat = vi.fn();
     const child = container.createChildContainer();
     child.register(WORKING_DIRECTORY, {useValue: '/home/user'});
-    child.register(PATKA_PROMPT_DIRECTIVE, {
-      useValue: createPatkaPromptDirective(),
-    });
-    child.register(PATKA_PROMPT_FACTORY, {
+    child.register(INFERENCE_CLIENT_CHAT_INPUT_FACTORY, {
       useFactory: (dependencyContainer: DependencyContainer) =>
-        new DefaultPatkaPromptFactory(
+        new DefaultInferenceClientChatInputFactory(
           dependencyContainer.resolve(PatkaTools),
-          dependencyContainer.resolve(WORKING_DIRECTORY),
-          dependencyContainer.resolve(PATKA_PROMPT_DIRECTIVE),
+          createTextFromPatkaTextKey('prompt.system', {
+            workingDirectory: dependencyContainer.resolve(WORKING_DIRECTORY),
+          }),
         ),
     });
     child.register(AGENT_NAME, {useValue: 'ROOT'});
@@ -149,7 +145,10 @@ describe('Patka', () => {
     child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {
-      useValue: {generate: () => of({content: 'Paris', usage: {inputTokens: 0, outputTokens: 0}})},
+      useValue: {
+        generate: () =>
+          of({content: 'Paris', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+      },
     });
     child.register(PATKA_TOOL, {useClass: ListFiles});
     child.register(PATKA_TOOL, {useClass: ReadFile});
@@ -160,9 +159,9 @@ describe('Patka', () => {
         updateLogs: vi.fn(),
         showLogs: vi.fn(),
         hideLogs: vi.fn(),
-        updateLastPrompt,
-        showLastPrompt: vi.fn(),
-        hideLastPrompt: vi.fn(),
+        updateInferenceClientChat,
+        showInferenceClientChat: vi.fn(),
+        hideInferenceClientChat: vi.fn(),
       },
     });
     child.register(PATKA_CONTEXT_ENTRIES, {
@@ -173,23 +172,21 @@ describe('Patka', () => {
 
     userInputs.next({content: 'capital of France?', timestamp: new Date(), id: randomUUID()});
 
-    expect(updateLastPrompt).toHaveBeenCalledWith(
-      expect.stringContaining('User: capital of France?'),
+    expect(updateInferenceClientChat).toHaveBeenCalledWith(
+      expect.stringContaining('capital of France?'),
     );
   });
   it('gives the answer what the user said as root', () => {
     const userInputs = new Subject<PatkaUserInput>();
     const child = container.createChildContainer();
     child.register(WORKING_DIRECTORY, {useValue: '/home/user'});
-    child.register(PATKA_PROMPT_DIRECTIVE, {
-      useValue: createPatkaPromptDirective(),
-    });
-    child.register(PATKA_PROMPT_FACTORY, {
+    child.register(INFERENCE_CLIENT_CHAT_INPUT_FACTORY, {
       useFactory: (dependencyContainer: DependencyContainer) =>
-        new DefaultPatkaPromptFactory(
+        new DefaultInferenceClientChatInputFactory(
           dependencyContainer.resolve(PatkaTools),
-          dependencyContainer.resolve(WORKING_DIRECTORY),
-          dependencyContainer.resolve(PATKA_PROMPT_DIRECTIVE),
+          createTextFromPatkaTextKey('prompt.system', {
+            workingDirectory: dependencyContainer.resolve(WORKING_DIRECTORY),
+          }),
         ),
     });
     child.register(AGENT_NAME, {useValue: 'ROOT'});
@@ -198,7 +195,10 @@ describe('Patka', () => {
     child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {
-      useValue: {generate: () => of({content: 'Paris', usage: {inputTokens: 0, outputTokens: 0}})},
+      useValue: {
+        generate: () =>
+          of({content: 'Paris', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+      },
     });
     child.register(PATKA_TOOL, {useClass: ListFiles});
     child.register(PATKA_TOOL, {useClass: ReadFile});
@@ -209,9 +209,9 @@ describe('Patka', () => {
         updateLogs: vi.fn(),
         showLogs: vi.fn(),
         hideLogs: vi.fn(),
-        updateLastPrompt: vi.fn(),
-        showLastPrompt: vi.fn(),
-        hideLastPrompt: vi.fn(),
+        updateInferenceClientChat: vi.fn(),
+        showInferenceClientChat: vi.fn(),
+        hideInferenceClientChat: vi.fn(),
       },
     });
     child.register(PATKA_CONTEXT_ENTRIES, {
@@ -233,15 +233,13 @@ describe('Patka', () => {
     const userInputs = new Subject<PatkaUserInput>();
     const child = container.createChildContainer();
     child.register(WORKING_DIRECTORY, {useValue: '/home/user'});
-    child.register(PATKA_PROMPT_DIRECTIVE, {
-      useValue: createPatkaPromptDirective(),
-    });
-    child.register(PATKA_PROMPT_FACTORY, {
+    child.register(INFERENCE_CLIENT_CHAT_INPUT_FACTORY, {
       useFactory: (dependencyContainer: DependencyContainer) =>
-        new DefaultPatkaPromptFactory(
+        new DefaultInferenceClientChatInputFactory(
           dependencyContainer.resolve(PatkaTools),
-          dependencyContainer.resolve(WORKING_DIRECTORY),
-          dependencyContainer.resolve(PATKA_PROMPT_DIRECTIVE),
+          createTextFromPatkaTextKey('prompt.system', {
+            workingDirectory: dependencyContainer.resolve(WORKING_DIRECTORY),
+          }),
         ),
     });
     child.register(AGENT_NAME, {useValue: 'ROOT'});
@@ -250,7 +248,10 @@ describe('Patka', () => {
     child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {
-      useValue: {generate: () => of({content: 'Paris', usage: {inputTokens: 0, outputTokens: 0}})},
+      useValue: {
+        generate: () =>
+          of({content: 'Paris', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
+      },
     });
     child.register(PATKA_TOOL, {useClass: ListFiles});
     child.register(PATKA_TOOL, {useClass: ReadFile});
@@ -261,9 +262,9 @@ describe('Patka', () => {
         updateLogs: vi.fn(),
         showLogs: vi.fn(),
         hideLogs: vi.fn(),
-        updateLastPrompt: vi.fn(),
-        showLastPrompt: vi.fn(),
-        hideLastPrompt: vi.fn(),
+        updateInferenceClientChat: vi.fn(),
+        showInferenceClientChat: vi.fn(),
+        hideInferenceClientChat: vi.fn(),
       },
     });
     child.register(PATKA_CONTEXT_ENTRIES, {

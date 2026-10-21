@@ -85,6 +85,7 @@ describe('PatkaEngine', () => {
         id: randomUUID(),
         usage: {inputTokens: 0, outputTokens: 0},
         content: 'world',
+        toolCall: none,
       });
 
       expect(patkaChatEntries.at(-1)?.metadata.duration).toBe('1200 ms');
@@ -109,6 +110,7 @@ describe('PatkaEngine', () => {
         id: randomUUID(),
         usage: {inputTokens: 100, outputTokens: 100},
         content: 'other',
+        toolCall: none,
       });
       patkaContext.append({
         type: 'PatkaUserUtterance',
@@ -127,7 +129,8 @@ describe('PatkaEngine', () => {
         parent: some(patkaUserUtteranceId),
         id: randomUUID(),
         usage: {inputTokens: 10, outputTokens: 2},
-        content: '$$$invoke(read_file, {"path": "note.txt"})',
+        content: '',
+        toolCall: some({name: 'read_file', input: {path: 'note.txt'}}),
       });
       patkaContext.append({
         type: 'PatkaInferenceClientResponse',
@@ -138,6 +141,7 @@ describe('PatkaEngine', () => {
         id: randomUUID(),
         usage: {inputTokens: 20, outputTokens: 3},
         content: 'world',
+        toolCall: none,
       });
 
       expect(patkaChatEntries.at(-1)?.metadata).toMatchObject({
@@ -184,6 +188,7 @@ describe('PatkaEngine', () => {
         id: randomUUID(),
         usage: {inputTokens: 0, outputTokens: 0},
         content: 'world',
+        toolCall: none,
       });
 
       expect(patkaChatEntries.map((entry) => entry.author)).toEqual(['patka']);
@@ -233,7 +238,7 @@ describe('PatkaEngine', () => {
       expect(patkaChatEntries).toEqual([]);
     });
 
-    it('keeps a reply that invokes a tool out of the chat', () => {
+    it('keeps a reply that calls a tool out of the chat', () => {
       const patkaContext = new PatkaContext();
       const patkaEngine = new PatkaEngine(patkaContext, 'patka');
       let patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
@@ -249,7 +254,8 @@ describe('PatkaEngine', () => {
         parent: none,
         id: randomUUID(),
         usage: {inputTokens: 0, outputTokens: 0},
-        content: '$$$invoke(read_file, {"path": "note.txt"})',
+        content: '',
+        toolCall: some({name: 'read_file', input: {path: 'note.txt'}}),
       });
 
       expect(patkaChatEntries).toEqual([]);
@@ -326,6 +332,7 @@ describe('PatkaEngine', () => {
         id: randomUUID(),
         usage: {inputTokens: 0, outputTokens: 0},
         content: 'world',
+        toolCall: none,
       });
 
       expect(patkaChatEntries.map((entry) => entry.role)).toEqual(['user', 'agent']);

@@ -34,7 +34,7 @@ export class Patka implements Disposable {
   private readonly appendToContext: Subscription;
   private readonly updateChat: Subscription;
   private readonly updateLogs: Subscription;
-  private readonly updateLastPrompt: Subscription;
+  private readonly updateInferenceClientChat: Subscription;
   private readonly patkaContext: PatkaContext;
   private readonly patkaAgent: PatkaAgent;
   private readonly patkaContextLogger: PatkaContextLogger;
@@ -70,7 +70,7 @@ export class Patka implements Disposable {
         scan((logs: ReadonlyArray<string>, log: string) => [...logs, log].slice(-KEPT_LOGS), []),
       )
       .subscribe((logs) => this.patkaUI.updateLogs(logs));
-    this.updateLastPrompt = this.patkaContext.entries
+    this.updateInferenceClientChat = this.patkaContext.entries
       .pipe(
         filter(
           (patkaContextEntry): patkaContextEntry is PatkaInferenceClientRequest =>
@@ -78,7 +78,9 @@ export class Patka implements Disposable {
         ),
       )
       .subscribe((patkaInferenceClientRequest) =>
-        this.patkaUI.updateLastPrompt(patkaInferenceClientRequest.prompt),
+        this.patkaUI.updateInferenceClientChat(
+          JSON.stringify(patkaInferenceClientRequest.input, null, 2),
+        ),
       );
   }
 
@@ -88,7 +90,7 @@ export class Patka implements Disposable {
     this.appendToContext.unsubscribe();
     this.updateChat.unsubscribe();
     this.updateLogs.unsubscribe();
-    this.updateLastPrompt.unsubscribe();
+    this.updateInferenceClientChat.unsubscribe();
   }
 
   private userEntries(): Observable<PatkaContextEntry> {

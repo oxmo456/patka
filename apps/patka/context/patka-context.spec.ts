@@ -28,6 +28,7 @@ describe('PatkaContext', () => {
       id: randomUUID(),
       usage: {inputTokens: 0, outputTokens: 0},
       content: 'Paris',
+      toolCall: none,
     });
 
     expect(received.map((patkaContextEntry) => patkaContextEntry.type)).toEqual([
@@ -88,6 +89,7 @@ describe('PatkaContext', () => {
       id: randomUUID(),
       usage: {inputTokens: 0, outputTokens: 0},
       content: 'Paris',
+      toolCall: none,
     });
     patkaContext.append({
       type: 'PatkaInferenceClientResponse',
@@ -98,6 +100,7 @@ describe('PatkaContext', () => {
       id: randomUUID(),
       usage: {inputTokens: 0, outputTokens: 0},
       content: 'Berlin',
+      toolCall: none,
     });
     const received: Array<PatkaContextEntry> = [];
 

@@ -131,14 +131,14 @@ export class PatkaTUI implements PatkaUI {
   private readonly conversation: Widgets.BoxElement;
   private readonly logs: Widgets.BoxElement;
   private readonly logsSeparator: Widgets.LineElement;
-  private readonly lastPrompt: Widgets.BoxElement;
-  private readonly lastPromptSeparator: Widgets.LineElement;
+  private readonly inferenceClientChat: Widgets.BoxElement;
+  private readonly inferenceClientChatSeparator: Widgets.LineElement;
   private readonly chatColumn: ReadonlyArray<Widgets.BlessedElement>;
   private patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
   private logLines: ReadonlyArray<string> = [];
-  private lastPromptContent = '';
+  private inferenceClientChatContent = '';
   private logsVisible = true;
-  private lastPromptVisible = false;
+  private inferenceClientChatVisible = false;
 
   readonly userInputs: Observable<PatkaUserInput> = this._userInputs.asObservable();
 
@@ -174,7 +174,7 @@ export class PatkaTUI implements PatkaUI {
       height: '100%',
       style: {fg: SOLARIZED.base02, bg: SOLARIZED.base03},
     });
-    this.lastPrompt = blessed.box({
+    this.inferenceClientChat = blessed.box({
       top: 0,
       height: '100%',
       content: '',
@@ -186,7 +186,7 @@ export class PatkaTUI implements PatkaUI {
         bg: SOLARIZED.base03,
       },
     });
-    this.lastPromptSeparator = blessed.line({
+    this.inferenceClientChatSeparator = blessed.line({
       orientation: 'vertical',
       top: 0,
       height: '100%',
@@ -227,8 +227,8 @@ export class PatkaTUI implements PatkaUI {
     this.screen.append(this.conversation);
     this.screen.append(this.logsSeparator);
     this.screen.append(this.logs);
-    this.screen.append(this.lastPromptSeparator);
-    this.screen.append(this.lastPrompt);
+    this.screen.append(this.inferenceClientChatSeparator);
+    this.screen.append(this.inferenceClientChat);
     this.screen.append(promptInput);
     this.screen.append(lineAboveInput);
     this.screen.append(lineBelowInput);
@@ -250,9 +250,9 @@ export class PatkaTUI implements PatkaUI {
     this.screen.render();
   }
 
-  updateLastPrompt(prompt: string): void {
-    this.lastPromptContent = prompt;
-    this.drawLastPrompt();
+  updateInferenceClientChat(inferenceClientChat: string): void {
+    this.inferenceClientChatContent = inferenceClientChat;
+    this.drawInferenceClientChat();
     this.screen.render();
   }
 
@@ -266,13 +266,13 @@ export class PatkaTUI implements PatkaUI {
     this.draw();
   }
 
-  showLastPrompt(): void {
-    this.lastPromptVisible = true;
+  showInferenceClientChat(): void {
+    this.inferenceClientChatVisible = true;
     this.draw();
   }
 
-  hideLastPrompt(): void {
-    this.lastPromptVisible = false;
+  hideInferenceClientChat(): void {
+    this.inferenceClientChatVisible = false;
     this.draw();
   }
 
@@ -280,14 +280,16 @@ export class PatkaTUI implements PatkaUI {
     this.layout();
     this.drawChat();
     this.drawLogs();
-    this.drawLastPrompt();
+    this.drawInferenceClientChat();
     this.screen.render();
   }
 
   private layout(): void {
     const panels: ReadonlyArray<readonly [Widgets.LineElement, Widgets.BoxElement]> = [
       ...(this.logsVisible ? [[this.logsSeparator, this.logs] as const] : []),
-      ...(this.lastPromptVisible ? [[this.lastPromptSeparator, this.lastPrompt] as const] : []),
+      ...(this.inferenceClientChatVisible
+        ? [[this.inferenceClientChatSeparator, this.inferenceClientChat] as const]
+        : []),
     ];
     const screenWidth = Number(this.screen.width);
     const columnWidth = Math.floor(screenWidth / (panels.length + 1));
@@ -299,8 +301,8 @@ export class PatkaTUI implements PatkaUI {
     for (const element of [
       this.logsSeparator,
       this.logs,
-      this.lastPromptSeparator,
-      this.lastPrompt,
+      this.inferenceClientChatSeparator,
+      this.inferenceClientChat,
     ]) {
       element.hide();
     }
@@ -337,8 +339,8 @@ export class PatkaTUI implements PatkaUI {
     this.logs.setScrollPerc(100);
   }
 
-  private drawLastPrompt(): void {
-    this.lastPrompt.setContent(this.lastPromptContent);
-    this.lastPrompt.setScrollPerc(100);
+  private drawInferenceClientChat(): void {
+    this.inferenceClientChat.setContent(this.inferenceClientChatContent);
+    this.inferenceClientChat.setScrollPerc(100);
   }
 }

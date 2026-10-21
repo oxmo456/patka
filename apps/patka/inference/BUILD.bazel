@@ -4,14 +4,12 @@ ptk_package(
     name = "inference",
     srcs = [
         "anthropic-inference-client.ts",
-        "claude-inference-client.ts",
         "inference-client.token.ts",
         "ollama-inference-client.ts",
         "patka-inference.ts",
     ],
     test_srcs = [
         "anthropic-inference-client.spec.ts",
-        "claude-inference-client.spec.ts",
         "ollama-inference-client.spec.ts",
         "patka-inference.spec.ts",
     ],
@@ -23,7 +21,8 @@ ptk_package(
         "//:node_modules/rxjs",
         "//:node_modules/ts-pattern",
         "//:node_modules/tsyringe",
-        "//apps/patka/text",
+        "//packages/json",
+        "//packages/option",
         "//packages/patka-inference",
     ],
 )

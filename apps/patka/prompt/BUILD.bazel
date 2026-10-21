@@ -2,20 +2,11 @@ load("//tools:ptk_package.bzl", "ptk_package")
 
 ptk_package(
     name = "prompt",
-    srcs = [
-        "patka-prompt-directive.token.ts",
-        "patka-prompt-directives.ts",
-        "patka-prompt-factory.token.ts",
-    ],
-    test_srcs = ["patka-prompt-directives.spec.ts"],
+    srcs = ["inference-client-chat-input-factory.token.ts"],
+    test_srcs = [],
     visibility = ["//apps/patka:__subpackages__"],
     deps = [
-        "//packages/json",
         "//:node_modules/tsyringe",
-        "//apps/patka/text",
-        "//packages/patka-tool",
-        "//packages/patka-tool-llm-manual",
         "//packages/patka-prompt",
-        "//packages/working-directory",
     ],
 )

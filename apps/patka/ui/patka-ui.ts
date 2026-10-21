@@ -9,13 +9,13 @@ export interface PatkaUI {
 
   updateLogs(logs: ReadonlyArray<string>): void;
 
-  updateLastPrompt(prompt: string): void;
+  updateInferenceClientChat(inferenceClientChat: string): void;
 
   showLogs(): void;
 
   hideLogs(): void;
 
-  showLastPrompt(): void;
+  showInferenceClientChat(): void;
 
-  hideLastPrompt(): void;
+  hideInferenceClientChat(): void;
 }

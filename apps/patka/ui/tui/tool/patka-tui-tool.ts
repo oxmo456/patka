@@ -10,7 +10,11 @@ import {PATKA_UI} from '../../patka-ui.token.ts';
 import type {PatkaUI} from '../../patka-ui.ts';
 
 export type PatkaTUIToolInput = {
-  readonly command: 'show_logs' | 'hide_logs' | 'show_last_prompt' | 'hide_last_prompt';
+  readonly command:
+    | 'show_logs'
+    | 'hide_logs'
+    | 'show_inference_client_chat'
+    | 'hide_inference_client_chat';
 };
 
 @injectable()
@@ -27,7 +31,7 @@ export class PatkaTUITool implements PatkaTool<PatkaTUIToolInput, string> {
       {
         command: propertyJsonSchemaLLMManual(
           'string',
-          'One of: "show_logs" to show the log panel, "hide_logs" to hide the log panel, "show_last_prompt" to show the panel of the last prompt sent to the model, "hide_last_prompt" to hide it.',
+          'One of: "show_logs" to show the log panel, "hide_logs" to hide the log panel, "show_inference_client_chat" to show the panel of the last inference client chat sent to the model, "hide_inference_client_chat" to hide it.',
         ),
       },
     ),
@@ -50,12 +54,12 @@ export class PatkaTUITool implements PatkaTool<PatkaTUIToolInput, string> {
           this.patkaUI.hideLogs();
           return EMPTY;
         })
-        .with('show_last_prompt', (): Observable<string> => {
-          this.patkaUI.showLastPrompt();
+        .with('show_inference_client_chat', (): Observable<string> => {
+          this.patkaUI.showInferenceClientChat();
           return EMPTY;
         })
-        .with('hide_last_prompt', (): Observable<string> => {
-          this.patkaUI.hideLastPrompt();
+        .with('hide_inference_client_chat', (): Observable<string> => {
+          this.patkaUI.hideInferenceClientChat();
           return EMPTY;
         })
         .otherwise((command): Observable<string> => {
