@@ -1,14 +1,14 @@
 import type Anthropic from '@anthropic-ai/sdk';
 import {defer, from, map, type Observable} from 'rxjs';
 import {match} from 'ts-pattern';
-import type {JsonObject} from '../../../packages/json/json.ts';
-import {none, type Option, some} from '../../../packages/option/option.ts';
-import type {InferenceClient} from '../../../packages/patka-inference/inference-client.ts';
-import type {InferenceClientChatInput} from '../../../packages/patka-inference/inference-client-chat-input.ts';
-import type {InferenceClientResponse} from '../../../packages/patka-inference/inference-client-response.ts';
-import type {InferenceMessage} from '../../../packages/patka-inference/inference-message.ts';
-import type {InferenceTool} from '../../../packages/patka-inference/inference-tool.ts';
-import type {InferenceToolCall} from '../../../packages/patka-inference/inference-tool-call.ts';
+import type {JsonObject} from '../json/json.ts';
+import {none, type Option, some} from '../option/option.ts';
+import type {InferenceClient} from '../patka-inference/inference-client.ts';
+import type {InferenceClientChatInput} from '../patka-inference/inference-client-chat-input.ts';
+import type {InferenceClientResponse} from '../patka-inference/inference-client-response.ts';
+import type {InferenceMessage} from '../patka-inference/inference-message.ts';
+import type {InferenceTool} from '../patka-inference/inference-tool.ts';
+import type {InferenceToolCall} from '../patka-inference/inference-tool-call.ts';
 
 const MAX_TOKENS = 16000;
 

@@ -1,7 +1,7 @@
 import type Anthropic from '@anthropic-ai/sdk';
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
-import {none, some} from '../../../packages/option/option.ts';
+import {none, some} from '../option/option.ts';
 import {AnthropicInferenceClient} from './anthropic-inference-client.ts';
 
 const anAnthropic = (create: () => unknown): Anthropic =>

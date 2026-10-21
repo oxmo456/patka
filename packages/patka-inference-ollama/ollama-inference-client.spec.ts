@@ -1,7 +1,7 @@
 import type {Ollama} from 'ollama';
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
-import {none, some} from '../../../packages/option/option.ts';
+import {none, some} from '../option/option.ts';
 import {OllamaInferenceClient} from './ollama-inference-client.ts';
 
 describe('OllamaInferenceClient', () => {

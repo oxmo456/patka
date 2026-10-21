@@ -2,8 +2,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import {Ollama} from 'ollama';
 import {match} from 'ts-pattern';
 import type {InferenceClient} from '../../../packages/patka-inference/inference-client.ts';
-import {AnthropicInferenceClient} from './anthropic-inference-client.ts';
-import {OllamaInferenceClient} from './ollama-inference-client.ts';
+import {AnthropicInferenceClient} from '../../../packages/patka-inference-anthropic/anthropic-inference-client.ts';
+import {OllamaInferenceClient} from '../../../packages/patka-inference-ollama/ollama-inference-client.ts';
 
 const DEFAULT_OLLAMA_MODEL = 'qwen2.5-coder:latest';
 

@@ -1,0 +1,17 @@
+load("//tools:ptk_library.bzl", "ptk_library")
+
+ptk_library(
+    name = "patka-inference-anthropic",
+    srcs = ["anthropic-inference-client.ts"],
+    test_srcs = ["anthropic-inference-client.spec.ts"],
+    deps = [
+        "//packages/json",
+        "//packages/option",
+        "//packages/patka-inference",
+    ],
+    npm_deps = [
+        "//:node_modules/@anthropic-ai/sdk",
+        "//:node_modules/rxjs",
+        "//:node_modules/ts-pattern",
+    ],
+)
