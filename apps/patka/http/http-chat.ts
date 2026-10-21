@@ -47,7 +47,8 @@ function extractContentFromBody(body: string): Option<string> {
     typeof parsed.value === 'object' &&
     parsed.value !== null &&
     'content' in parsed.value &&
-    typeof parsed.value.content === 'string'
+    typeof parsed.value.content === 'string' &&
+    parsed.value.content.trim() !== ''
     ? some(parsed.value.content)
     : none;
 }
