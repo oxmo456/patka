@@ -1,4 +1,5 @@
 import {randomUUID} from 'node:crypto';
+import {createServer} from 'node:http';
 import {of, Subject} from 'rxjs';
 import {container, type DependencyContainer} from 'tsyringe';
 import {describe, expect, it, vi} from 'vitest';
@@ -15,6 +16,7 @@ import {AGENT_NAME} from './agent/agent-name.token.ts';
 import {createPatkaAgentFromDependencyContainer} from './agent/patka-agent-factory.ts';
 import {PatkaContext} from './context/patka-context.ts';
 import {PATKA_CONTEXT_ENTRIES} from './context/patka-context-entries.token.ts';
+import {HTTP_SERVER_FACTORY} from './http/http-server-factory.token.ts';
 import {INFERENCE_CLIENT} from './inference/inference-client.token.ts';
 import {Patka} from './patka.ts';
 import {INFERENCE_CLIENT_CHAT_INPUT_FACTORY} from './prompt/inference-client-chat-input-factory.token.ts';
@@ -53,6 +55,7 @@ describe('Patka', () => {
     });
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.registerSingleton(PatkaLogger);
+    child.register(HTTP_SERVER_FACTORY, {useValue: createServer});
     child.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
     child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
@@ -89,6 +92,7 @@ describe('Patka', () => {
     });
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.registerSingleton(PatkaLogger);
+    child.register(HTTP_SERVER_FACTORY, {useValue: createServer});
     child.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
     child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
@@ -153,6 +157,7 @@ describe('Patka', () => {
     });
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.registerSingleton(PatkaLogger);
+    child.register(HTTP_SERVER_FACTORY, {useValue: createServer});
     child.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
     child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
@@ -209,6 +214,7 @@ describe('Patka', () => {
     });
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.registerSingleton(PatkaLogger);
+    child.register(HTTP_SERVER_FACTORY, {useValue: createServer});
     child.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
     child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
@@ -268,6 +274,7 @@ describe('Patka', () => {
     });
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.registerSingleton(PatkaLogger);
+    child.register(HTTP_SERVER_FACTORY, {useValue: createServer});
     child.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
     child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});

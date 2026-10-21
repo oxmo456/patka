@@ -24,6 +24,7 @@ ptk_app(
         "//apps/patka/agent",
         "//apps/patka/chat",
         "//apps/patka/context",
+        "//apps/patka/http",
         "//apps/patka/inference",
         "//apps/patka/prompt",
         "//apps/patka/text",

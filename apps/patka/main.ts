@@ -1,5 +1,6 @@
 import {PatkaLogger} from '../../packages/patka-logger/patka-logger.ts';
 import 'reflect-metadata';
+import {createServer, type RequestListener, type Server} from 'node:http';
 import blessed from 'blessed';
 import {container, type DependencyContainer, Lifecycle} from 'tsyringe';
 import {$} from 'zx';
@@ -19,6 +20,8 @@ import {AGENT_NAME} from './agent/agent-name.token.ts';
 import {createPatkaAgentFromDependencyContainer} from './agent/patka-agent-factory.ts';
 import {PatkaContext} from './context/patka-context.ts';
 import {PATKA_CONTEXT_ENTRIES} from './context/patka-context-entries.token.ts';
+import {HttpChat} from './http/http-chat.ts';
+import {HTTP_SERVER_FACTORY} from './http/http-server-factory.token.ts';
 import {INFERENCE_CLIENT} from './inference/inference-client.token.ts';
 import {
   buildInferenceClient,
@@ -38,6 +41,12 @@ import {PatkaTUITool} from './ui/tui/tool/patka-tui-tool.ts';
 // zx must never write to the terminal: blessed owns the screen.
 $.quiet = true;
 
+const HTTP_PORT = 4242;
+
+function createHttpServerFromRequestListener(requestListener: RequestListener): Server {
+  return createServer(requestListener).listen(HTTP_PORT, '127.0.0.1');
+}
+
 container.register(WORKING_DIRECTORY, {useValue: process.cwd()});
 container.register(INFERENCE_CLIENT_CHAT_INPUT_FACTORY, {
   useFactory: (dependencyContainer: DependencyContainer) =>
@@ -50,6 +59,8 @@ container.register(INFERENCE_CLIENT_CHAT_INPUT_FACTORY, {
 });
 container.register(AGENT_NAME, {useValue: 'ROOT'});
 container.registerSingleton(PatkaLogger);
+container.registerSingleton(HttpChat);
+container.register(HTTP_SERVER_FACTORY, {useValue: createHttpServerFromRequestListener});
 container.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
 container.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
 container.register(BLESSED, {useValue: blessed});

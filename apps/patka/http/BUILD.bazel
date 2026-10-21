@@ -1,0 +1,22 @@
+load("//tools:ptk_package.bzl", "ptk_package")
+
+ptk_package(
+    name = "http",
+    srcs = [
+        "http-chat.ts",
+        "http-server-factory.token.ts",
+        "http-server-factory.ts",
+    ],
+    test_srcs = [],
+    visibility = ["//apps/patka:__subpackages__"],
+    deps = [
+        "//:node_modules/@types/node",
+        "//:node_modules/rxjs",
+        "//:node_modules/tsyringe",
+        "//apps/patka/chat",
+        "//apps/patka/ui",
+        "//packages/disposable",
+        "//packages/option",
+        "//packages/try",
+    ],
+)

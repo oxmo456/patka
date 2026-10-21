@@ -23,6 +23,7 @@ import {createTimestamp} from '../../packages/timestamp/timestamp.ts';
 import {PatkaEngine} from './chat/patka-engine.ts';
 import {PatkaContext} from './context/patka-context.ts';
 import {PatkaContextLogger} from './context/patka-context-logger.ts';
+import {HttpChat} from './http/http-chat.ts';
 import {PATKA_UI} from './ui/patka-ui.token.ts';
 import type {PatkaUI} from './ui/patka-ui.ts';
 import {toPatkaUtterance} from './ui/patka-user-input.ts';
@@ -41,6 +42,7 @@ export class Patka implements Disposable {
   private readonly patkaEngine: PatkaEngine;
   private readonly patkaUI: PatkaUI;
   private readonly patkaLogger: PatkaLogger;
+  private readonly httpChat: HttpChat;
 
   constructor(
     @inject(PatkaContext) patkaContext: PatkaContext,
@@ -49,6 +51,7 @@ export class Patka implements Disposable {
     @inject(PatkaEngine) patkaEngine: PatkaEngine,
     @inject(PATKA_UI) patkaUI: PatkaUI,
     @inject(PatkaLogger) patkaLogger: PatkaLogger,
+    @inject(HttpChat) httpChat: HttpChat,
   ) {
     this.patkaContext = patkaContext;
     this.patkaAgent = patkaAgent;
@@ -56,15 +59,17 @@ export class Patka implements Disposable {
     this.patkaEngine = patkaEngine;
     this.patkaUI = patkaUI;
     this.patkaLogger = patkaLogger;
+    this.httpChat = httpChat;
 
     this.patkaContextLogger.start();
 
     this.appendToContext = merge(this.userEntries(), this.patkaAgent.output).subscribe(
       (patkaContextEntry) => this.patkaContext.append(patkaContextEntry),
     );
-    this.updateChat = this.patkaEngine.patkaChatEntries.subscribe((patkaChatEntries) =>
-      this.patkaUI.updateChat(patkaChatEntries),
-    );
+    this.updateChat = this.patkaEngine.patkaChatEntries.subscribe((patkaChatEntries) => {
+      this.patkaUI.updateChat(patkaChatEntries);
+      this.httpChat.updateChat(patkaChatEntries);
+    });
     this.updateLogs = this.patkaLogger.logs
       .pipe(
         scan((logs: ReadonlyArray<string>, log: string) => [...logs, log].slice(-KEPT_LOGS), []),
@@ -94,7 +99,7 @@ export class Patka implements Disposable {
   }
 
   private userEntries(): Observable<PatkaContextEntry> {
-    return this.patkaUI.userInputs.pipe(
+    return merge(this.patkaUI.userInputs, this.httpChat.userInputs).pipe(
       withLatestFrom(
         this.patkaContext.entries.pipe(
           map((patkaContextEntry): Option<PatkaContextEntry> => some(patkaContextEntry)),
