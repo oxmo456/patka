@@ -10,7 +10,7 @@ import type {PatkaUserInput} from '../ui/patka-user-input.ts';
 import {HTTP_SERVER_FACTORY} from './http-server-factory.token.ts';
 import type {HttpServerFactory} from './http-server-factory.ts';
 
-type HttpChatResponse = {
+type PatkaHTTPServerResponse = {
   readonly statusCode: number;
   readonly body: unknown;
 };
@@ -54,9 +54,10 @@ function extractContentFromBody(body: string): Option<string> {
 }
 
 @injectable()
-export class HttpChat implements Disposable {
+export class PatkaHTTPServer implements Disposable {
   private readonly _userInputs = new Subject<PatkaUserInput>();
-  private readonly _patkaChatEntries = new BehaviorSubject<ReadonlyArray<PatkaChatEntry>>([]);
+  private readonly patkaChatEntries = new BehaviorSubject<ReadonlyArray<PatkaChatEntry>>([]);
+  private readonly logs = new BehaviorSubject<ReadonlyArray<string>>([]);
   private readonly server: Server;
 
   readonly userInputs: Observable<PatkaUserInput> = this._userInputs.asObservable();
@@ -66,7 +67,11 @@ export class HttpChat implements Disposable {
   }
 
   updateChat(patkaChatEntries: ReadonlyArray<PatkaChatEntry>): void {
-    this._patkaChatEntries.next(patkaChatEntries);
+    this.patkaChatEntries.next(patkaChatEntries);
+  }
+
+  updateLogs(logs: ReadonlyArray<string>): void {
+    this.logs.next(logs);
   }
 
   dispose(): void {
@@ -78,18 +83,24 @@ export class HttpChat implements Disposable {
     serverResponse: ServerResponse,
   ): void => {
     this.respond(incomingMessage)
-      .catch((): HttpChatResponse => ({statusCode: 400, body: {error: 'Invalid request'}}))
-      .then((httpChatResponse) => {
-        serverResponse.writeHead(httpChatResponse.statusCode, {
+      .catch((): PatkaHTTPServerResponse => ({statusCode: 400, body: {error: 'Invalid request'}}))
+      .then((patkaHTTPServerResponse) => {
+        serverResponse.writeHead(patkaHTTPServerResponse.statusCode, {
           'content-type': 'application/json',
         });
-        serverResponse.end(JSON.stringify(httpChatResponse.body));
+        serverResponse.end(JSON.stringify(patkaHTTPServerResponse.body));
       });
   };
 
-  private async respond(incomingMessage: IncomingMessage): Promise<HttpChatResponse> {
+  private async respond(incomingMessage: IncomingMessage): Promise<PatkaHTTPServerResponse> {
     if (!isLocalHost(incomingMessage.headers.host)) {
       return {statusCode: 403, body: {error: 'The host must be localhost'}};
+    }
+
+    if (incomingMessage.url === '/logs') {
+      return incomingMessage.method === 'GET'
+        ? {statusCode: 200, body: this.logs.value}
+        : {statusCode: 405, body: {error: 'Method not allowed'}};
     }
 
     if (incomingMessage.url !== '/chat') {
@@ -97,7 +108,7 @@ export class HttpChat implements Disposable {
     }
 
     if (incomingMessage.method === 'GET') {
-      return {statusCode: 200, body: this._patkaChatEntries.value};
+      return {statusCode: 200, body: this.patkaChatEntries.value};
     }
 
     if (incomingMessage.method === 'POST') {
@@ -107,7 +118,7 @@ export class HttpChat implements Disposable {
     return {statusCode: 405, body: {error: 'Method not allowed'}};
   }
 
-  private async post(incomingMessage: IncomingMessage): Promise<HttpChatResponse> {
+  private async post(incomingMessage: IncomingMessage): Promise<PatkaHTTPServerResponse> {
     if (!incomingMessage.headers['content-type']?.startsWith('application/json')) {
       return {statusCode: 415, body: {error: 'The content type must be application/json'}};
     }

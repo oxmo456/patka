@@ -3,7 +3,7 @@ load("//tools:ptk_package.bzl", "ptk_package")
 ptk_package(
     name = "http",
     srcs = [
-        "http-chat.ts",
+        "patka-http-server.ts",
         "http-server-factory.token.ts",
         "http-server-factory.ts",
     ],

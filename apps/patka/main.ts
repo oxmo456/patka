@@ -20,8 +20,8 @@ import {AGENT_NAME} from './agent/agent-name.token.ts';
 import {createPatkaAgentFromDependencyContainer} from './agent/patka-agent-factory.ts';
 import {PatkaContext} from './context/patka-context.ts';
 import {PATKA_CONTEXT_ENTRIES} from './context/patka-context-entries.token.ts';
-import {HttpChat} from './http/http-chat.ts';
 import {HTTP_SERVER_FACTORY} from './http/http-server-factory.token.ts';
+import {PatkaHTTPServer} from './http/patka-http-server.ts';
 import {INFERENCE_CLIENT} from './inference/inference-client.token.ts';
 import {
   buildInferenceClient,
@@ -59,7 +59,7 @@ container.register(INFERENCE_CLIENT_CHAT_INPUT_FACTORY, {
 });
 container.register(AGENT_NAME, {useValue: 'ROOT'});
 container.registerSingleton(PatkaLogger);
-container.registerSingleton(HttpChat);
+container.registerSingleton(PatkaHTTPServer);
 container.register(HTTP_SERVER_FACTORY, {useValue: createHttpServerFromRequestListener});
 container.register(PatkaTools, {useFactory: createPatkaToolsFromDependencyContainer});
 container.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
