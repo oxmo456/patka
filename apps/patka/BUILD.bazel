@@ -53,6 +53,7 @@ ptk_app(
         "//packages/patka-role",
         "//packages/patka-utterance",
         "//packages/performance-timestamp",
+        "//packages/relative-path",
         "//packages/timestamp",
         "//packages/try",
         "//packages/working-directory",

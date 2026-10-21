@@ -4,16 +4,16 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it} from 'vitest';
-import {cd} from 'zx';
 import {ApplyPatch} from './apply-patch.ts';
 
 describe('ApplyPatch', () => {
   it('carries a manual for the LLM', () => {
-    expect(new ApplyPatch().name).toBe('apply_patch');
+    expect(new ApplyPatch(tmpdir()).name).toBe('apply_patch');
   });
 
   it('changes a file', async () => {
     const path = await mkdtemp(join(tmpdir(), 'patka-patch-'));
+
     await writeFile(join(path, 'note.txt'), 'hello\n');
     const patch = [
       '--- a/note.txt',
@@ -23,20 +23,15 @@ describe('ApplyPatch', () => {
       '+hello patka',
       '',
     ].join('\n');
-    const before = process.cwd();
-    cd(path);
 
-    try {
-      await firstValueFrom(new ApplyPatch().invoke({patch}));
-    } finally {
-      cd(before);
-    }
+    await firstValueFrom(new ApplyPatch(path).invoke({patch}));
 
     expect(await readFile(join(path, 'note.txt'), 'utf8')).toBe('hello patka\n');
   });
 
   it('emits a line for each file it applied', async () => {
     const path = await mkdtemp(join(tmpdir(), 'patka-patch-'));
+
     await writeFile(join(path, 'note.txt'), 'hello\n');
     const patch = [
       '--- a/note.txt',
@@ -46,20 +41,15 @@ describe('ApplyPatch', () => {
       '+hello patka',
       '',
     ].join('\n');
-    const before = process.cwd();
-    cd(path);
 
-    try {
-      const output = await firstValueFrom(new ApplyPatch().invoke({patch}));
+    const output = await firstValueFrom(new ApplyPatch(path).invoke({patch}));
 
-      expect(output).toContain('Applied patch note.txt cleanly.');
-    } finally {
-      cd(before);
-    }
+    expect(output).toContain('Applied patch note.txt cleanly.');
   });
 
   it('emits the warnings git prints on stderr', async () => {
     const path = await mkdtemp(join(tmpdir(), 'patka-patch-'));
+
     await writeFile(join(path, 'note.txt'), 'hello\n');
     const patch = [
       '--- a/note.txt',
@@ -69,16 +59,10 @@ describe('ApplyPatch', () => {
       '+hello patka   ',
       '',
     ].join('\n');
-    const before = process.cwd();
-    cd(path);
 
-    try {
-      const output = await firstValueFrom(new ApplyPatch().invoke({patch}));
+    const output = await firstValueFrom(new ApplyPatch(path).invoke({patch}));
 
-      expect(output).toContain('warning: 1 line adds whitespace errors.');
-    } finally {
-      cd(before);
-    }
+    expect(output).toContain('warning: 1 line adds whitespace errors.');
   });
 
   it('creates a file', async () => {
@@ -86,36 +70,26 @@ describe('ApplyPatch', () => {
     const patch = ['--- /dev/null', '+++ b/note.txt', '@@ -0,0 +1 @@', '+hello patka', ''].join(
       '\n',
     );
-    const before = process.cwd();
-    cd(path);
 
-    try {
-      await firstValueFrom(new ApplyPatch().invoke({patch}));
-    } finally {
-      cd(before);
-    }
+    await firstValueFrom(new ApplyPatch(path).invoke({patch}));
 
     expect(await readFile(join(path, 'note.txt'), 'utf8')).toBe('hello patka\n');
   });
 
   it('deletes a file', async () => {
     const path = await mkdtemp(join(tmpdir(), 'patka-patch-'));
+
     await writeFile(join(path, 'note.txt'), 'hello\n');
     const patch = ['--- a/note.txt', '+++ /dev/null', '@@ -1 +0,0 @@', '-hello', ''].join('\n');
-    const before = process.cwd();
-    cd(path);
 
-    try {
-      await firstValueFrom(new ApplyPatch().invoke({patch}));
-    } finally {
-      cd(before);
-    }
+    await firstValueFrom(new ApplyPatch(path).invoke({patch}));
 
     expect(existsSync(join(path, 'note.txt'))).toBe(false);
   });
 
   it('accepts a hunk header with wrong line counts', async () => {
     const path = await mkdtemp(join(tmpdir(), 'patka-patch-'));
+
     await writeFile(join(path, 'note.txt'), 'hello\n');
     const patch = [
       '--- a/note.txt',
@@ -125,20 +99,15 @@ describe('ApplyPatch', () => {
       '+hello patka',
       '',
     ].join('\n');
-    const before = process.cwd();
-    cd(path);
 
-    try {
-      await firstValueFrom(new ApplyPatch().invoke({patch}));
-    } finally {
-      cd(before);
-    }
+    await firstValueFrom(new ApplyPatch(path).invoke({patch}));
 
     expect(await readFile(join(path, 'note.txt'), 'utf8')).toBe('hello patka\n');
   });
 
   it('fails with the error from git when the patch does not match the file', async () => {
     const path = await mkdtemp(join(tmpdir(), 'patka-patch-'));
+
     await writeFile(join(path, 'note.txt'), 'hello\n');
     const patch = [
       '--- a/note.txt',
@@ -148,19 +117,13 @@ describe('ApplyPatch', () => {
       '+hello patka',
       '',
     ].join('\n');
-    const before = process.cwd();
-    cd(path);
 
-    try {
-      await expect(firstValueFrom(new ApplyPatch().invoke({patch}))).rejects.toThrow(
-        'error: patch failed: note.txt:1',
-      );
-    } finally {
-      cd(before);
-    }
+    await expect(firstValueFrom(new ApplyPatch(path).invoke({patch}))).rejects.toThrow(
+      'error: patch failed: note.txt:1',
+    );
   });
 
   it('does not touch the disk until subscribed', () => {
-    expect(() => new ApplyPatch().invoke({patch: 'not a patch'})).not.toThrow();
+    expect(() => new ApplyPatch(tmpdir()).invoke({patch: 'not a patch'})).not.toThrow();
   });
 });

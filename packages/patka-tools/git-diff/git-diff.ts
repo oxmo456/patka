@@ -34,11 +34,21 @@ export class GitDiff implements PatkaTool<GitDiffInput, string> {
     ),
   );
 
+  private readonly workingDirectory: string;
+
+  constructor(workingDirectory: string) {
+    this.workingDirectory = workingDirectory;
+  }
+
   invoke(gitDiffInput: GitDiffInput): Observable<string> {
     return defer(() => {
-      assertRelativePathInsideTheWorkingDirectory(gitDiffInput.relativePath);
+      assertRelativePathInsideTheWorkingDirectory(this.workingDirectory, gitDiffInput.relativePath);
 
-      return from($`git -c color.ui=never diff -- ${gitDiffInput.relativePath}`.text());
+      return from(
+        $({
+          cwd: this.workingDirectory,
+        })`git -c color.ui=never diff -- ${gitDiffInput.relativePath}`.text(),
+      );
     });
   }
 }

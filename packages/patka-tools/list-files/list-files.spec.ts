@@ -5,49 +5,41 @@ import {firstValueFrom} from 'rxjs';
 import {describe, expect, it} from 'vitest';
 import {ListFiles} from './list-files.ts';
 
-const inADirectory = async <T>(run: () => Promise<T>): Promise<T> => {
-  const path = await mkdtemp(join(tmpdir(), 'patka-list-'));
-  await writeFile(join(path, 'second.ts'), '');
-  await writeFile(join(path, 'first.ts'), '');
-  await mkdir(join(path, 'nested'));
-  const before = process.cwd();
-  process.chdir(path);
-
-  try {
-    return await run();
-  } finally {
-    process.chdir(before);
-  }
-};
-
 describe('ListFiles', () => {
   it('carries a manual for the LLM', () => {
-    const listFiles = new ListFiles();
+    const listFiles = new ListFiles(tmpdir());
 
     expect(listFiles.name).toBe('list_files');
   });
 
   it('lists what the directory holds, in order', async () => {
-    const listing = await inADirectory(() =>
-      firstValueFrom(new ListFiles().invoke({relativePath: '.'})),
-    );
+    const path = await mkdtemp(join(tmpdir(), 'patka-list-'));
+    await writeFile(join(path, 'second.ts'), '');
+    await writeFile(join(path, 'first.ts'), '');
+    await mkdir(join(path, 'nested'));
+
+    const listing = await firstValueFrom(new ListFiles(path).invoke({relativePath: '.'}));
 
     expect(listing).toEqual(['first.ts', 'nested/', 'second.ts']);
   });
 
   it('refuses an absolute path', async () => {
-    await expect(firstValueFrom(new ListFiles().invoke({relativePath: tmpdir()}))).rejects.toThrow(
-      'only accepts a relative path',
-    );
+    await expect(
+      firstValueFrom(new ListFiles(tmpdir()).invoke({relativePath: tmpdir()})),
+    ).rejects.toThrow('only accepts a relative path');
   });
 
   it('fails when the directory does not exist', async () => {
+    const path = await mkdtemp(join(tmpdir(), 'patka-list-'));
+
     await expect(
-      firstValueFrom(new ListFiles().invoke({relativePath: 'patka-does-not-exist'})),
+      firstValueFrom(new ListFiles(path).invoke({relativePath: 'patka-does-not-exist'})),
     ).rejects.toThrow();
   });
 
   it('does not touch the disk until subscribed', () => {
-    expect(() => new ListFiles().invoke({relativePath: 'patka-does-not-exist'})).not.toThrow();
+    expect(() =>
+      new ListFiles(tmpdir()).invoke({relativePath: 'patka-does-not-exist'}),
+    ).not.toThrow();
   });
 });

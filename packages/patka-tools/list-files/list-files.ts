@@ -1,4 +1,5 @@
 import {readdir} from 'node:fs/promises';
+import {join} from 'node:path';
 import {defer, from, map, type Observable} from 'rxjs';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
 import {objectJsonSchemaLLMManual} from '../../patka-tool-llm-manual/object-json-schema-llm-manual.ts';
@@ -32,11 +33,22 @@ export class ListFiles implements PatkaTool<ListFilesInput, ReadonlyArray<string
       ),
     );
 
+  private readonly workingDirectory: string;
+
+  constructor(workingDirectory: string) {
+    this.workingDirectory = workingDirectory;
+  }
+
   invoke(listFilesInput: ListFilesInput): Observable<ReadonlyArray<string>> {
     return defer(() => {
-      assertRelativePathInsideTheWorkingDirectory(listFilesInput.relativePath);
+      assertRelativePathInsideTheWorkingDirectory(
+        this.workingDirectory,
+        listFilesInput.relativePath,
+      );
 
-      return from(readdir(listFilesInput.relativePath, {withFileTypes: true}));
+      return from(
+        readdir(join(this.workingDirectory, listFilesInput.relativePath), {withFileTypes: true}),
+      );
     }).pipe(
       map((entries) =>
         entries.map((entry) => (entry.isDirectory() ? `${entry.name}/` : entry.name)).sort(),

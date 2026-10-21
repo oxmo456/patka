@@ -55,14 +55,23 @@ export class GrepFiles implements PatkaTool<GrepFilesInput, string> {
     ),
   );
 
+  private readonly workingDirectory: string;
+
+  constructor(workingDirectory: string) {
+    this.workingDirectory = workingDirectory;
+  }
+
   invoke(grepFilesInput: GrepFilesInput): Observable<string> {
     return defer(() => {
-      assertRelativePathInsideTheWorkingDirectory(grepFilesInput.relativePath);
+      assertRelativePathInsideTheWorkingDirectory(
+        this.workingDirectory,
+        grepFilesInput.relativePath,
+      );
 
       return from(
         Promise.resolve(
           $({
-            cwd: process.cwd(),
+            cwd: this.workingDirectory,
             nothrow: true,
           })`git --literal-pathspecs -c color.ui=never grep --untracked -I -n -e ${grepFilesInput.pattern} -- ${grepFilesInput.relativePath}`,
         ),

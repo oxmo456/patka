@@ -8,7 +8,7 @@ vi.mock('zx', () => ({$: vi.fn()}));
 
 describe('GrepFiles', () => {
   it('carries a manual for the LLM', () => {
-    const grepFiles = new GrepFiles();
+    const grepFiles = new GrepFiles(tmpdir());
 
     expect(grepFiles.name).toBe('grep_files');
   });
@@ -21,7 +21,7 @@ describe('GrepFiles', () => {
       .mockReset()
       .mockReturnValue(template as never);
 
-    await firstValueFrom(new GrepFiles().invoke({pattern: 'needle', relativePath: './'}));
+    await firstValueFrom(new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: './'}));
 
     expect(String.raw(...template.mock.calls[0])).toBe(
       'git --literal-pathspecs -c color.ui=never grep --untracked -I -n -e needle -- ./',
@@ -36,7 +36,9 @@ describe('GrepFiles', () => {
       .mockReset()
       .mockReturnValue(template as never);
 
-    await firstValueFrom(new GrepFiles().invoke({pattern: 'needle', relativePath: 'src/utils'}));
+    await firstValueFrom(
+      new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: 'src/utils'}),
+    );
 
     expect(String.raw(...template.mock.calls[0])).toBe(
       'git --literal-pathspecs -c color.ui=never grep --untracked -I -n -e needle -- src/utils',
@@ -49,9 +51,9 @@ describe('GrepFiles', () => {
       .mockReset()
       .mockReturnValue(template as never);
 
-    await firstValueFrom(new GrepFiles().invoke({pattern: 'needle', relativePath: './'}));
+    await firstValueFrom(new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: './'}));
 
-    expect($).toHaveBeenCalledWith({cwd: process.cwd(), nothrow: true});
+    expect($).toHaveBeenCalledWith({cwd: tmpdir(), nothrow: true});
   });
 
   it('gives the lines that git finds', async () => {
@@ -67,7 +69,7 @@ describe('GrepFiles', () => {
       .mockReturnValue(template as never);
 
     const matches = await firstValueFrom(
-      new GrepFiles().invoke({pattern: 'needle', relativePath: './'}),
+      new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: './'}),
     );
 
     expect(matches).toEqual('first.ts:1:export const needle = 1;\n');
@@ -80,7 +82,7 @@ describe('GrepFiles', () => {
       .mockReturnValue(template as never);
 
     const matches = await firstValueFrom(
-      new GrepFiles().invoke({pattern: 'needle', relativePath: './'}),
+      new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: './'}),
     );
 
     expect(matches).toEqual('');
@@ -95,7 +97,7 @@ describe('GrepFiles', () => {
       .mockReturnValue(template as never);
 
     const matches = await firstValueFrom(
-      new GrepFiles().invoke({pattern: 'needle', relativePath: './'}),
+      new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: './'}),
     );
 
     expect(matches).toEqual(
@@ -112,26 +114,26 @@ describe('GrepFiles', () => {
       .mockReturnValue(template as never);
 
     await expect(
-      firstValueFrom(new GrepFiles().invoke({pattern: 'needle', relativePath: './'})),
+      firstValueFrom(new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: './'})),
     ).rejects.toThrow('git grep failed: fatal: not a git repository');
   });
 
   it('refuses an absolute path', async () => {
     await expect(
-      firstValueFrom(new GrepFiles().invoke({pattern: 'needle', relativePath: tmpdir()})),
+      firstValueFrom(new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: tmpdir()})),
     ).rejects.toThrow('only accepts a relative path');
   });
 
   it('refuses a path outside the working directory', async () => {
     await expect(
-      firstValueFrom(new GrepFiles().invoke({pattern: 'needle', relativePath: '../'})),
+      firstValueFrom(new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: '../'})),
     ).rejects.toThrow('only accepts a path inside the working directory');
   });
 
   it('does not run git until subscribed', () => {
     vi.mocked($).mockReset();
 
-    new GrepFiles().invoke({pattern: 'needle', relativePath: './'});
+    new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: './'});
 
     expect($).not.toHaveBeenCalled();
   });

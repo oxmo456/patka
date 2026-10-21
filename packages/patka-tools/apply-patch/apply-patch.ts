@@ -33,9 +33,16 @@ export class ApplyPatch implements PatkaTool<ApplyPatchInput, string> {
     ),
   );
 
+  private readonly workingDirectory: string;
+
+  constructor(workingDirectory: string) {
+    this.workingDirectory = workingDirectory;
+  }
+
   invoke(applyPatchInput: ApplyPatchInput): Observable<string> {
     return defer(async () => {
       const processOutput = await $({
+        cwd: this.workingDirectory,
         input: applyPatchInput.patch,
         nothrow: true,
       })`git apply --recount --verbose`;

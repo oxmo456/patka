@@ -1,4 +1,5 @@
 import {writeFile} from 'node:fs/promises';
+import {join} from 'node:path';
 import {defer, from, map, type Observable} from 'rxjs';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
 import {objectJsonSchemaLLMManual} from '../../patka-tool-llm-manual/object-json-schema-llm-manual.ts';
@@ -33,13 +34,26 @@ export class WriteFile implements PatkaTool<WriteFileInput, string> {
     propertyJsonSchemaLLMManual('string', 'The path of the file that was written.'),
   );
 
+  private readonly workingDirectory: string;
+
+  constructor(workingDirectory: string) {
+    this.workingDirectory = workingDirectory;
+  }
+
   invoke(writeFileInput: WriteFileInput): Observable<string> {
     return defer(() => {
-      assertRelativePathInsideTheWorkingDirectory(writeFileInput.relativePath);
-
-      return from(writeFile(writeFileInput.relativePath, writeFileInput.content, 'utf8')).pipe(
-        map(() => writeFileInput.relativePath),
+      assertRelativePathInsideTheWorkingDirectory(
+        this.workingDirectory,
+        writeFileInput.relativePath,
       );
+
+      return from(
+        writeFile(
+          join(this.workingDirectory, writeFileInput.relativePath),
+          writeFileInput.content,
+          'utf8',
+        ),
+      ).pipe(map(() => writeFileInput.relativePath));
     });
   }
 }

@@ -30,10 +30,10 @@ function createRealPathFromPath(path: string): string {
   return join(createRealPathFromPath(dirname(path)), basename(path));
 }
 
-function isOutsideTheWorkingDirectory(relativePath: string): boolean {
+function isOutsideTheWorkingDirectory(workingDirectory: string, relativePath: string): boolean {
   const pathFromTheWorkingDirectory = relative(
-    realpathSync(process.cwd()),
-    createRealPathFromPath(resolve(relativePath)),
+    realpathSync(workingDirectory),
+    createRealPathFromPath(resolve(workingDirectory, relativePath)),
   );
 
   return (
@@ -43,12 +43,18 @@ function isOutsideTheWorkingDirectory(relativePath: string): boolean {
   );
 }
 
-export function assertRelativePathInsideTheWorkingDirectory(relativePath: string): void {
+export function assertRelativePathInsideTheWorkingDirectory(
+  workingDirectory: string,
+  relativePath: string,
+): void {
   if (isPathAbsolute(relativePath)) {
     throw new Error(`The tool only accepts a relative path, given "${relativePath}"`);
   }
 
-  if (hasParentSegment(relativePath) || isOutsideTheWorkingDirectory(relativePath)) {
+  if (
+    hasParentSegment(relativePath) ||
+    isOutsideTheWorkingDirectory(workingDirectory, relativePath)
+  ) {
     throw new Error(
       `The tool only accepts a path inside the working directory, given "${relativePath}"`,
     );

@@ -57,8 +57,14 @@ describe('Patka', () => {
     child.register(PatkaAgent, {useFactory: createPatkaAgentFromDependencyContainer});
     child.register(BLESSED, {useValue: {} as unknown as Blessed});
     child.register(INFERENCE_CLIENT, {useValue: {chat: vi.fn()}});
-    child.register(PATKA_TOOL, {useClass: ListFiles});
-    child.register(PATKA_TOOL, {useClass: ReadFile});
+    child.register(PATKA_TOOL, {
+      useFactory: (dependencyContainer: DependencyContainer) =>
+        new ListFiles(dependencyContainer.resolve(WORKING_DIRECTORY)),
+    });
+    child.register(PATKA_TOOL, {
+      useFactory: (dependencyContainer: DependencyContainer) =>
+        new ReadFile(dependencyContainer.resolve(WORKING_DIRECTORY)),
+    });
     child.register(PATKA_UI, {useValue: aPatkaUI()});
     child.register(PATKA_CONTEXT_ENTRIES, {
       useFactory: (dependencyContainer: DependencyContainer) =>
@@ -92,8 +98,14 @@ describe('Patka', () => {
           of({content: 'Paris', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
       },
     });
-    child.register(PATKA_TOOL, {useClass: ListFiles});
-    child.register(PATKA_TOOL, {useClass: ReadFile});
+    child.register(PATKA_TOOL, {
+      useFactory: (dependencyContainer: DependencyContainer) =>
+        new ListFiles(dependencyContainer.resolve(WORKING_DIRECTORY)),
+    });
+    child.register(PATKA_TOOL, {
+      useFactory: (dependencyContainer: DependencyContainer) =>
+        new ReadFile(dependencyContainer.resolve(WORKING_DIRECTORY)),
+    });
     child.register(PATKA_UI, {
       useValue: {
         userInputs,
@@ -150,8 +162,14 @@ describe('Patka', () => {
           of({content: 'Paris', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
       },
     });
-    child.register(PATKA_TOOL, {useClass: ListFiles});
-    child.register(PATKA_TOOL, {useClass: ReadFile});
+    child.register(PATKA_TOOL, {
+      useFactory: (dependencyContainer: DependencyContainer) =>
+        new ListFiles(dependencyContainer.resolve(WORKING_DIRECTORY)),
+    });
+    child.register(PATKA_TOOL, {
+      useFactory: (dependencyContainer: DependencyContainer) =>
+        new ReadFile(dependencyContainer.resolve(WORKING_DIRECTORY)),
+    });
     child.register(PATKA_UI, {
       useValue: {
         userInputs,
@@ -200,8 +218,14 @@ describe('Patka', () => {
           of({content: 'Paris', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
       },
     });
-    child.register(PATKA_TOOL, {useClass: ListFiles});
-    child.register(PATKA_TOOL, {useClass: ReadFile});
+    child.register(PATKA_TOOL, {
+      useFactory: (dependencyContainer: DependencyContainer) =>
+        new ListFiles(dependencyContainer.resolve(WORKING_DIRECTORY)),
+    });
+    child.register(PATKA_TOOL, {
+      useFactory: (dependencyContainer: DependencyContainer) =>
+        new ReadFile(dependencyContainer.resolve(WORKING_DIRECTORY)),
+    });
     child.register(PATKA_UI, {
       useValue: {
         userInputs,
@@ -253,8 +277,14 @@ describe('Patka', () => {
           of({content: 'Paris', toolCall: none, usage: {inputTokens: 0, outputTokens: 0}}),
       },
     });
-    child.register(PATKA_TOOL, {useClass: ListFiles});
-    child.register(PATKA_TOOL, {useClass: ReadFile});
+    child.register(PATKA_TOOL, {
+      useFactory: (dependencyContainer: DependencyContainer) =>
+        new ListFiles(dependencyContainer.resolve(WORKING_DIRECTORY)),
+    });
+    child.register(PATKA_TOOL, {
+      useFactory: (dependencyContainer: DependencyContainer) =>
+        new ReadFile(dependencyContainer.resolve(WORKING_DIRECTORY)),
+    });
     child.register(PATKA_UI, {
       useValue: {
         userInputs,

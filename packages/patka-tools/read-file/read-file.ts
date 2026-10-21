@@ -1,4 +1,5 @@
 import {readFile} from 'node:fs/promises';
+import {join} from 'node:path';
 import {defer, from, type Observable} from 'rxjs';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
 import {objectJsonSchemaLLMManual} from '../../patka-tool-llm-manual/object-json-schema-llm-manual.ts';
@@ -31,11 +32,20 @@ export class ReadFile implements PatkaTool<ReadFileInput, string> {
     propertyJsonSchemaLLMManual('string', 'The whole contents of the file, as text.'),
   );
 
+  private readonly workingDirectory: string;
+
+  constructor(workingDirectory: string) {
+    this.workingDirectory = workingDirectory;
+  }
+
   invoke(readFileInput: ReadFileInput): Observable<string> {
     return defer(() => {
-      assertRelativePathInsideTheWorkingDirectory(readFileInput.relativePath);
+      assertRelativePathInsideTheWorkingDirectory(
+        this.workingDirectory,
+        readFileInput.relativePath,
+      );
 
-      return from(readFile(readFileInput.relativePath, 'utf8'));
+      return from(readFile(join(this.workingDirectory, readFileInput.relativePath), 'utf8'));
     });
   }
 }

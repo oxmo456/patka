@@ -21,7 +21,13 @@ export class GitStatus implements PatkaTool<Record<string, never>, string> {
     propertyJsonSchemaLLMManual('string', 'The text that "git status" prints.'),
   );
 
+  private readonly workingDirectory: string;
+
+  constructor(workingDirectory: string) {
+    this.workingDirectory = workingDirectory;
+  }
+
   invoke(): Observable<string> {
-    return defer(() => from($`git -c color.ui=never status`.text()));
+    return defer(() => from($({cwd: this.workingDirectory})`git -c color.ui=never status`.text()));
   }
 }

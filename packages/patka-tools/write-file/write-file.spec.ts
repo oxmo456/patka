@@ -5,40 +5,28 @@ import {firstValueFrom} from 'rxjs';
 import {describe, expect, it} from 'vitest';
 import {WriteFile} from './write-file.ts';
 
-const inADirectory = async <T>(run: () => Promise<T>): Promise<T> => {
-  const path = await mkdtemp(join(tmpdir(), 'patka-write-'));
-  const before = process.cwd();
-  process.chdir(path);
-
-  try {
-    return await run();
-  } finally {
-    process.chdir(before);
-  }
-};
-
 describe('WriteFile', () => {
   it('carries a manual for the LLM', () => {
-    const writeFile = new WriteFile();
+    const writeFile = new WriteFile(tmpdir());
 
     expect(writeFile.name).toBe('write_file');
   });
 
   it('writes the content to the file', async () => {
-    const content = await inADirectory(async () => {
-      await firstValueFrom(
-        new WriteFile().invoke({relativePath: 'note.txt', content: 'hello patka'}),
-      );
+    const path = await mkdtemp(join(tmpdir(), 'patka-write-'));
 
-      return readFile('note.txt', 'utf8');
-    });
+    await firstValueFrom(
+      new WriteFile(path).invoke({relativePath: 'note.txt', content: 'hello patka'}),
+    );
 
-    expect(content).toBe('hello patka');
+    expect(await readFile(join(path, 'note.txt'), 'utf8')).toBe('hello patka');
   });
 
   it('emits the path it wrote', async () => {
-    const output = await inADirectory(() =>
-      firstValueFrom(new WriteFile().invoke({relativePath: 'note.txt', content: 'hello patka'})),
+    const path = await mkdtemp(join(tmpdir(), 'patka-write-'));
+
+    const output = await firstValueFrom(
+      new WriteFile(path).invoke({relativePath: 'note.txt', content: 'hello patka'}),
     );
 
     expect(output).toEqual('note.txt');
@@ -47,20 +35,22 @@ describe('WriteFile', () => {
   it('refuses an absolute path', async () => {
     await expect(
       firstValueFrom(
-        new WriteFile().invoke({relativePath: join(tmpdir(), 'note.txt'), content: ''}),
+        new WriteFile(tmpdir()).invoke({relativePath: join(tmpdir(), 'note.txt'), content: ''}),
       ),
     ).rejects.toThrow('only accepts a relative path');
   });
 
   it('fails when the directory does not exist', async () => {
+    const path = await mkdtemp(join(tmpdir(), 'patka-write-'));
+
     await expect(
-      inADirectory(() =>
-        firstValueFrom(new WriteFile().invoke({relativePath: 'missing/note.txt', content: ''})),
-      ),
+      firstValueFrom(new WriteFile(path).invoke({relativePath: 'missing/note.txt', content: ''})),
     ).rejects.toThrow();
   });
 
   it('does not touch the disk until subscribed', () => {
-    expect(() => new WriteFile().invoke({relativePath: 'note.txt', content: ''})).not.toThrow();
+    expect(() =>
+      new WriteFile(tmpdir()).invoke({relativePath: 'note.txt', content: ''}),
+    ).not.toThrow();
   });
 });

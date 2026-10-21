@@ -59,13 +59,34 @@ container.register(INFERENCE_CLIENT, {
     extractOllamaModel(process.argv),
   ),
 });
-container.register(PATKA_TOOL, {useClass: ListFiles});
-container.register(PATKA_TOOL, {useClass: GrepFiles});
-container.register(PATKA_TOOL, {useClass: GitStatus});
-container.register(PATKA_TOOL, {useClass: GitDiff});
-container.register(PATKA_TOOL, {useClass: ApplyPatch});
-container.register(PATKA_TOOL, {useClass: ReadFile});
-container.register(PATKA_TOOL, {useClass: WriteFile});
+container.register(PATKA_TOOL, {
+  useFactory: (dependencyContainer: DependencyContainer) =>
+    new ListFiles(dependencyContainer.resolve(WORKING_DIRECTORY)),
+});
+container.register(PATKA_TOOL, {
+  useFactory: (dependencyContainer: DependencyContainer) =>
+    new GrepFiles(dependencyContainer.resolve(WORKING_DIRECTORY)),
+});
+container.register(PATKA_TOOL, {
+  useFactory: (dependencyContainer: DependencyContainer) =>
+    new GitStatus(dependencyContainer.resolve(WORKING_DIRECTORY)),
+});
+container.register(PATKA_TOOL, {
+  useFactory: (dependencyContainer: DependencyContainer) =>
+    new GitDiff(dependencyContainer.resolve(WORKING_DIRECTORY)),
+});
+container.register(PATKA_TOOL, {
+  useFactory: (dependencyContainer: DependencyContainer) =>
+    new ApplyPatch(dependencyContainer.resolve(WORKING_DIRECTORY)),
+});
+container.register(PATKA_TOOL, {
+  useFactory: (dependencyContainer: DependencyContainer) =>
+    new ReadFile(dependencyContainer.resolve(WORKING_DIRECTORY)),
+});
+container.register(PATKA_TOOL, {
+  useFactory: (dependencyContainer: DependencyContainer) =>
+    new WriteFile(dependencyContainer.resolve(WORKING_DIRECTORY)),
+});
 container.register(PATKA_TOOL, {useClass: ReportIncompetency});
 container.register(PATKA_TOOL, {useClass: PatkaTUITool});
 container.register(PATKA_UI, {useClass: PatkaTUI}, {lifecycle: Lifecycle.Singleton});

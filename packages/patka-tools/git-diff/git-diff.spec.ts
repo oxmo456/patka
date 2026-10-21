@@ -4,12 +4,11 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it} from 'vitest';
-import {cd} from 'zx';
 import {GitDiff} from './git-diff.ts';
 
 describe('GitDiff', () => {
   it('carries a manual for the LLM', () => {
-    expect(new GitDiff().name).toBe('git_diff');
+    expect(new GitDiff(tmpdir()).name).toBe('git_diff');
   });
 
   it('emits the change made to a committed file', async () => {
@@ -23,16 +22,10 @@ describe('GitDiff', () => {
       {cwd: path},
     );
     await writeFile(join(path, 'note.txt'), 'hello patka\n');
-    const before = process.cwd();
-    cd(path);
 
-    try {
-      const output = await firstValueFrom(new GitDiff().invoke({relativePath: 'note.txt'}));
+    const output = await firstValueFrom(new GitDiff(path).invoke({relativePath: 'note.txt'}));
 
-      expect(output).toContain('+hello patka');
-    } finally {
-      cd(before);
-    }
+    expect(output).toContain('+hello patka');
   });
 
   it('emits nothing for a file with no change', async () => {
@@ -45,25 +38,19 @@ describe('GitDiff', () => {
       ['-c', 'user.name=patka', '-c', 'user.email=patka@test', 'commit', '--quiet', '-m', 'init'],
       {cwd: path},
     );
-    const before = process.cwd();
-    cd(path);
 
-    try {
-      const output = await firstValueFrom(new GitDiff().invoke({relativePath: 'note.txt'}));
+    const output = await firstValueFrom(new GitDiff(path).invoke({relativePath: 'note.txt'}));
 
-      expect(output).toBe('');
-    } finally {
-      cd(before);
-    }
+    expect(output).toBe('');
   });
 
   it('refuses an absolute path', async () => {
     await expect(
-      firstValueFrom(new GitDiff().invoke({relativePath: join(tmpdir(), 'note.txt')})),
+      firstValueFrom(new GitDiff(tmpdir()).invoke({relativePath: join(tmpdir(), 'note.txt')})),
     ).rejects.toThrow('only accepts a relative path');
   });
 
   it('does not run git until subscribed', () => {
-    expect(() => new GitDiff().invoke({relativePath: 'note.txt'})).not.toThrow();
+    expect(() => new GitDiff(tmpdir()).invoke({relativePath: 'note.txt'})).not.toThrow();
   });
 });
