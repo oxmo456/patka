@@ -1,6 +1,7 @@
 import {firstValueFrom, toArray} from 'rxjs';
 import {describe, expect, it} from 'vitest';
-import {defaultPatkaDictionary, PatkaText} from '../../patka-text/patka-text.ts';
+import defaultPatkaDictionary from '../../patka-text/default.json' with {type: 'json'};
+import {PatkaText} from '../../patka-text/patka-text.ts';
 import {ReportIncompetency} from './report-incompetency.ts';
 
 describe('ReportIncompetency', () => {

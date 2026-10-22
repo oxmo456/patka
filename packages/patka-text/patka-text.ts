@@ -1,10 +1,4 @@
-import defaultPatkaDictionary from './default.json' with {type: 'json'};
-
-export {defaultPatkaDictionary};
-
-export type PatkaTextKey = keyof typeof defaultPatkaDictionary;
-
-export type PatkaDictionary = Readonly<Record<PatkaTextKey, string>>;
+export type PatkaDictionary = Readonly<Record<string, string>>;
 
 const PLACEHOLDER = /\{(\w+)\}/g;
 
@@ -15,10 +9,16 @@ export class PatkaText {
     this.patkaDictionary = patkaDictionary;
   }
 
-  get(patkaTextKey: PatkaTextKey, values: Readonly<Record<string, string>> = {}): string {
-    return this.patkaDictionary[patkaTextKey].replace(
+  get(key: string, values: Readonly<Record<string, string>> = {}): string {
+    const text: string | undefined = this.patkaDictionary[key];
+
+    if (text === undefined) {
+      throw new Error(`The dictionary has no text for the key: ${key}`);
+    }
+
+    return text.replace(
       PLACEHOLDER,
-      (placeholder: string, key: string) => values[key] ?? placeholder,
+      (placeholder: string, name: string) => values[name] ?? placeholder,
     );
   }
 }

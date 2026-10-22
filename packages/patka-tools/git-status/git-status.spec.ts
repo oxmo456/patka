@@ -4,7 +4,8 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it} from 'vitest';
-import {defaultPatkaDictionary, PatkaText} from '../../patka-text/patka-text.ts';
+import defaultPatkaDictionary from '../../patka-text/default.json' with {type: 'json'};
+import {PatkaText} from '../../patka-text/patka-text.ts';
 import {GitStatus} from './git-status.ts';
 
 describe('GitStatus', () => {

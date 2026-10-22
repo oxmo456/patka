@@ -3,7 +3,14 @@ load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@npm//:vitest/package_json.bzl", vitest_bin = "bin")
 load("@npm//:@biomejs/biome/package_json.bzl", biome_bin = "bin")
 
-def ptk_library(name, srcs, test_srcs = [], deps = [], npm_deps = []):
+def ptk_library(name, srcs, test_srcs = [], deps = [], npm_deps = [], data = []):
+    js_library(
+        name = "data",
+        srcs = data,
+        types = data,
+        visibility = ["//visibility:public"],
+    )
+
     ts_project(
         name = name,
         srcs = srcs,
@@ -12,12 +19,12 @@ def ptk_library(name, srcs, test_srcs = [], deps = [], npm_deps = []):
         transpiler = "tsc",
         tsconfig = "//:tsconfig",
         visibility = ["//visibility:public"],
-        deps = ["//:package_json", "//:node_modules/@types/node"] + deps + npm_deps,
+        deps = ["//:package_json", "//:node_modules/@types/node", ":data"] + deps + npm_deps,
     )
 
     js_library(
         name = "test_data",
-        srcs = srcs,
+        srcs = srcs + data,
         deps = [dep + ":test_data" for dep in deps],
         visibility = ["//visibility:public"],
     )

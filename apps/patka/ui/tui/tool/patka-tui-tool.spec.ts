@@ -1,6 +1,9 @@
 import {firstValueFrom, lastValueFrom, of, toArray} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
-import {defaultPatkaDictionary, PatkaText} from '../../../../../packages/patka-text/patka-text.ts';
+import defaultPatkaDictionary from '../../../../../packages/patka-text/default.json' with {
+  type: 'json',
+};
+import {PatkaText} from '../../../../../packages/patka-text/patka-text.ts';
 import type {PatkaUI} from '../../patka-ui.ts';
 import {PatkaTUITool, type PatkaTUIToolInput} from './patka-tui-tool.ts';
 

@@ -2,7 +2,8 @@ import {tmpdir} from 'node:os';
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
 import {$} from 'zx';
-import {defaultPatkaDictionary, PatkaText} from '../../patka-text/patka-text.ts';
+import defaultPatkaDictionary from '../../patka-text/default.json' with {type: 'json'};
+import {PatkaText} from '../../patka-text/patka-text.ts';
 import {GrepFiles} from './grep-files.ts';
 
 vi.mock('zx', () => ({$: vi.fn()}));
