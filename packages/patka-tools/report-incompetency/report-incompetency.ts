@@ -1,4 +1,5 @@
 import {EMPTY, type Observable} from 'rxjs';
+import type {PatkaText} from '../../patka-text/patka-text.ts';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
 import {REPORT_INCOMPETENCY} from '../../patka-tool/report-incompetency.ts';
 import {objectJsonSchemaLLMManual} from '../../patka-tool-llm-manual/object-json-schema-llm-manual.ts';
@@ -16,30 +17,40 @@ export type ReportIncompetencyInput = {
 
 export class ReportIncompetency implements PatkaTool<ReportIncompetencyInput, string> {
   readonly name: string = REPORT_INCOMPETENCY;
-  readonly llmManual: PatkaToolLLMManual<ReportIncompetencyInput, string> = patkaToolLLMManual<
-    ReportIncompetencyInput,
-    string
-  >(
-    this.name,
-    objectJsonSchemaLLMManual<ReportIncompetencyInput>(
+  readonly llmManual: PatkaToolLLMManual<ReportIncompetencyInput, string>;
+
+  constructor(patkaText: PatkaText) {
+    this.llmManual = patkaToolLLMManual<ReportIncompetencyInput, string>(
       this.name,
-      'Use it only when the request needs a tool that is not in this list.',
-      {
-        modelName: propertyJsonSchemaLLMManual('string', 'Your model name.'),
-        modelVersion: propertyJsonSchemaLLMManual('string', 'Your model version.'),
-        request: propertyJsonSchemaLLMManual('string', 'What was asked of you, and by whom.'),
-        rationale: propertyJsonSchemaLLMManual(
-          'string',
-          'Why the request needs a tool, and why no tool in this list can do it.',
-        ),
-        toolSuggestion: propertyJsonSchemaLLMManual(
-          'array',
-          'The names of the tools that you need and do not have.',
-        ),
-      },
-    ),
-    propertyJsonSchemaLLMManual('string', 'The report was sent. It has no output.'),
-  );
+      objectJsonSchemaLLMManual<ReportIncompetencyInput>(
+        this.name,
+        patkaText.get('tool.report_incompetency.description'),
+        {
+          modelName: propertyJsonSchemaLLMManual(
+            'string',
+            patkaText.get('tool.report_incompetency.input.modelName'),
+          ),
+          modelVersion: propertyJsonSchemaLLMManual(
+            'string',
+            patkaText.get('tool.report_incompetency.input.modelVersion'),
+          ),
+          request: propertyJsonSchemaLLMManual(
+            'string',
+            patkaText.get('tool.report_incompetency.input.request'),
+          ),
+          rationale: propertyJsonSchemaLLMManual(
+            'string',
+            patkaText.get('tool.report_incompetency.input.rationale'),
+          ),
+          toolSuggestion: propertyJsonSchemaLLMManual(
+            'array',
+            patkaText.get('tool.report_incompetency.input.toolSuggestion'),
+          ),
+        },
+      ),
+      propertyJsonSchemaLLMManual('string', patkaText.get('tool.report_incompetency.output')),
+    );
+  }
 
   invoke(): Observable<string> {
     return EMPTY;

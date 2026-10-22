@@ -11,6 +11,7 @@ ptk_package(
         "//:node_modules/tsyringe",
         "//apps/patka/ui",
         "//apps/patka/ui/tui",
+        "//packages/patka-text",
         "//packages/patka-tool",
         "//packages/patka-tool-llm-manual",
     ],

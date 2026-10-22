@@ -8,6 +8,7 @@ import {PatkaAgent} from '../../packages/patka-agent/patka-agent.ts';
 import type {PatkaContextEntry} from '../../packages/patka-context/patka-context-entry.ts';
 import {PatkaLogger} from '../../packages/patka-logger/patka-logger.ts';
 import {DefaultInferenceClientChatInputFactory} from '../../packages/patka-prompt/default-inference-client-chat-input-factory.ts';
+import {defaultPatkaDictionary, PatkaText} from '../../packages/patka-text/patka-text.ts';
 import {PatkaTools} from '../../packages/patka-tool/patka-tools.ts';
 import {ListFiles} from '../../packages/patka-tools/list-files/list-files.ts';
 import {ReadFile} from '../../packages/patka-tools/read-file/read-file.ts';
@@ -20,7 +21,6 @@ import {HTTP_SERVER_FACTORY} from './http/http-server-factory.token.ts';
 import {INFERENCE_CLIENT} from './inference/inference-client.token.ts';
 import {Patka} from './patka.ts';
 import {INFERENCE_CLIENT_CHAT_INPUT_FACTORY} from './prompt/inference-client-chat-input-factory.token.ts';
-import {createTextFromPatkaTextKey} from './text/patka-text.ts';
 import {PATKA_TOOL} from './tools/patka-tool.token.ts';
 import {createPatkaToolsFromDependencyContainer} from './tools/patka-tools-factory.ts';
 import {PATKA_UI} from './ui/patka-ui.token.ts';
@@ -48,11 +48,12 @@ describe('Patka', () => {
       useFactory: (dependencyContainer: DependencyContainer) =>
         new DefaultInferenceClientChatInputFactory(
           dependencyContainer.resolve(PatkaTools),
-          createTextFromPatkaTextKey('prompt.system', {
+          new PatkaText(defaultPatkaDictionary).get('prompt.system', {
             workingDirectory: dependencyContainer.resolve(WORKING_DIRECTORY),
           }),
         ),
     });
+    child.register(PatkaText, {useValue: new PatkaText(defaultPatkaDictionary)});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.registerSingleton(PatkaLogger);
     child.register(HTTP_SERVER_FACTORY, {useValue: createServer});
@@ -62,11 +63,17 @@ describe('Patka', () => {
     child.register(INFERENCE_CLIENT, {useValue: {chat: vi.fn()}});
     child.register(PATKA_TOOL, {
       useFactory: (dependencyContainer: DependencyContainer) =>
-        new ListFiles(dependencyContainer.resolve(WORKING_DIRECTORY)),
+        new ListFiles(
+          dependencyContainer.resolve(WORKING_DIRECTORY),
+          new PatkaText(defaultPatkaDictionary),
+        ),
     });
     child.register(PATKA_TOOL, {
       useFactory: (dependencyContainer: DependencyContainer) =>
-        new ReadFile(dependencyContainer.resolve(WORKING_DIRECTORY)),
+        new ReadFile(
+          dependencyContainer.resolve(WORKING_DIRECTORY),
+          new PatkaText(defaultPatkaDictionary),
+        ),
     });
     child.register(PATKA_UI, {useValue: aPatkaUI()});
     child.register(PATKA_CONTEXT_ENTRIES, {
@@ -85,11 +92,12 @@ describe('Patka', () => {
       useFactory: (dependencyContainer: DependencyContainer) =>
         new DefaultInferenceClientChatInputFactory(
           dependencyContainer.resolve(PatkaTools),
-          createTextFromPatkaTextKey('prompt.system', {
+          new PatkaText(defaultPatkaDictionary).get('prompt.system', {
             workingDirectory: dependencyContainer.resolve(WORKING_DIRECTORY),
           }),
         ),
     });
+    child.register(PatkaText, {useValue: new PatkaText(defaultPatkaDictionary)});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.registerSingleton(PatkaLogger);
     child.register(HTTP_SERVER_FACTORY, {useValue: createServer});
@@ -104,11 +112,17 @@ describe('Patka', () => {
     });
     child.register(PATKA_TOOL, {
       useFactory: (dependencyContainer: DependencyContainer) =>
-        new ListFiles(dependencyContainer.resolve(WORKING_DIRECTORY)),
+        new ListFiles(
+          dependencyContainer.resolve(WORKING_DIRECTORY),
+          new PatkaText(defaultPatkaDictionary),
+        ),
     });
     child.register(PATKA_TOOL, {
       useFactory: (dependencyContainer: DependencyContainer) =>
-        new ReadFile(dependencyContainer.resolve(WORKING_DIRECTORY)),
+        new ReadFile(
+          dependencyContainer.resolve(WORKING_DIRECTORY),
+          new PatkaText(defaultPatkaDictionary),
+        ),
     });
     child.register(PATKA_UI, {
       useValue: {
@@ -150,11 +164,12 @@ describe('Patka', () => {
       useFactory: (dependencyContainer: DependencyContainer) =>
         new DefaultInferenceClientChatInputFactory(
           dependencyContainer.resolve(PatkaTools),
-          createTextFromPatkaTextKey('prompt.system', {
+          new PatkaText(defaultPatkaDictionary).get('prompt.system', {
             workingDirectory: dependencyContainer.resolve(WORKING_DIRECTORY),
           }),
         ),
     });
+    child.register(PatkaText, {useValue: new PatkaText(defaultPatkaDictionary)});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.registerSingleton(PatkaLogger);
     child.register(HTTP_SERVER_FACTORY, {useValue: createServer});
@@ -169,11 +184,17 @@ describe('Patka', () => {
     });
     child.register(PATKA_TOOL, {
       useFactory: (dependencyContainer: DependencyContainer) =>
-        new ListFiles(dependencyContainer.resolve(WORKING_DIRECTORY)),
+        new ListFiles(
+          dependencyContainer.resolve(WORKING_DIRECTORY),
+          new PatkaText(defaultPatkaDictionary),
+        ),
     });
     child.register(PATKA_TOOL, {
       useFactory: (dependencyContainer: DependencyContainer) =>
-        new ReadFile(dependencyContainer.resolve(WORKING_DIRECTORY)),
+        new ReadFile(
+          dependencyContainer.resolve(WORKING_DIRECTORY),
+          new PatkaText(defaultPatkaDictionary),
+        ),
     });
     child.register(PATKA_UI, {
       useValue: {
@@ -207,11 +228,12 @@ describe('Patka', () => {
       useFactory: (dependencyContainer: DependencyContainer) =>
         new DefaultInferenceClientChatInputFactory(
           dependencyContainer.resolve(PatkaTools),
-          createTextFromPatkaTextKey('prompt.system', {
+          new PatkaText(defaultPatkaDictionary).get('prompt.system', {
             workingDirectory: dependencyContainer.resolve(WORKING_DIRECTORY),
           }),
         ),
     });
+    child.register(PatkaText, {useValue: new PatkaText(defaultPatkaDictionary)});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.registerSingleton(PatkaLogger);
     child.register(HTTP_SERVER_FACTORY, {useValue: createServer});
@@ -226,11 +248,17 @@ describe('Patka', () => {
     });
     child.register(PATKA_TOOL, {
       useFactory: (dependencyContainer: DependencyContainer) =>
-        new ListFiles(dependencyContainer.resolve(WORKING_DIRECTORY)),
+        new ListFiles(
+          dependencyContainer.resolve(WORKING_DIRECTORY),
+          new PatkaText(defaultPatkaDictionary),
+        ),
     });
     child.register(PATKA_TOOL, {
       useFactory: (dependencyContainer: DependencyContainer) =>
-        new ReadFile(dependencyContainer.resolve(WORKING_DIRECTORY)),
+        new ReadFile(
+          dependencyContainer.resolve(WORKING_DIRECTORY),
+          new PatkaText(defaultPatkaDictionary),
+        ),
     });
     child.register(PATKA_UI, {
       useValue: {
@@ -267,11 +295,12 @@ describe('Patka', () => {
       useFactory: (dependencyContainer: DependencyContainer) =>
         new DefaultInferenceClientChatInputFactory(
           dependencyContainer.resolve(PatkaTools),
-          createTextFromPatkaTextKey('prompt.system', {
+          new PatkaText(defaultPatkaDictionary).get('prompt.system', {
             workingDirectory: dependencyContainer.resolve(WORKING_DIRECTORY),
           }),
         ),
     });
+    child.register(PatkaText, {useValue: new PatkaText(defaultPatkaDictionary)});
     child.register(AGENT_NAME, {useValue: 'ROOT'});
     child.registerSingleton(PatkaLogger);
     child.register(HTTP_SERVER_FACTORY, {useValue: createServer});
@@ -286,11 +315,17 @@ describe('Patka', () => {
     });
     child.register(PATKA_TOOL, {
       useFactory: (dependencyContainer: DependencyContainer) =>
-        new ListFiles(dependencyContainer.resolve(WORKING_DIRECTORY)),
+        new ListFiles(
+          dependencyContainer.resolve(WORKING_DIRECTORY),
+          new PatkaText(defaultPatkaDictionary),
+        ),
     });
     child.register(PATKA_TOOL, {
       useFactory: (dependencyContainer: DependencyContainer) =>
-        new ReadFile(dependencyContainer.resolve(WORKING_DIRECTORY)),
+        new ReadFile(
+          dependencyContainer.resolve(WORKING_DIRECTORY),
+          new PatkaText(defaultPatkaDictionary),
+        ),
     });
     child.register(PATKA_UI, {
       useValue: {

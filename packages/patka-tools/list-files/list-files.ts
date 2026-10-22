@@ -1,6 +1,7 @@
 import {readdir} from 'node:fs/promises';
 import {join} from 'node:path';
 import {defer, from, map, type Observable} from 'rxjs';
+import type {PatkaText} from '../../patka-text/patka-text.ts';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
 import {objectJsonSchemaLLMManual} from '../../patka-tool-llm-manual/object-json-schema-llm-manual.ts';
 import type {PatkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
@@ -14,29 +15,26 @@ export type ListFilesInput = {
 
 export class ListFiles implements PatkaTool<ListFilesInput, ReadonlyArray<string>> {
   readonly name: string = 'list_files';
-  readonly llmManual: PatkaToolLLMManual<ListFilesInput, ReadonlyArray<string>> =
-    patkaToolLLMManual<ListFilesInput, ReadonlyArray<string>>(
-      this.name,
-      objectJsonSchemaLLMManual<ListFilesInput>(
-        this.name,
-        'Use it to discover what a directory holds before reading any file.',
-        {
-          relativePath: propertyJsonSchemaLLMManual(
-            'string',
-            'Relative path of the directory to list, from the working directory (e.g. "." or "src/utils"). Never an absolute path and never outside the working directory: such a path is refused.',
-          ),
-        },
-      ),
-      propertyJsonSchemaLLMManual(
-        'array',
-        'The names of the files and directories found, directories ending with a slash.',
-      ),
-    );
+  readonly llmManual: PatkaToolLLMManual<ListFilesInput, ReadonlyArray<string>>;
 
   private readonly workingDirectory: string;
 
-  constructor(workingDirectory: string) {
+  constructor(workingDirectory: string, patkaText: PatkaText) {
     this.workingDirectory = workingDirectory;
+    this.llmManual = patkaToolLLMManual<ListFilesInput, ReadonlyArray<string>>(
+      this.name,
+      objectJsonSchemaLLMManual<ListFilesInput>(
+        this.name,
+        patkaText.get('tool.list_files.description'),
+        {
+          relativePath: propertyJsonSchemaLLMManual(
+            'string',
+            patkaText.get('tool.list_files.input.relativePath'),
+          ),
+        },
+      ),
+      propertyJsonSchemaLLMManual('array', patkaText.get('tool.list_files.output')),
+    );
   }
 
   invoke(listFilesInput: ListFilesInput): Observable<ReadonlyArray<string>> {

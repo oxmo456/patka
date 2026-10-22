@@ -6,6 +6,7 @@ ptk_library(
     test_srcs = ["apply-patch.spec.ts"],
     deps = [
         "//packages/patka-tool-llm-manual",
+        "//packages/patka-text",
         "//packages/patka-tool",
     ],
     npm_deps = [

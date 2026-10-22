@@ -1,0 +1,10 @@
+load("//tools:ptk_library.bzl", "ptk_library")
+
+ptk_library(
+    name = "patka-text",
+    srcs = [
+        "default.json",
+        "patka-text.ts",
+    ],
+    test_srcs = ["patka-text.spec.ts"],
+)

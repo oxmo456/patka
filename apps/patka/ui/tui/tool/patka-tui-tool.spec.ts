@@ -1,5 +1,6 @@
 import {firstValueFrom, lastValueFrom, of, toArray} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
+import {defaultPatkaDictionary, PatkaText} from '../../../../../packages/patka-text/patka-text.ts';
 import type {PatkaUI} from '../../patka-ui.ts';
 import {PatkaTUITool, type PatkaTUIToolInput} from './patka-tui-tool.ts';
 
@@ -16,7 +17,7 @@ describe('PatkaTUITool', () => {
       hideInferenceClientChat: vi.fn(),
     };
 
-    expect(new PatkaTUITool(patkaUI).name).toBe('patka_tui');
+    expect(new PatkaTUITool(patkaUI, new PatkaText(defaultPatkaDictionary)).name).toBe('patka_tui');
   });
 
   it('shows the log panel on the show_logs command', async () => {
@@ -31,9 +32,14 @@ describe('PatkaTUITool', () => {
       hideInferenceClientChat: vi.fn(),
     };
 
-    await lastValueFrom(new PatkaTUITool(patkaUI).invoke({command: 'show_logs'}), {
-      defaultValue: undefined,
-    });
+    await lastValueFrom(
+      new PatkaTUITool(patkaUI, new PatkaText(defaultPatkaDictionary)).invoke({
+        command: 'show_logs',
+      }),
+      {
+        defaultValue: undefined,
+      },
+    );
 
     expect(patkaUI.showLogs).toHaveBeenCalledTimes(1);
   });
@@ -50,9 +56,14 @@ describe('PatkaTUITool', () => {
       hideInferenceClientChat: vi.fn(),
     };
 
-    await lastValueFrom(new PatkaTUITool(patkaUI).invoke({command: 'hide_logs'}), {
-      defaultValue: undefined,
-    });
+    await lastValueFrom(
+      new PatkaTUITool(patkaUI, new PatkaText(defaultPatkaDictionary)).invoke({
+        command: 'hide_logs',
+      }),
+      {
+        defaultValue: undefined,
+      },
+    );
 
     expect(patkaUI.hideLogs).toHaveBeenCalledTimes(1);
   });
@@ -69,9 +80,14 @@ describe('PatkaTUITool', () => {
       hideInferenceClientChat: vi.fn(),
     };
 
-    await lastValueFrom(new PatkaTUITool(patkaUI).invoke({command: 'show_inference_client_chat'}), {
-      defaultValue: undefined,
-    });
+    await lastValueFrom(
+      new PatkaTUITool(patkaUI, new PatkaText(defaultPatkaDictionary)).invoke({
+        command: 'show_inference_client_chat',
+      }),
+      {
+        defaultValue: undefined,
+      },
+    );
 
     expect(patkaUI.showInferenceClientChat).toHaveBeenCalledTimes(1);
   });
@@ -88,9 +104,14 @@ describe('PatkaTUITool', () => {
       hideInferenceClientChat: vi.fn(),
     };
 
-    await lastValueFrom(new PatkaTUITool(patkaUI).invoke({command: 'hide_inference_client_chat'}), {
-      defaultValue: undefined,
-    });
+    await lastValueFrom(
+      new PatkaTUITool(patkaUI, new PatkaText(defaultPatkaDictionary)).invoke({
+        command: 'hide_inference_client_chat',
+      }),
+      {
+        defaultValue: undefined,
+      },
+    );
 
     expect(patkaUI.hideInferenceClientChat).toHaveBeenCalledTimes(1);
   });
@@ -108,7 +129,9 @@ describe('PatkaTUITool', () => {
     };
 
     const outputs = await firstValueFrom(
-      new PatkaTUITool(patkaUI).invoke({command: 'show_logs'}).pipe(toArray()),
+      new PatkaTUITool(patkaUI, new PatkaText(defaultPatkaDictionary))
+        .invoke({command: 'show_logs'})
+        .pipe(toArray()),
     );
 
     expect(outputs).toEqual([]);
@@ -128,7 +151,9 @@ describe('PatkaTUITool', () => {
 
     await expect(
       firstValueFrom(
-        new PatkaTUITool(patkaUI).invoke({command: 'dance'} as unknown as PatkaTUIToolInput),
+        new PatkaTUITool(patkaUI, new PatkaText(defaultPatkaDictionary)).invoke({
+          command: 'dance',
+        } as unknown as PatkaTUIToolInput),
       ),
     ).rejects.toThrow('Unknown command: dance');
   });
@@ -145,7 +170,7 @@ describe('PatkaTUITool', () => {
       hideInferenceClientChat: vi.fn(),
     };
 
-    new PatkaTUITool(patkaUI).invoke({command: 'show_logs'});
+    new PatkaTUITool(patkaUI, new PatkaText(defaultPatkaDictionary)).invoke({command: 'show_logs'});
 
     expect(patkaUI.showLogs).not.toHaveBeenCalled();
   });

@@ -14,8 +14,8 @@ ptk_package(
         "//apps/patka/context",
         "//apps/patka/inference",
         "//apps/patka/prompt",
-        "//apps/patka/text",
         "//packages/patka-agent",
+        "//packages/patka-text",
         "//packages/patka-tool",
     ],
 )

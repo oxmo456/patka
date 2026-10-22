@@ -4,11 +4,14 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it} from 'vitest';
+import {defaultPatkaDictionary, PatkaText} from '../../patka-text/patka-text.ts';
 import {ApplyPatch} from './apply-patch.ts';
 
 describe('ApplyPatch', () => {
   it('carries a manual for the LLM', () => {
-    expect(new ApplyPatch(tmpdir()).name).toBe('apply_patch');
+    expect(new ApplyPatch(tmpdir(), new PatkaText(defaultPatkaDictionary)).name).toBe(
+      'apply_patch',
+    );
   });
 
   it('changes a file', async () => {
@@ -24,7 +27,9 @@ describe('ApplyPatch', () => {
       '',
     ].join('\n');
 
-    await firstValueFrom(new ApplyPatch(path).invoke({patch}));
+    await firstValueFrom(
+      new ApplyPatch(path, new PatkaText(defaultPatkaDictionary)).invoke({patch}),
+    );
 
     expect(await readFile(join(path, 'note.txt'), 'utf8')).toBe('hello patka\n');
   });
@@ -42,7 +47,9 @@ describe('ApplyPatch', () => {
       '',
     ].join('\n');
 
-    const output = await firstValueFrom(new ApplyPatch(path).invoke({patch}));
+    const output = await firstValueFrom(
+      new ApplyPatch(path, new PatkaText(defaultPatkaDictionary)).invoke({patch}),
+    );
 
     expect(output).toContain('Applied patch note.txt cleanly.');
   });
@@ -60,7 +67,9 @@ describe('ApplyPatch', () => {
       '',
     ].join('\n');
 
-    const output = await firstValueFrom(new ApplyPatch(path).invoke({patch}));
+    const output = await firstValueFrom(
+      new ApplyPatch(path, new PatkaText(defaultPatkaDictionary)).invoke({patch}),
+    );
 
     expect(output).toContain('warning: 1 line adds whitespace errors.');
   });
@@ -71,7 +80,9 @@ describe('ApplyPatch', () => {
       '\n',
     );
 
-    await firstValueFrom(new ApplyPatch(path).invoke({patch}));
+    await firstValueFrom(
+      new ApplyPatch(path, new PatkaText(defaultPatkaDictionary)).invoke({patch}),
+    );
 
     expect(await readFile(join(path, 'note.txt'), 'utf8')).toBe('hello patka\n');
   });
@@ -82,7 +93,9 @@ describe('ApplyPatch', () => {
     await writeFile(join(path, 'note.txt'), 'hello\n');
     const patch = ['--- a/note.txt', '+++ /dev/null', '@@ -1 +0,0 @@', '-hello', ''].join('\n');
 
-    await firstValueFrom(new ApplyPatch(path).invoke({patch}));
+    await firstValueFrom(
+      new ApplyPatch(path, new PatkaText(defaultPatkaDictionary)).invoke({patch}),
+    );
 
     expect(existsSync(join(path, 'note.txt'))).toBe(false);
   });
@@ -100,7 +113,9 @@ describe('ApplyPatch', () => {
       '',
     ].join('\n');
 
-    await firstValueFrom(new ApplyPatch(path).invoke({patch}));
+    await firstValueFrom(
+      new ApplyPatch(path, new PatkaText(defaultPatkaDictionary)).invoke({patch}),
+    );
 
     expect(await readFile(join(path, 'note.txt'), 'utf8')).toBe('hello patka\n');
   });
@@ -118,12 +133,16 @@ describe('ApplyPatch', () => {
       '',
     ].join('\n');
 
-    await expect(firstValueFrom(new ApplyPatch(path).invoke({patch}))).rejects.toThrow(
-      'error: patch failed: note.txt:1',
-    );
+    await expect(
+      firstValueFrom(new ApplyPatch(path, new PatkaText(defaultPatkaDictionary)).invoke({patch})),
+    ).rejects.toThrow('error: patch failed: note.txt:1');
   });
 
   it('does not touch the disk until subscribed', () => {
-    expect(() => new ApplyPatch(tmpdir()).invoke({patch: 'not a patch'})).not.toThrow();
+    expect(() =>
+      new ApplyPatch(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+        patch: 'not a patch',
+      }),
+    ).not.toThrow();
   });
 });

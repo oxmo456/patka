@@ -3,11 +3,12 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it} from 'vitest';
+import {defaultPatkaDictionary, PatkaText} from '../../patka-text/patka-text.ts';
 import {WriteFile} from './write-file.ts';
 
 describe('WriteFile', () => {
   it('carries a manual for the LLM', () => {
-    const writeFile = new WriteFile(tmpdir());
+    const writeFile = new WriteFile(tmpdir(), new PatkaText(defaultPatkaDictionary));
 
     expect(writeFile.name).toBe('write_file');
   });
@@ -16,7 +17,10 @@ describe('WriteFile', () => {
     const path = await mkdtemp(join(tmpdir(), 'patka-write-'));
 
     await firstValueFrom(
-      new WriteFile(path).invoke({relativePath: 'note.txt', content: 'hello patka'}),
+      new WriteFile(path, new PatkaText(defaultPatkaDictionary)).invoke({
+        relativePath: 'note.txt',
+        content: 'hello patka',
+      }),
     );
 
     expect(await readFile(join(path, 'note.txt'), 'utf8')).toBe('hello patka');
@@ -26,7 +30,10 @@ describe('WriteFile', () => {
     const path = await mkdtemp(join(tmpdir(), 'patka-write-'));
 
     const output = await firstValueFrom(
-      new WriteFile(path).invoke({relativePath: 'note.txt', content: 'hello patka'}),
+      new WriteFile(path, new PatkaText(defaultPatkaDictionary)).invoke({
+        relativePath: 'note.txt',
+        content: 'hello patka',
+      }),
     );
 
     expect(output).toEqual('note.txt');
@@ -35,7 +42,10 @@ describe('WriteFile', () => {
   it('refuses an absolute path', async () => {
     await expect(
       firstValueFrom(
-        new WriteFile(tmpdir()).invoke({relativePath: join(tmpdir(), 'note.txt'), content: ''}),
+        new WriteFile(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+          relativePath: join(tmpdir(), 'note.txt'),
+          content: '',
+        }),
       ),
     ).rejects.toThrow('only accepts a relative path');
   });
@@ -44,7 +54,10 @@ describe('WriteFile', () => {
     const path = await mkdtemp(join(tmpdir(), 'patka-write-'));
 
     await firstValueFrom(
-      new WriteFile(path).invoke({relativePath: 'missing/note.txt', content: 'hello patka'}),
+      new WriteFile(path, new PatkaText(defaultPatkaDictionary)).invoke({
+        relativePath: 'missing/note.txt',
+        content: 'hello patka',
+      }),
     );
 
     expect(await readFile(join(path, 'missing/note.txt'), 'utf8')).toBe('hello patka');
@@ -52,7 +65,10 @@ describe('WriteFile', () => {
 
   it('does not touch the disk until subscribed', () => {
     expect(() =>
-      new WriteFile(tmpdir()).invoke({relativePath: 'note.txt', content: ''}),
+      new WriteFile(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+        relativePath: 'note.txt',
+        content: '',
+      }),
     ).not.toThrow();
   });
 });

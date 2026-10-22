@@ -1,6 +1,7 @@
 import {mkdir, writeFile} from 'node:fs/promises';
 import {dirname, join} from 'node:path';
 import {defer, from, map, type Observable} from 'rxjs';
+import type {PatkaText} from '../../patka-text/patka-text.ts';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
 import {objectJsonSchemaLLMManual} from '../../patka-tool-llm-manual/object-json-schema-llm-manual.ts';
 import type {PatkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
@@ -15,29 +16,30 @@ export type WriteFileInput = {
 
 export class WriteFile implements PatkaTool<WriteFileInput, string> {
   readonly name: string = 'write_file';
-  readonly llmManual: PatkaToolLLMManual<WriteFileInput, string> = patkaToolLLMManual<
-    WriteFileInput,
-    string
-  >(
-    this.name,
-    objectJsonSchemaLLMManual<WriteFileInput>(
-      this.name,
-      'Use it once you know the path of the file and the whole text it must hold.',
-      {
-        relativePath: propertyJsonSchemaLLMManual(
-          'string',
-          'Relative path of the file to write, from the working directory (e.g. "notes.txt" or "src/main.ts"). Missing directories are created. Never an absolute path and never outside the working directory: such a path is refused.',
-        ),
-        content: propertyJsonSchemaLLMManual('string', 'The whole text the file must hold.'),
-      },
-    ),
-    propertyJsonSchemaLLMManual('string', 'The path of the file that was written.'),
-  );
+  readonly llmManual: PatkaToolLLMManual<WriteFileInput, string>;
 
   private readonly workingDirectory: string;
 
-  constructor(workingDirectory: string) {
+  constructor(workingDirectory: string, patkaText: PatkaText) {
     this.workingDirectory = workingDirectory;
+    this.llmManual = patkaToolLLMManual<WriteFileInput, string>(
+      this.name,
+      objectJsonSchemaLLMManual<WriteFileInput>(
+        this.name,
+        patkaText.get('tool.write_file.description'),
+        {
+          relativePath: propertyJsonSchemaLLMManual(
+            'string',
+            patkaText.get('tool.write_file.input.relativePath'),
+          ),
+          content: propertyJsonSchemaLLMManual(
+            'string',
+            patkaText.get('tool.write_file.input.content'),
+          ),
+        },
+      ),
+      propertyJsonSchemaLLMManual('string', patkaText.get('tool.write_file.output')),
+    );
   }
 
   invoke(writeFileInput: WriteFileInput): Observable<string> {

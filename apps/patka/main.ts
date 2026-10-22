@@ -6,6 +6,7 @@ import {container, type DependencyContainer, Lifecycle} from 'tsyringe';
 import {$} from 'zx';
 import {PatkaAgent} from '../../packages/patka-agent/patka-agent.ts';
 import {DefaultInferenceClientChatInputFactory} from '../../packages/patka-prompt/default-inference-client-chat-input-factory.ts';
+import {defaultPatkaDictionary, PatkaText} from '../../packages/patka-text/patka-text.ts';
 import {PatkaTools} from '../../packages/patka-tool/patka-tools.ts';
 import {ApplyPatch} from '../../packages/patka-tools/apply-patch/apply-patch.ts';
 import {GitDiff} from '../../packages/patka-tools/git-diff/git-diff.ts';
@@ -30,7 +31,6 @@ import {
 } from './inference/patka-inference.ts';
 import {Patka} from './patka.ts';
 import {INFERENCE_CLIENT_CHAT_INPUT_FACTORY} from './prompt/inference-client-chat-input-factory.token.ts';
-import {createTextFromPatkaTextKey} from './text/patka-text.ts';
 import {PATKA_TOOL} from './tools/patka-tool.token.ts';
 import {createPatkaToolsFromDependencyContainer} from './tools/patka-tools-factory.ts';
 import {PATKA_UI} from './ui/patka-ui.token.ts';
@@ -48,11 +48,12 @@ function createHttpServerFromRequestListener(requestListener: RequestListener): 
 }
 
 container.register(WORKING_DIRECTORY, {useValue: process.cwd()});
+container.register(PatkaText, {useValue: new PatkaText(defaultPatkaDictionary)});
 container.register(INFERENCE_CLIENT_CHAT_INPUT_FACTORY, {
   useFactory: (dependencyContainer: DependencyContainer) =>
     new DefaultInferenceClientChatInputFactory(
       dependencyContainer.resolve(PatkaTools),
-      createTextFromPatkaTextKey('prompt.system', {
+      dependencyContainer.resolve(PatkaText).get('prompt.system', {
         workingDirectory: dependencyContainer.resolve(WORKING_DIRECTORY),
       }),
     ),
@@ -72,33 +73,57 @@ container.register(INFERENCE_CLIENT, {
 });
 container.register(PATKA_TOOL, {
   useFactory: (dependencyContainer: DependencyContainer) =>
-    new ListFiles(dependencyContainer.resolve(WORKING_DIRECTORY)),
+    new ListFiles(
+      dependencyContainer.resolve(WORKING_DIRECTORY),
+      dependencyContainer.resolve(PatkaText),
+    ),
 });
 container.register(PATKA_TOOL, {
   useFactory: (dependencyContainer: DependencyContainer) =>
-    new GrepFiles(dependencyContainer.resolve(WORKING_DIRECTORY)),
+    new GrepFiles(
+      dependencyContainer.resolve(WORKING_DIRECTORY),
+      dependencyContainer.resolve(PatkaText),
+    ),
 });
 container.register(PATKA_TOOL, {
   useFactory: (dependencyContainer: DependencyContainer) =>
-    new GitStatus(dependencyContainer.resolve(WORKING_DIRECTORY)),
+    new GitStatus(
+      dependencyContainer.resolve(WORKING_DIRECTORY),
+      dependencyContainer.resolve(PatkaText),
+    ),
 });
 container.register(PATKA_TOOL, {
   useFactory: (dependencyContainer: DependencyContainer) =>
-    new GitDiff(dependencyContainer.resolve(WORKING_DIRECTORY)),
+    new GitDiff(
+      dependencyContainer.resolve(WORKING_DIRECTORY),
+      dependencyContainer.resolve(PatkaText),
+    ),
 });
 container.register(PATKA_TOOL, {
   useFactory: (dependencyContainer: DependencyContainer) =>
-    new ApplyPatch(dependencyContainer.resolve(WORKING_DIRECTORY)),
+    new ApplyPatch(
+      dependencyContainer.resolve(WORKING_DIRECTORY),
+      dependencyContainer.resolve(PatkaText),
+    ),
 });
 container.register(PATKA_TOOL, {
   useFactory: (dependencyContainer: DependencyContainer) =>
-    new ReadFile(dependencyContainer.resolve(WORKING_DIRECTORY)),
+    new ReadFile(
+      dependencyContainer.resolve(WORKING_DIRECTORY),
+      dependencyContainer.resolve(PatkaText),
+    ),
 });
 container.register(PATKA_TOOL, {
   useFactory: (dependencyContainer: DependencyContainer) =>
-    new WriteFile(dependencyContainer.resolve(WORKING_DIRECTORY)),
+    new WriteFile(
+      dependencyContainer.resolve(WORKING_DIRECTORY),
+      dependencyContainer.resolve(PatkaText),
+    ),
 });
-container.register(PATKA_TOOL, {useClass: ReportIncompetency});
+container.register(PATKA_TOOL, {
+  useFactory: (dependencyContainer: DependencyContainer) =>
+    new ReportIncompetency(dependencyContainer.resolve(PatkaText)),
+});
 container.register(PATKA_TOOL, {useClass: PatkaTUITool});
 container.register(PATKA_UI, {useClass: PatkaTUI}, {lifecycle: Lifecycle.Singleton});
 container.register(PATKA_CONTEXT_ENTRIES, {

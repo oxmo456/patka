@@ -1,15 +1,17 @@
 import type {DependencyContainer} from 'tsyringe';
 import {PatkaAgent} from '../../../packages/patka-agent/patka-agent.ts';
+import {PatkaText} from '../../../packages/patka-text/patka-text.ts';
 import {PatkaTools} from '../../../packages/patka-tool/patka-tools.ts';
 import {PATKA_CONTEXT_ENTRIES} from '../context/patka-context-entries.token.ts';
 import {INFERENCE_CLIENT} from '../inference/inference-client.token.ts';
 import {INFERENCE_CLIENT_CHAT_INPUT_FACTORY} from '../prompt/inference-client-chat-input-factory.token.ts';
-import {createTextFromPatkaTextKey} from '../text/patka-text.ts';
 import {AGENT_NAME} from './agent-name.token.ts';
 
 export function createPatkaAgentFromDependencyContainer(
   dependencyContainer: DependencyContainer,
 ): PatkaAgent {
+  const patkaText: PatkaText = dependencyContainer.resolve(PatkaText);
+
   return new PatkaAgent(
     dependencyContainer.resolve(AGENT_NAME),
     dependencyContainer.resolve(PatkaTools),
@@ -17,8 +19,8 @@ export function createPatkaAgentFromDependencyContainer(
     dependencyContainer.resolve(PATKA_CONTEXT_ENTRIES),
     dependencyContainer.resolve(INFERENCE_CLIENT_CHAT_INPUT_FACTORY),
     {
-      missingTools: createTextFromPatkaTextKey('agent.missingTools'),
-      error: (message: string) => createTextFromPatkaTextKey('agent.error', {message}),
+      missingTools: patkaText.get('agent.missingTools'),
+      error: (message: string) => patkaText.get('agent.error', {message}),
     },
   );
 }

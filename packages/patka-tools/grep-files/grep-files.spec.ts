@@ -2,13 +2,14 @@ import {tmpdir} from 'node:os';
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
 import {$} from 'zx';
+import {defaultPatkaDictionary, PatkaText} from '../../patka-text/patka-text.ts';
 import {GrepFiles} from './grep-files.ts';
 
 vi.mock('zx', () => ({$: vi.fn()}));
 
 describe('GrepFiles', () => {
   it('carries a manual for the LLM', () => {
-    const grepFiles = new GrepFiles(tmpdir());
+    const grepFiles = new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary));
 
     expect(grepFiles.name).toBe('grep_files');
   });
@@ -21,7 +22,12 @@ describe('GrepFiles', () => {
       .mockReset()
       .mockReturnValue(template as never);
 
-    await firstValueFrom(new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: './'}));
+    await firstValueFrom(
+      new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+        pattern: 'needle',
+        relativePath: './',
+      }),
+    );
 
     expect(String.raw(...template.mock.calls[0])).toBe(
       'git --literal-pathspecs -c color.ui=never grep --untracked -I -n -e needle -- ./',
@@ -37,7 +43,10 @@ describe('GrepFiles', () => {
       .mockReturnValue(template as never);
 
     await firstValueFrom(
-      new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: 'src/utils'}),
+      new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+        pattern: 'needle',
+        relativePath: 'src/utils',
+      }),
     );
 
     expect(String.raw(...template.mock.calls[0])).toBe(
@@ -51,7 +60,12 @@ describe('GrepFiles', () => {
       .mockReset()
       .mockReturnValue(template as never);
 
-    await firstValueFrom(new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: './'}));
+    await firstValueFrom(
+      new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+        pattern: 'needle',
+        relativePath: './',
+      }),
+    );
 
     expect($).toHaveBeenCalledWith({cwd: tmpdir(), nothrow: true});
   });
@@ -69,7 +83,10 @@ describe('GrepFiles', () => {
       .mockReturnValue(template as never);
 
     const matches = await firstValueFrom(
-      new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: './'}),
+      new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+        pattern: 'needle',
+        relativePath: './',
+      }),
     );
 
     expect(matches).toEqual('first.ts:1:export const needle = 1;\n');
@@ -82,7 +99,10 @@ describe('GrepFiles', () => {
       .mockReturnValue(template as never);
 
     const matches = await firstValueFrom(
-      new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: './'}),
+      new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+        pattern: 'needle',
+        relativePath: './',
+      }),
     );
 
     expect(matches).toEqual('');
@@ -97,7 +117,10 @@ describe('GrepFiles', () => {
       .mockReturnValue(template as never);
 
     const matches = await firstValueFrom(
-      new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: './'}),
+      new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+        pattern: 'needle',
+        relativePath: './',
+      }),
     );
 
     expect(matches).toEqual(
@@ -114,26 +137,44 @@ describe('GrepFiles', () => {
       .mockReturnValue(template as never);
 
     await expect(
-      firstValueFrom(new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: './'})),
+      firstValueFrom(
+        new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+          pattern: 'needle',
+          relativePath: './',
+        }),
+      ),
     ).rejects.toThrow('git grep failed: fatal: not a git repository');
   });
 
   it('refuses an absolute path', async () => {
     await expect(
-      firstValueFrom(new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: tmpdir()})),
+      firstValueFrom(
+        new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+          pattern: 'needle',
+          relativePath: tmpdir(),
+        }),
+      ),
     ).rejects.toThrow('only accepts a relative path');
   });
 
   it('refuses a path outside the working directory', async () => {
     await expect(
-      firstValueFrom(new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: '../'})),
+      firstValueFrom(
+        new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+          pattern: 'needle',
+          relativePath: '../',
+        }),
+      ),
     ).rejects.toThrow('only accepts a path inside the working directory');
   });
 
   it('does not run git until subscribed', () => {
     vi.mocked($).mockReset();
 
-    new GrepFiles(tmpdir()).invoke({pattern: 'needle', relativePath: './'});
+    new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+      pattern: 'needle',
+      relativePath: './',
+    });
 
     expect($).not.toHaveBeenCalled();
   });
