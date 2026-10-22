@@ -2,7 +2,7 @@
   "prompt.system": "# Role\n\nYou are Patka, an agent that helps the human user with their tasks.\n\n# Actions\n\nYou act by calling tools: code that runs on the user's machine and returns a result.\n\nIf the user asks you to do something or perform an action, you will most likely need to use one of the tools you are given.\n\nIf no tool is necessary, answer the user directly.\n\nNever call a tool as a guess. Every input you give it must come from the request.\n\nIf the request is empty, ambiguous, or not actionable, ask the user a question instead.\n\n# Answer style\n\nUse the fewest words possible.\n\nNo preamble, no restatement of the question, no closing offer to help.\n\nWrite the answer in markdown.\n\n# Environment\n\nAs an agent, your working directory is: {workingDirectory}",
   "agent.missingTools": "Patka agent is not providing the necessary tools for the LLM to complete the task.",
   "agent.error": "Oops something went wrong... {message}",
-  "tool.apply_patch.description": "Use it to change part of a file without writing the whole file again. Read the file first, so the context lines of the patch are exact.",
+  "tool.apply_patch.description": "Use it to change an existing file. Read the file first, so the context lines of the patch are exact. Prefer it to replace_text and write_file for any change to an existing file.",
   "tool.apply_patch.input.patch": "A unified diff, as \"git diff\" prints it. Paths are relative to the working directory, with the \"a/\" and \"b/\" prefixes (e.g. \"--- a/src/main.ts\" and \"+++ b/src/main.ts\"). Use \"--- /dev/null\" to create a file and \"+++ /dev/null\" to delete one.",
   "tool.apply_patch.output": "What git prints: one line per file it checked and applied, and any warning.",
   "tool.git_diff.description": "Use it to see what changed in a file that git status shows as modified.",
@@ -27,11 +27,16 @@
   "tool.report_incompetency.input.rationale": "Why the request needs a tool, and why no tool in this list can do it.",
   "tool.report_incompetency.input.toolSuggestion": "The names of the tools that you need and do not have.",
   "tool.report_incompetency.output": "The report was sent. It has no output.",
-  "tool.write_file.description": "Use it once you know the path of the file and the whole text it must hold.",
+  "tool.write_file.description": "Use it to create a new file, once you know its path and the whole text it must hold. To change an existing file, use apply_patch.",
   "tool.write_file.input.relativePath": "Relative path of the file to write, from the working directory (e.g. \"notes.txt\" or \"src/main.ts\"). Missing directories are created. Never an absolute path and never outside the working directory: such a path is refused.",
   "tool.write_file.input.content": "The whole text the file must hold.",
   "tool.write_file.output": "The path of the file that was written.",
   "tool.patka_tui.description": "Use it to change the patka terminal UI when the user asks for it.",
   "tool.patka_tui.input.command": "One of: \"show_logs\" to show the log panel, \"hide_logs\" to hide the log panel, \"show_inference_client_chat\" to show the panel of the last inference client chat sent to the model, \"hide_inference_client_chat\" to hide it.",
-  "tool.patka_tui.output": "It has no output."
+  "tool.patka_tui.output": "It has no output.",
+  "tool.replace_text.description": "Use it to change part of an existing file when apply_patch fails. Read the file first, then replace one exact piece of its text.",
+  "tool.replace_text.input.relativePath": "Relative path of the file to change, from the working directory (e.g. \"src/main.ts\"). Never an absolute path and never outside the working directory: such a path is refused.",
+  "tool.replace_text.input.oldText": "The exact text to replace. Keep it short: only the lines that change. It must occur exactly once in the file: add one surrounding line if it is not unique.",
+  "tool.replace_text.input.newText": "The text that replaces oldText.",
+  "tool.replace_text.output": "The path of the file that was changed."
 }

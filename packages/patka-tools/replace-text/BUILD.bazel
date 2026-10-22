@@ -1,0 +1,15 @@
+load("//tools:ptk_library.bzl", "ptk_library")
+
+ptk_library(
+    name = "replace-text",
+    srcs = ["replace-text.ts"],
+    deps = [
+        "//packages/patka-text",
+        "//packages/patka-tool-llm-manual",
+        "//packages/patka-tool",
+        "//packages/relative-path",
+    ],
+    npm_deps = [
+        "//:node_modules/rxjs",
+    ],
+)

@@ -15,6 +15,7 @@ import {GitStatus} from '../../packages/patka-tools/git-status/git-status.ts';
 import {GrepFiles} from '../../packages/patka-tools/grep-files/grep-files.ts';
 import {ListFiles} from '../../packages/patka-tools/list-files/list-files.ts';
 import {ReadFile} from '../../packages/patka-tools/read-file/read-file.ts';
+import {ReplaceText} from '../../packages/patka-tools/replace-text/replace-text.ts';
 import {ReportIncompetency} from '../../packages/patka-tools/report-incompetency/report-incompetency.ts';
 import {WriteFile} from '../../packages/patka-tools/write-file/write-file.ts';
 import {WORKING_DIRECTORY} from '../../packages/working-directory/working-directory.token.ts';
@@ -117,6 +118,13 @@ container.register(PATKA_TOOL, {
 container.register(PATKA_TOOL, {
   useFactory: (dependencyContainer: DependencyContainer) =>
     new WriteFile(
+      dependencyContainer.resolve(WORKING_DIRECTORY),
+      dependencyContainer.resolve(PatkaText),
+    ),
+});
+container.register(PATKA_TOOL, {
+  useFactory: (dependencyContainer: DependencyContainer) =>
+    new ReplaceText(
       dependencyContainer.resolve(WORKING_DIRECTORY),
       dependencyContainer.resolve(PatkaText),
     ),

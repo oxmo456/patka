@@ -44,6 +44,7 @@ ptk_app(
         "//packages/patka-logger",
         "//packages/patka-prompt",
         "//packages/patka-tools/apply-patch",
+        "//packages/patka-tools/replace-text",
         "//packages/patka-tools/git-diff",
         "//packages/patka-tools/git-status",
         "//packages/patka-tools/grep-files",

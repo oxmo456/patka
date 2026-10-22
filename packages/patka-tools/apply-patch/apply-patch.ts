@@ -7,6 +7,10 @@ import type {PatkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-ll
 import {patkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-manual.ts';
 import {propertyJsonSchemaLLMManual} from '../../patka-tool-llm-manual/property-json-schema-llm-manual.ts';
 
+function appendFinalNewline(patch: string): string {
+  return patch.endsWith('\n') ? patch : `${patch}\n`;
+}
+
 export type ApplyPatchInput = {
   readonly patch: string;
 };
@@ -39,7 +43,7 @@ export class ApplyPatch implements PatkaTool<ApplyPatchInput, string> {
     return defer(async () => {
       const processOutput = await $({
         cwd: this.workingDirectory,
-        input: applyPatchInput.patch,
+        input: appendFinalNewline(applyPatchInput.patch),
         nothrow: true,
       })`git apply --recount --verbose`;
 
