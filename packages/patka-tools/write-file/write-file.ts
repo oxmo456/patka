@@ -1,5 +1,5 @@
-import {writeFile} from 'node:fs/promises';
-import {join} from 'node:path';
+import {mkdir, writeFile} from 'node:fs/promises';
+import {dirname, join} from 'node:path';
 import {defer, from, map, type Observable} from 'rxjs';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
 import {objectJsonSchemaLLMManual} from '../../patka-tool-llm-manual/object-json-schema-llm-manual.ts';
@@ -26,7 +26,7 @@ export class WriteFile implements PatkaTool<WriteFileInput, string> {
       {
         relativePath: propertyJsonSchemaLLMManual(
           'string',
-          'Relative path of the file to write, from the working directory (e.g. "notes.txt" or "src/main.ts"). Never an absolute path and never outside the working directory: such a path is refused.',
+          'Relative path of the file to write, from the working directory (e.g. "notes.txt" or "src/main.ts"). Missing directories are created. Never an absolute path and never outside the working directory: such a path is refused.',
         ),
         content: propertyJsonSchemaLLMManual('string', 'The whole text the file must hold.'),
       },
@@ -47,11 +47,11 @@ export class WriteFile implements PatkaTool<WriteFileInput, string> {
         writeFileInput.relativePath,
       );
 
+      const path = join(this.workingDirectory, writeFileInput.relativePath);
+
       return from(
-        writeFile(
-          join(this.workingDirectory, writeFileInput.relativePath),
-          writeFileInput.content,
-          'utf8',
+        mkdir(dirname(path), {recursive: true}).then(() =>
+          writeFile(path, writeFileInput.content, 'utf8'),
         ),
       ).pipe(map(() => writeFileInput.relativePath));
     });

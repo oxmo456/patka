@@ -40,12 +40,14 @@ describe('WriteFile', () => {
     ).rejects.toThrow('only accepts a relative path');
   });
 
-  it('fails when the directory does not exist', async () => {
+  it('creates the directories that do not exist', async () => {
     const path = await mkdtemp(join(tmpdir(), 'patka-write-'));
 
-    await expect(
-      firstValueFrom(new WriteFile(path).invoke({relativePath: 'missing/note.txt', content: ''})),
-    ).rejects.toThrow();
+    await firstValueFrom(
+      new WriteFile(path).invoke({relativePath: 'missing/note.txt', content: 'hello patka'}),
+    );
+
+    expect(await readFile(join(path, 'missing/note.txt'), 'utf8')).toBe('hello patka');
   });
 
   it('does not touch the disk until subscribed', () => {
