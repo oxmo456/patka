@@ -28,6 +28,10 @@ export class GitStatus implements PatkaTool<Record<string, never>, string> {
   }
 
   invoke(): Observable<string> {
-    return defer(() => from($({cwd: this.workingDirectory})`git -c color.ui=never status`.text()));
+    return defer(() =>
+      from(
+        $({cwd: this.workingDirectory})`git -c color.ui=never status --untracked-files=all`.text(),
+      ),
+    );
   }
 }
