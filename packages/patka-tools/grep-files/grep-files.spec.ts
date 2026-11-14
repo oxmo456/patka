@@ -1,7 +1,8 @@
-import {tmpdir} from 'node:os';
+import {memfs} from 'memfs';
 import {firstValueFrom} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
 import {$} from 'zx';
+import type {FileSystem} from '../../file-system/file-system.ts';
 import defaultPatkaDictionary from '../../patka-text/default.json' with {type: 'json'};
 import {PatkaText} from '../../patka-text/patka-text.ts';
 import {GrepFiles} from './grep-files.ts';
@@ -10,7 +11,11 @@ vi.mock('zx', () => ({$: vi.fn()}));
 
 describe('GrepFiles', () => {
   it('carries a manual for the LLM', () => {
-    const grepFiles = new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary));
+    const grepFiles = new GrepFiles(
+      '/work',
+      new PatkaText(defaultPatkaDictionary),
+      memfs({'/work': null}).fs as unknown as FileSystem,
+    );
 
     expect(grepFiles.name).toBe('grep_files');
   });
@@ -24,7 +29,11 @@ describe('GrepFiles', () => {
       .mockReturnValue(template as never);
 
     await firstValueFrom(
-      new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+      new GrepFiles(
+        '/work',
+        new PatkaText(defaultPatkaDictionary),
+        memfs({'/work': null}).fs as unknown as FileSystem,
+      ).invoke({
         pattern: 'needle',
         relativePath: './',
       }),
@@ -44,7 +53,11 @@ describe('GrepFiles', () => {
       .mockReturnValue(template as never);
 
     await firstValueFrom(
-      new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+      new GrepFiles(
+        '/work',
+        new PatkaText(defaultPatkaDictionary),
+        memfs({'/work': null}).fs as unknown as FileSystem,
+      ).invoke({
         pattern: 'needle',
         relativePath: 'src/utils',
       }),
@@ -62,13 +75,17 @@ describe('GrepFiles', () => {
       .mockReturnValue(template as never);
 
     await firstValueFrom(
-      new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+      new GrepFiles(
+        '/work',
+        new PatkaText(defaultPatkaDictionary),
+        memfs({'/work': null}).fs as unknown as FileSystem,
+      ).invoke({
         pattern: 'needle',
         relativePath: './',
       }),
     );
 
-    expect($).toHaveBeenCalledWith({cwd: tmpdir(), nothrow: true});
+    expect($).toHaveBeenCalledWith({cwd: '/work', nothrow: true});
   });
 
   it('gives the lines that git finds', async () => {
@@ -84,7 +101,11 @@ describe('GrepFiles', () => {
       .mockReturnValue(template as never);
 
     const matches = await firstValueFrom(
-      new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+      new GrepFiles(
+        '/work',
+        new PatkaText(defaultPatkaDictionary),
+        memfs({'/work': null}).fs as unknown as FileSystem,
+      ).invoke({
         pattern: 'needle',
         relativePath: './',
       }),
@@ -100,7 +121,11 @@ describe('GrepFiles', () => {
       .mockReturnValue(template as never);
 
     const matches = await firstValueFrom(
-      new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+      new GrepFiles(
+        '/work',
+        new PatkaText(defaultPatkaDictionary),
+        memfs({'/work': null}).fs as unknown as FileSystem,
+      ).invoke({
         pattern: 'needle',
         relativePath: './',
       }),
@@ -118,7 +143,11 @@ describe('GrepFiles', () => {
       .mockReturnValue(template as never);
 
     const matches = await firstValueFrom(
-      new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+      new GrepFiles(
+        '/work',
+        new PatkaText(defaultPatkaDictionary),
+        memfs({'/work': null}).fs as unknown as FileSystem,
+      ).invoke({
         pattern: 'needle',
         relativePath: './',
       }),
@@ -139,7 +168,11 @@ describe('GrepFiles', () => {
 
     await expect(
       firstValueFrom(
-        new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+        new GrepFiles(
+          '/work',
+          new PatkaText(defaultPatkaDictionary),
+          memfs({'/work': null}).fs as unknown as FileSystem,
+        ).invoke({
           pattern: 'needle',
           relativePath: './',
         }),
@@ -150,9 +183,13 @@ describe('GrepFiles', () => {
   it('refuses an absolute path', async () => {
     await expect(
       firstValueFrom(
-        new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+        new GrepFiles(
+          '/work',
+          new PatkaText(defaultPatkaDictionary),
+          memfs({'/work': null}).fs as unknown as FileSystem,
+        ).invoke({
           pattern: 'needle',
-          relativePath: tmpdir(),
+          relativePath: '/work',
         }),
       ),
     ).rejects.toThrow('only accepts a relative path');
@@ -161,7 +198,11 @@ describe('GrepFiles', () => {
   it('refuses a path outside the working directory', async () => {
     await expect(
       firstValueFrom(
-        new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+        new GrepFiles(
+          '/work',
+          new PatkaText(defaultPatkaDictionary),
+          memfs({'/work': null}).fs as unknown as FileSystem,
+        ).invoke({
           pattern: 'needle',
           relativePath: '../',
         }),
@@ -172,7 +213,11 @@ describe('GrepFiles', () => {
   it('does not run git until subscribed', () => {
     vi.mocked($).mockReset();
 
-    new GrepFiles(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+    new GrepFiles(
+      '/work',
+      new PatkaText(defaultPatkaDictionary),
+      memfs({'/work': null}).fs as unknown as FileSystem,
+    ).invoke({
       pattern: 'needle',
       relativePath: './',
     });

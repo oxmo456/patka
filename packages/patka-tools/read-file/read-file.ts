@@ -1,6 +1,6 @@
-import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {defer, from, type Observable} from 'rxjs';
+import type {FileSystem} from '../../file-system/file-system.ts';
 import type {PatkaText} from '../../patka-text/patka-text.ts';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
 import {objectJsonSchemaLLMManual} from '../../patka-tool-llm-manual/object-json-schema-llm-manual.ts';
@@ -18,9 +18,11 @@ export class ReadFile implements PatkaTool<ReadFileInput, string> {
   readonly llmManual: PatkaToolLLMManual<ReadFileInput, string>;
 
   private readonly workingDirectory: string;
+  private readonly fileSystem: FileSystem;
 
-  constructor(workingDirectory: string, patkaText: PatkaText) {
+  constructor(workingDirectory: string, patkaText: PatkaText, fileSystem: FileSystem) {
     this.workingDirectory = workingDirectory;
+    this.fileSystem = fileSystem;
     this.llmManual = patkaToolLLMManual<ReadFileInput, string>(
       this.name,
       objectJsonSchemaLLMManual<ReadFileInput>(
@@ -40,11 +42,17 @@ export class ReadFile implements PatkaTool<ReadFileInput, string> {
   invoke(readFileInput: ReadFileInput): Observable<string> {
     return defer(() => {
       assertRelativePathInsideTheWorkingDirectory(
+        this.fileSystem,
         this.workingDirectory,
         readFileInput.relativePath,
       );
 
-      return from(readFile(join(this.workingDirectory, readFileInput.relativePath), 'utf8'));
+      return from(
+        this.fileSystem.promises.readFile(
+          join(this.workingDirectory, readFileInput.relativePath),
+          'utf8',
+        ),
+      );
     });
   }
 }

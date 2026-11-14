@@ -1,5 +1,6 @@
 import {defer, from, type Observable} from 'rxjs';
 import {$} from 'zx';
+import type {FileSystem} from '../../file-system/file-system.ts';
 import type {PatkaText} from '../../patka-text/patka-text.ts';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
 import {objectJsonSchemaLLMManual} from '../../patka-tool-llm-manual/object-json-schema-llm-manual.ts';
@@ -17,9 +18,11 @@ export class GitDiff implements PatkaTool<GitDiffInput, string> {
   readonly llmManual: PatkaToolLLMManual<GitDiffInput, string>;
 
   private readonly workingDirectory: string;
+  private readonly fileSystem: FileSystem;
 
-  constructor(workingDirectory: string, patkaText: PatkaText) {
+  constructor(workingDirectory: string, patkaText: PatkaText, fileSystem: FileSystem) {
     this.workingDirectory = workingDirectory;
+    this.fileSystem = fileSystem;
     this.llmManual = patkaToolLLMManual<GitDiffInput, string>(
       this.name,
       objectJsonSchemaLLMManual<GitDiffInput>(
@@ -38,7 +41,11 @@ export class GitDiff implements PatkaTool<GitDiffInput, string> {
 
   invoke(gitDiffInput: GitDiffInput): Observable<string> {
     return defer(() => {
-      assertRelativePathInsideTheWorkingDirectory(this.workingDirectory, gitDiffInput.relativePath);
+      assertRelativePathInsideTheWorkingDirectory(
+        this.fileSystem,
+        this.workingDirectory,
+        gitDiffInput.relativePath,
+      );
 
       return from(
         $({

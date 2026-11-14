@@ -38,6 +38,7 @@ ptk_app(
         "//packages/patka-tool",
         "//packages/patka-tool-llm-manual",
         "//packages/disposable",
+        "//packages/file-system",
         "//packages/duration",
         "//packages/json",
         "//packages/option",

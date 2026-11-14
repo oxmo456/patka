@@ -4,6 +4,7 @@ ptk_library(
     name = "replace-text",
     srcs = ["replace-text.ts"],
     deps = [
+        "//packages/file-system",
         "//packages/patka-text",
         "//packages/patka-tool-llm-manual",
         "//packages/patka-tool",

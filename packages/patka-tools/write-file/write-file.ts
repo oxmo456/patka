@@ -1,6 +1,6 @@
-import {mkdir, writeFile} from 'node:fs/promises';
 import {dirname, join} from 'node:path';
 import {defer, from, map, type Observable} from 'rxjs';
+import type {FileSystem} from '../../file-system/file-system.ts';
 import type {PatkaText} from '../../patka-text/patka-text.ts';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
 import {objectJsonSchemaLLMManual} from '../../patka-tool-llm-manual/object-json-schema-llm-manual.ts';
@@ -19,9 +19,11 @@ export class WriteFile implements PatkaTool<WriteFileInput, string> {
   readonly llmManual: PatkaToolLLMManual<WriteFileInput, string>;
 
   private readonly workingDirectory: string;
+  private readonly fileSystem: FileSystem;
 
-  constructor(workingDirectory: string, patkaText: PatkaText) {
+  constructor(workingDirectory: string, patkaText: PatkaText, fileSystem: FileSystem) {
     this.workingDirectory = workingDirectory;
+    this.fileSystem = fileSystem;
     this.llmManual = patkaToolLLMManual<WriteFileInput, string>(
       this.name,
       objectJsonSchemaLLMManual<WriteFileInput>(
@@ -45,6 +47,7 @@ export class WriteFile implements PatkaTool<WriteFileInput, string> {
   invoke(writeFileInput: WriteFileInput): Observable<string> {
     return defer(() => {
       assertRelativePathInsideTheWorkingDirectory(
+        this.fileSystem,
         this.workingDirectory,
         writeFileInput.relativePath,
       );
@@ -52,9 +55,9 @@ export class WriteFile implements PatkaTool<WriteFileInput, string> {
       const path = join(this.workingDirectory, writeFileInput.relativePath);
 
       return from(
-        mkdir(dirname(path), {recursive: true}).then(() =>
-          writeFile(path, writeFileInput.content, 'utf8'),
-        ),
+        this.fileSystem.promises
+          .mkdir(dirname(path), {recursive: true})
+          .then(() => this.fileSystem.promises.writeFile(path, writeFileInput.content, 'utf8')),
       ).pipe(map(() => writeFileInput.relativePath));
     });
   }

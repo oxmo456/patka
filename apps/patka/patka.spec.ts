@@ -1,4 +1,5 @@
 import {randomUUID} from 'node:crypto';
+import * as fileSystem from 'node:fs';
 import {createServer} from 'node:http';
 import {of, Subject} from 'rxjs';
 import {container, type DependencyContainer} from 'tsyringe';
@@ -67,6 +68,7 @@ describe('Patka', () => {
         new ListFiles(
           dependencyContainer.resolve(WORKING_DIRECTORY),
           new PatkaText(defaultPatkaDictionary),
+          fileSystem,
         ),
     });
     child.register(PATKA_TOOL, {
@@ -74,6 +76,7 @@ describe('Patka', () => {
         new ReadFile(
           dependencyContainer.resolve(WORKING_DIRECTORY),
           new PatkaText(defaultPatkaDictionary),
+          fileSystem,
         ),
     });
     child.register(PATKA_UI, {useValue: aPatkaUI()});
@@ -116,6 +119,7 @@ describe('Patka', () => {
         new ListFiles(
           dependencyContainer.resolve(WORKING_DIRECTORY),
           new PatkaText(defaultPatkaDictionary),
+          fileSystem,
         ),
     });
     child.register(PATKA_TOOL, {
@@ -123,6 +127,7 @@ describe('Patka', () => {
         new ReadFile(
           dependencyContainer.resolve(WORKING_DIRECTORY),
           new PatkaText(defaultPatkaDictionary),
+          fileSystem,
         ),
     });
     child.register(PATKA_UI, {
@@ -188,6 +193,7 @@ describe('Patka', () => {
         new ListFiles(
           dependencyContainer.resolve(WORKING_DIRECTORY),
           new PatkaText(defaultPatkaDictionary),
+          fileSystem,
         ),
     });
     child.register(PATKA_TOOL, {
@@ -195,6 +201,7 @@ describe('Patka', () => {
         new ReadFile(
           dependencyContainer.resolve(WORKING_DIRECTORY),
           new PatkaText(defaultPatkaDictionary),
+          fileSystem,
         ),
     });
     child.register(PATKA_UI, {
@@ -252,6 +259,7 @@ describe('Patka', () => {
         new ListFiles(
           dependencyContainer.resolve(WORKING_DIRECTORY),
           new PatkaText(defaultPatkaDictionary),
+          fileSystem,
         ),
     });
     child.register(PATKA_TOOL, {
@@ -259,6 +267,7 @@ describe('Patka', () => {
         new ReadFile(
           dependencyContainer.resolve(WORKING_DIRECTORY),
           new PatkaText(defaultPatkaDictionary),
+          fileSystem,
         ),
     });
     child.register(PATKA_UI, {
@@ -319,6 +328,7 @@ describe('Patka', () => {
         new ListFiles(
           dependencyContainer.resolve(WORKING_DIRECTORY),
           new PatkaText(defaultPatkaDictionary),
+          fileSystem,
         ),
     });
     child.register(PATKA_TOOL, {
@@ -326,6 +336,7 @@ describe('Patka', () => {
         new ReadFile(
           dependencyContainer.resolve(WORKING_DIRECTORY),
           new PatkaText(defaultPatkaDictionary),
+          fileSystem,
         ),
     });
     child.register(PATKA_UI, {

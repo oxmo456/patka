@@ -1,6 +1,6 @@
-import {readdir} from 'node:fs/promises';
 import {join} from 'node:path';
 import {defer, from, map, type Observable} from 'rxjs';
+import type {FileSystem} from '../../file-system/file-system.ts';
 import type {PatkaText} from '../../patka-text/patka-text.ts';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
 import {objectJsonSchemaLLMManual} from '../../patka-tool-llm-manual/object-json-schema-llm-manual.ts';
@@ -18,9 +18,11 @@ export class ListFiles implements PatkaTool<ListFilesInput, ReadonlyArray<string
   readonly llmManual: PatkaToolLLMManual<ListFilesInput, ReadonlyArray<string>>;
 
   private readonly workingDirectory: string;
+  private readonly fileSystem: FileSystem;
 
-  constructor(workingDirectory: string, patkaText: PatkaText) {
+  constructor(workingDirectory: string, patkaText: PatkaText, fileSystem: FileSystem) {
     this.workingDirectory = workingDirectory;
+    this.fileSystem = fileSystem;
     this.llmManual = patkaToolLLMManual<ListFilesInput, ReadonlyArray<string>>(
       this.name,
       objectJsonSchemaLLMManual<ListFilesInput>(
@@ -40,12 +42,15 @@ export class ListFiles implements PatkaTool<ListFilesInput, ReadonlyArray<string
   invoke(listFilesInput: ListFilesInput): Observable<ReadonlyArray<string>> {
     return defer(() => {
       assertRelativePathInsideTheWorkingDirectory(
+        this.fileSystem,
         this.workingDirectory,
         listFilesInput.relativePath,
       );
 
       return from(
-        readdir(join(this.workingDirectory, listFilesInput.relativePath), {withFileTypes: true}),
+        this.fileSystem.promises.readdir(join(this.workingDirectory, listFilesInput.relativePath), {
+          withFileTypes: true,
+        }),
       );
     }).pipe(
       map((entries) =>

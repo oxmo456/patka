@@ -1,4 +1,5 @@
 import {execFileSync} from 'node:child_process';
+import * as fileSystem from 'node:fs';
 import {mkdtemp, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
@@ -10,7 +11,9 @@ import {GitDiff} from './git-diff.ts';
 
 describe('GitDiff', () => {
   it('carries a manual for the LLM', () => {
-    expect(new GitDiff(tmpdir(), new PatkaText(defaultPatkaDictionary)).name).toBe('git_diff');
+    expect(new GitDiff(tmpdir(), new PatkaText(defaultPatkaDictionary), fileSystem).name).toBe(
+      'git_diff',
+    );
   });
 
   it('emits the change made to a committed file', async () => {
@@ -26,7 +29,9 @@ describe('GitDiff', () => {
     await writeFile(join(path, 'note.txt'), 'hello patka\n');
 
     const output = await firstValueFrom(
-      new GitDiff(path, new PatkaText(defaultPatkaDictionary)).invoke({relativePath: 'note.txt'}),
+      new GitDiff(path, new PatkaText(defaultPatkaDictionary), fileSystem).invoke({
+        relativePath: 'note.txt',
+      }),
     );
 
     expect(output).toContain('+hello patka');
@@ -44,7 +49,9 @@ describe('GitDiff', () => {
     );
 
     const output = await firstValueFrom(
-      new GitDiff(path, new PatkaText(defaultPatkaDictionary)).invoke({relativePath: 'note.txt'}),
+      new GitDiff(path, new PatkaText(defaultPatkaDictionary), fileSystem).invoke({
+        relativePath: 'note.txt',
+      }),
     );
 
     expect(output).toBe('');
@@ -53,7 +60,7 @@ describe('GitDiff', () => {
   it('refuses an absolute path', async () => {
     await expect(
       firstValueFrom(
-        new GitDiff(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+        new GitDiff(tmpdir(), new PatkaText(defaultPatkaDictionary), fileSystem).invoke({
           relativePath: join(tmpdir(), 'note.txt'),
         }),
       ),
@@ -62,7 +69,7 @@ describe('GitDiff', () => {
 
   it('does not run git until subscribed', () => {
     expect(() =>
-      new GitDiff(tmpdir(), new PatkaText(defaultPatkaDictionary)).invoke({
+      new GitDiff(tmpdir(), new PatkaText(defaultPatkaDictionary), fileSystem).invoke({
         relativePath: 'note.txt',
       }),
     ).not.toThrow();

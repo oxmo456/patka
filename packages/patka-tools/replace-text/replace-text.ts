@@ -1,6 +1,6 @@
-import {readFile, writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {defer, type Observable} from 'rxjs';
+import type {FileSystem} from '../../file-system/file-system.ts';
 import type {PatkaText} from '../../patka-text/patka-text.ts';
 import type {PatkaTool} from '../../patka-tool/patka-tool.ts';
 import {objectJsonSchemaLLMManual} from '../../patka-tool-llm-manual/object-json-schema-llm-manual.ts';
@@ -24,9 +24,11 @@ export class ReplaceText implements PatkaTool<ReplaceTextInput, string> {
   readonly llmManual: PatkaToolLLMManual<ReplaceTextInput, string>;
 
   private readonly workingDirectory: string;
+  private readonly fileSystem: FileSystem;
 
-  constructor(workingDirectory: string, patkaText: PatkaText) {
+  constructor(workingDirectory: string, patkaText: PatkaText, fileSystem: FileSystem) {
     this.workingDirectory = workingDirectory;
+    this.fileSystem = fileSystem;
     this.llmManual = patkaToolLLMManual<ReplaceTextInput, string>(
       this.name,
       objectJsonSchemaLLMManual<ReplaceTextInput>(
@@ -54,6 +56,7 @@ export class ReplaceText implements PatkaTool<ReplaceTextInput, string> {
   invoke(replaceTextInput: ReplaceTextInput): Observable<string> {
     return defer(async () => {
       assertRelativePathInsideTheWorkingDirectory(
+        this.fileSystem,
         this.workingDirectory,
         replaceTextInput.relativePath,
       );
@@ -63,7 +66,7 @@ export class ReplaceText implements PatkaTool<ReplaceTextInput, string> {
       }
 
       const path = join(this.workingDirectory, replaceTextInput.relativePath);
-      const content = await readFile(path, 'utf8');
+      const content = await this.fileSystem.promises.readFile(path, 'utf8');
       const occurrences = countOccurrences(content, replaceTextInput.oldText);
 
       if (occurrences === 0) {
@@ -78,7 +81,7 @@ export class ReplaceText implements PatkaTool<ReplaceTextInput, string> {
         );
       }
 
-      await writeFile(
+      await this.fileSystem.promises.writeFile(
         path,
         content.replace(replaceTextInput.oldText, () => replaceTextInput.newText),
         'utf8',

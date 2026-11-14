@@ -1,9 +1,11 @@
 import {PatkaLogger} from '../../packages/patka-logger/patka-logger.ts';
 import 'reflect-metadata';
+import * as fileSystem from 'node:fs';
 import {createServer, type RequestListener, type Server} from 'node:http';
 import blessed from 'blessed';
 import {container, type DependencyContainer, Lifecycle} from 'tsyringe';
 import {$} from 'zx';
+import {FILE_SYSTEM} from '../../packages/file-system/file-system.token.ts';
 import {PatkaAgent} from '../../packages/patka-agent/patka-agent.ts';
 import {DefaultInferenceClientChatInputFactory} from '../../packages/patka-prompt/default-inference-client-chat-input-factory.ts';
 import defaultPatkaDictionary from '../../packages/patka-text/default.json' with {type: 'json'};
@@ -50,6 +52,7 @@ function createHttpServerFromRequestListener(requestListener: RequestListener): 
 }
 
 container.register(WORKING_DIRECTORY, {useValue: process.cwd()});
+container.register(FILE_SYSTEM, {useValue: fileSystem});
 container.register(PatkaText, {useValue: new PatkaText(defaultPatkaDictionary)});
 container.register(INFERENCE_CLIENT_CHAT_INPUT_FACTORY, {
   useFactory: (dependencyContainer: DependencyContainer) =>
@@ -78,6 +81,7 @@ container.register(PATKA_TOOL, {
     new ListFiles(
       dependencyContainer.resolve(WORKING_DIRECTORY),
       dependencyContainer.resolve(PatkaText),
+      dependencyContainer.resolve(FILE_SYSTEM),
     ),
 });
 container.register(PATKA_TOOL, {
@@ -85,6 +89,7 @@ container.register(PATKA_TOOL, {
     new GrepFiles(
       dependencyContainer.resolve(WORKING_DIRECTORY),
       dependencyContainer.resolve(PatkaText),
+      dependencyContainer.resolve(FILE_SYSTEM),
     ),
 });
 container.register(PATKA_TOOL, {
@@ -99,6 +104,7 @@ container.register(PATKA_TOOL, {
     new GitDiff(
       dependencyContainer.resolve(WORKING_DIRECTORY),
       dependencyContainer.resolve(PatkaText),
+      dependencyContainer.resolve(FILE_SYSTEM),
     ),
 });
 container.register(PATKA_TOOL, {
@@ -113,6 +119,7 @@ container.register(PATKA_TOOL, {
     new ReadFile(
       dependencyContainer.resolve(WORKING_DIRECTORY),
       dependencyContainer.resolve(PatkaText),
+      dependencyContainer.resolve(FILE_SYSTEM),
     ),
 });
 container.register(PATKA_TOOL, {
@@ -120,6 +127,7 @@ container.register(PATKA_TOOL, {
     new WriteFile(
       dependencyContainer.resolve(WORKING_DIRECTORY),
       dependencyContainer.resolve(PatkaText),
+      dependencyContainer.resolve(FILE_SYSTEM),
     ),
 });
 container.register(PATKA_TOOL, {
@@ -127,6 +135,7 @@ container.register(PATKA_TOOL, {
     new ReplaceText(
       dependencyContainer.resolve(WORKING_DIRECTORY),
       dependencyContainer.resolve(PatkaText),
+      dependencyContainer.resolve(FILE_SYSTEM),
     ),
 });
 container.register(PATKA_TOOL, {

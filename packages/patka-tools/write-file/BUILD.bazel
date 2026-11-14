@@ -5,12 +5,14 @@ ptk_library(
     srcs = ["write-file.ts"],
     test_srcs = ["write-file.spec.ts"],
     deps = [
+        "//packages/file-system",
         "//packages/patka-tool-llm-manual",
         "//packages/patka-text",
         "//packages/patka-tool",
         "//packages/relative-path",
     ],
     npm_deps = [
+        "//:node_modules/memfs",
         "//:node_modules/rxjs",
     ],
 )

@@ -4,4 +4,6 @@ ptk_library(
     name = "relative-path",
     srcs = ["assert-relative-path-inside-the-working-directory.ts"],
     test_srcs = ["assert-relative-path-inside-the-working-directory.spec.ts"],
+    deps = ["//packages/file-system"],
+    npm_deps = ["//:node_modules/memfs"],
 )

@@ -1,4 +1,3 @@
-import {lstatSync, realpathSync} from 'node:fs';
 import {
   basename,
   dirname,
@@ -8,32 +7,37 @@ import {
   resolve,
   sep,
 } from 'node:path';
+import type {FileSystem} from '../file-system/file-system.ts';
 
 function hasParentSegment(relativePath: string): boolean {
   return relativePath.split(/[\\/]/).includes('..');
 }
 
-function isPresent(path: string): boolean {
+function isPresent(fileSystem: FileSystem, path: string): boolean {
   try {
-    lstatSync(path);
+    fileSystem.lstatSync(path);
     return true;
   } catch {
     return false;
   }
 }
 
-function createRealPathFromPath(path: string): string {
-  if (isPresent(path)) {
-    return realpathSync(path);
+function createRealPathFromPath(fileSystem: FileSystem, path: string): string {
+  if (isPresent(fileSystem, path)) {
+    return fileSystem.realpathSync(path);
   }
 
-  return join(createRealPathFromPath(dirname(path)), basename(path));
+  return join(createRealPathFromPath(fileSystem, dirname(path)), basename(path));
 }
 
-function isOutsideTheWorkingDirectory(workingDirectory: string, relativePath: string): boolean {
+function isOutsideTheWorkingDirectory(
+  fileSystem: FileSystem,
+  workingDirectory: string,
+  relativePath: string,
+): boolean {
   const pathFromTheWorkingDirectory = relative(
-    realpathSync(workingDirectory),
-    createRealPathFromPath(resolve(workingDirectory, relativePath)),
+    fileSystem.realpathSync(workingDirectory),
+    createRealPathFromPath(fileSystem, resolve(workingDirectory, relativePath)),
   );
 
   return (
@@ -44,6 +48,7 @@ function isOutsideTheWorkingDirectory(workingDirectory: string, relativePath: st
 }
 
 export function assertRelativePathInsideTheWorkingDirectory(
+  fileSystem: FileSystem,
   workingDirectory: string,
   relativePath: string,
 ): void {
@@ -53,7 +58,7 @@ export function assertRelativePathInsideTheWorkingDirectory(
 
   if (
     hasParentSegment(relativePath) ||
-    isOutsideTheWorkingDirectory(workingDirectory, relativePath)
+    isOutsideTheWorkingDirectory(fileSystem, workingDirectory, relativePath)
   ) {
     throw new Error(
       `The tool only accepts a path inside the working directory, given "${relativePath}"`,
