@@ -6,7 +6,6 @@ ptk_package(
         "blessed.token.ts",
         "patka-markdown.ts",
         "patka-tui.ts",
-        "solarized.ts",
     ],
     test_srcs = ["patka-markdown.spec.ts"],
     visibility = ["//apps/patka:__subpackages__"],

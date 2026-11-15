@@ -1,5 +1,3 @@
-import {SOLARIZED} from './solarized.ts';
-
 const HEADING = /^\s{0,3}(#{1,6})\s+(.*)$/;
 
 const BULLET = /^(\s*)[-*+]\s+(.*)$/;
@@ -18,9 +16,9 @@ const BLESSED_TAG = /\{[^{}]*\}/g;
 
 const ESCAPED_BRACE = 'x';
 
-const CODE_STYLE = `{${SOLARIZED.cyan}-fg}`;
+const CODE_STYLE = '{cyan-fg}';
 
-const CODE_STYLE_END = `{/${SOLARIZED.cyan}-fg}`;
+const CODE_STYLE_END = '{/cyan-fg}';
 
 type MarkdownState = {
   readonly fenced: boolean;

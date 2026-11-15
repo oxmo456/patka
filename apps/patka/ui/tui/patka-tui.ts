@@ -10,24 +10,23 @@ import type {PatkaUI} from '../patka-ui.ts';
 import type {PatkaUserInput} from '../patka-user-input.ts';
 import {BLESSED} from './blessed.token.ts';
 import {toMarkdownLines, visibleLength} from './patka-markdown.ts';
-import {SOLARIZED} from './solarized.ts';
 
 export type Blessed = Pick<typeof blessedModule, 'screen' | 'box' | 'line' | 'textbox'>;
 
 const PENDING_RESPONSE = '...';
 
-const USER_STYLE = `{${SOLARIZED.blue}-bg}{${SOLARIZED.base3}-fg}`;
+const USER_STYLE = '{blue-bg}{white-fg}';
 
-const AGENT_STYLE = `{${SOLARIZED.base02}-bg}{${SOLARIZED.base0}-fg}`;
+const AGENT_STYLE = '';
 
-const METADATA_STYLE = `{${SOLARIZED.base01}-fg}`;
+const METADATA_STYLE = '{gray-fg}';
 
 const MIN_WIDTH = 8;
 
 const LEVEL_STYLE: Record<number, string> = {
-  30: `{${SOLARIZED.green}-fg}`,
-  40: `{${SOLARIZED.yellow}-fg}`,
-  50: `{${SOLARIZED.red}-fg}`,
+  30: '{green-fg}',
+  40: '{yellow-fg}',
+  50: '{red-fg}',
 };
 
 const PINO_OWN_FIELDS: ReadonlySet<string> = new Set(['level', 'time', 'pid', 'hostname', 'msg']);
@@ -133,6 +132,7 @@ export class PatkaTUI implements PatkaUI {
   private readonly logsSeparator: Widgets.LineElement;
   private readonly inferenceClientChat: Widgets.BoxElement;
   private readonly inferenceClientChatSeparator: Widgets.LineElement;
+  private readonly lineBelowInput: Widgets.BoxElement;
   private readonly chatColumn: ReadonlyArray<Widgets.BlessedElement>;
   private patkaChatEntries: ReadonlyArray<PatkaChatEntry> = [];
   private logLines: ReadonlyArray<string> = [];
@@ -153,7 +153,6 @@ export class PatkaTUI implements PatkaUI {
       scrollable: true,
       alwaysScroll: true,
       mouse: true,
-      style: {fg: SOLARIZED.base0, bg: SOLARIZED.base03},
     });
     this.logs = blessed.box({
       top: 0,
@@ -163,16 +162,11 @@ export class PatkaTUI implements PatkaUI {
       scrollable: true,
       alwaysScroll: true,
       mouse: true,
-      style: {
-        fg: SOLARIZED.base0,
-        bg: SOLARIZED.base03,
-      },
     });
     this.logsSeparator = blessed.line({
       orientation: 'vertical',
       top: 0,
       height: '100%',
-      style: {fg: SOLARIZED.base02, bg: SOLARIZED.base03},
     });
     this.inferenceClientChat = blessed.box({
       top: 0,
@@ -181,41 +175,30 @@ export class PatkaTUI implements PatkaUI {
       scrollable: true,
       alwaysScroll: true,
       mouse: true,
-      style: {
-        fg: SOLARIZED.base0,
-        bg: SOLARIZED.base03,
-      },
     });
     this.inferenceClientChatSeparator = blessed.line({
       orientation: 'vertical',
       top: 0,
       height: '100%',
-      style: {fg: SOLARIZED.base02, bg: SOLARIZED.base03},
     });
     const promptInput = blessed.textbox({
       bottom: 1,
       left: 0,
       height: 1,
       inputOnFocus: true,
-      style: {
-        fg: SOLARIZED.base1,
-        bg: SOLARIZED.base03,
-      },
     });
     const lineAboveInput = blessed.line({
       orientation: 'horizontal',
       bottom: 2,
       left: 0,
-      style: {fg: SOLARIZED.base02, bg: SOLARIZED.base03},
     });
-    const lineBelowInput = blessed.line({
-      orientation: 'horizontal',
+    this.lineBelowInput = blessed.box({
       bottom: 0,
       left: 0,
-      style: {fg: SOLARIZED.base02, bg: SOLARIZED.base03},
+      height: 1,
     });
 
-    this.chatColumn = [this.conversation, promptInput, lineAboveInput, lineBelowInput];
+    this.chatColumn = [this.conversation, promptInput, lineAboveInput, this.lineBelowInput];
 
     promptInput.on('submit', (prompt: string) => {
       this._userInputs.next({content: prompt, timestamp: new Date(), id: randomUUID()});
@@ -231,7 +214,7 @@ export class PatkaTUI implements PatkaUI {
     this.screen.append(this.inferenceClientChat);
     this.screen.append(promptInput);
     this.screen.append(lineAboveInput);
-    this.screen.append(lineBelowInput);
+    this.screen.append(this.lineBelowInput);
     this.screen.key(['escape', 'C-c'], () => process.exit(0));
     this.screen.on('resize', () => this.draw());
     promptInput.focus();
@@ -297,6 +280,8 @@ export class PatkaTUI implements PatkaUI {
     for (const element of this.chatColumn) {
       element.width = columnWidth;
     }
+
+    this.lineBelowInput.setContent('─'.repeat(columnWidth));
 
     for (const element of [
       this.logsSeparator,

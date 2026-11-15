@@ -15,9 +15,7 @@ describe('toMarkdownLines', () => {
   });
 
   it('colours a code span', () => {
-    expect(toMarkdownLines('run `npm test` now')).toEqual([
-      'run {#2aa198-fg}npm test{/#2aa198-fg} now',
-    ]);
+    expect(toMarkdownLines('run `npm test` now')).toEqual(['run {cyan-fg}npm test{/cyan-fg} now']);
   });
 
   it('keeps a bullet', () => {
@@ -30,13 +28,13 @@ describe('toMarkdownLines', () => {
 
   it('drops the fences of a code block', () => {
     expect(toMarkdownLines(['```ts', 'const x = 1;', '```'].join('\n'))).toEqual([
-      '{#2aa198-fg}const x = 1;{/#2aa198-fg}',
+      '{cyan-fg}const x = 1;{/cyan-fg}',
     ]);
   });
 
   it('leaves a star inside a code block alone', () => {
     expect(toMarkdownLines(['```', 'a * b', '```'].join('\n'))).toEqual([
-      '{#2aa198-fg}a * b{/#2aa198-fg}',
+      '{cyan-fg}a * b{/cyan-fg}',
     ]);
   });
 
