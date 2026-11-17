@@ -12,8 +12,8 @@ describe('extractInferenceClientOption', () => {
 });
 
 describe('extractOllamaModel', () => {
-  it('uses qwen2.5-coder when no model is given', () => {
-    expect(extractOllamaModel(['node', 'main.js'])).toBe('qwen2.5-coder:latest');
+  it('uses qwen3.6 when no model is given', () => {
+    expect(extractOllamaModel(['node', 'main.js'])).toBe('qwen3.6:35b-a3b');
   });
 
   it('uses the model given with --ollama-model=', () => {

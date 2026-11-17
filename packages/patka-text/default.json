@@ -11,7 +11,7 @@
   "tool.git_status.description": "Use it to know which files are changed, staged or not tracked by git.",
   "tool.git_status.output": "The text that \"git status\" prints.",
   "tool.grep_files.description": "Use it to find where a name or a text appears, before you read or change a file.",
-  "tool.grep_files.input.pattern": "The text to search, as a basic regular expression (e.g. \"PatkaTool\" or \"class .*Files\").",
+  "tool.grep_files.input.pattern": "The text to search, as an extended regular expression (e.g. \"PatkaTool\" or \"class .*Files|listen\").",
   "tool.grep_files.input.relativePath": "Relative path of the file or directory to search in, from the working directory (e.g. \"./\" for the whole working directory, or \"src/utils\"). Never an absolute path and never outside the working directory: such a path is refused.",
   "tool.grep_files.output": "One line per match, as \"path:line:text\". Empty when no file matches. At most {maximumMatches} lines, then a last line tells how many matches are not shown.",
   "tool.list_files.description": "Use it to discover what a directory holds before reading any file.",

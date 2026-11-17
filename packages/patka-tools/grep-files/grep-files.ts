@@ -78,7 +78,7 @@ export class GrepFiles implements PatkaTool<GrepFilesInput, string> {
           $({
             cwd: this.workingDirectory,
             nothrow: true,
-          })`git --literal-pathspecs -c color.ui=never grep --untracked -I -n -e ${grepFilesInput.pattern} -- ${grepFilesInput.relativePath}`,
+          })`git --literal-pathspecs -c color.ui=never grep --untracked -I -n -E -e ${grepFilesInput.pattern} -- ${grepFilesInput.relativePath}`,
         ),
       );
     }).pipe(

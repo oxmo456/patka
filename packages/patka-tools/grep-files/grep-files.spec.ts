@@ -40,7 +40,7 @@ describe('GrepFiles', () => {
     );
 
     expect(String.raw(...template.mock.calls[0])).toBe(
-      'git --literal-pathspecs -c color.ui=never grep --untracked -I -n -e needle -- ./',
+      'git --literal-pathspecs -c color.ui=never grep --untracked -I -n -E -e needle -- ./',
     );
   });
 
@@ -64,7 +64,7 @@ describe('GrepFiles', () => {
     );
 
     expect(String.raw(...template.mock.calls[0])).toBe(
-      'git --literal-pathspecs -c color.ui=never grep --untracked -I -n -e needle -- src/utils',
+      'git --literal-pathspecs -c color.ui=never grep --untracked -I -n -E -e needle -- src/utils',
     );
   });
 
