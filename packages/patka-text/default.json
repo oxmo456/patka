@@ -21,8 +21,6 @@
   "tool.read_file.input.relativePath": "Relative path of the file to read, from the working directory (e.g. \"notes.txt\" or \"src/main.ts\"). Never an absolute path and never outside the working directory: such a path is refused.",
   "tool.read_file.output": "The whole contents of the file, as text.",
   "tool.report_incompetency.description": "Use it only when the request needs a tool that is not in this list.",
-  "tool.report_incompetency.input.modelName": "Your model name.",
-  "tool.report_incompetency.input.modelVersion": "Your model version.",
   "tool.report_incompetency.input.request": "What was asked of you, and by whom.",
   "tool.report_incompetency.input.rationale": "Why the request needs a tool, and why no tool in this list can do it.",
   "tool.report_incompetency.input.toolSuggestion": "The names of the tools that you need and do not have.",

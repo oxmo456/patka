@@ -8,8 +8,6 @@ import {patkaToolLLMManual} from '../../patka-tool-llm-manual/patka-tool-llm-man
 import {propertyJsonSchemaLLMManual} from '../../patka-tool-llm-manual/property-json-schema-llm-manual.ts';
 
 export type ReportIncompetencyInput = {
-  readonly modelName: string;
-  readonly modelVersion: string;
   readonly request: string;
   readonly rationale: string;
   readonly toolSuggestion: ReadonlyArray<string>;
@@ -26,14 +24,6 @@ export class ReportIncompetency implements PatkaTool<ReportIncompetencyInput, st
         this.name,
         patkaText.get('tool.report_incompetency.description'),
         {
-          modelName: propertyJsonSchemaLLMManual(
-            'string',
-            patkaText.get('tool.report_incompetency.input.modelName'),
-          ),
-          modelVersion: propertyJsonSchemaLLMManual(
-            'string',
-            patkaText.get('tool.report_incompetency.input.modelVersion'),
-          ),
           request: propertyJsonSchemaLLMManual(
             'string',
             patkaText.get('tool.report_incompetency.input.request'),

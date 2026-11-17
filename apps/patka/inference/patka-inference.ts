@@ -11,7 +11,11 @@ const OLLAMA_MODEL_FLAG = '--ollama-model=';
 
 const ANTHROPIC_MODEL = 'claude-opus-5';
 
-export type PatkaInferenceClientOption = 'ollama' | 'anthropic';
+const QWEN_MODEL = 'qwen4-max';
+
+const QWEN_BASE_URL = 'https://us-east-1.maas.qwencloudapi.com/apps/anthropic';
+
+export type PatkaInferenceClientOption = 'ollama' | 'anthropic' | 'qwen';
 
 export const extractInferenceClientOption = (
   args: ReadonlyArray<string>,
@@ -20,6 +24,10 @@ export const extractInferenceClientOption = (
     .when(
       (candidates: ReadonlyArray<string>) => candidates.includes('--anthropic'),
       (): PatkaInferenceClientOption => 'anthropic',
+    )
+    .when(
+      (candidates: ReadonlyArray<string>) => candidates.includes('--qwen'),
+      (): PatkaInferenceClientOption => 'qwen',
     )
     .otherwise((): PatkaInferenceClientOption => 'ollama');
 
@@ -38,4 +46,16 @@ export const buildInferenceClient = (
   match(patkaInferenceClientOption)
     .with('ollama', () => new OllamaInferenceClient(ollamaModel, new Ollama()))
     .with('anthropic', () => new AnthropicInferenceClient(ANTHROPIC_MODEL, new Anthropic()))
+    .with(
+      'qwen',
+      () =>
+        new AnthropicInferenceClient(
+          QWEN_MODEL,
+          new Anthropic({
+            apiKey: null,
+            authToken: process.env.DASHSCOPE_API_KEY,
+            baseURL: QWEN_BASE_URL,
+          }),
+        ),
+    )
     .exhaustive();
