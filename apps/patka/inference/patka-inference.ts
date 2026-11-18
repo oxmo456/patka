@@ -5,7 +5,7 @@ import type {InferenceClient} from '../../../packages/patka-inference/inference-
 import {AnthropicInferenceClient} from '../../../packages/patka-inference-anthropic/anthropic-inference-client.ts';
 import {OllamaInferenceClient} from '../../../packages/patka-inference-ollama/ollama-inference-client.ts';
 
-const DEFAULT_OLLAMA_MODEL = 'qwen3.6:35b-a3b';
+const DEFAULT_OLLAMA_MODEL = 'qwen3.8:27b';
 
 const OLLAMA_MODEL_FLAG = '--ollama-model=';
 
